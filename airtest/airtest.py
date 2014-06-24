@@ -1,20 +1,22 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-#!/usr/bin/env python
 # coding: utf-8
 #
-# basic operation for a game(like a user does)
+'''
+basic operation for a game(like a user does)
+'''
 
 import os
 import time
 import requests
 
-from airtest.simplelog import sl as log
+import logging
 from com.dtmilano.android.viewclient import ViewClient 
 from com.dtmilano.android.viewclient import adbclient
 
 DEBUG = os.getenv("DEBUG")=="true"
+
+logging.basicConfig(format = '%(asctime)s - %(levelname)s: %(message)s', level = logging.DEBUG)  
+log = logging.getLogger('root')
 
 def _wait_until(until_func, interval=0.5, max_retry=10):
     '''
