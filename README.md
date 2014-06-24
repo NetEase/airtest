@@ -5,7 +5,7 @@ this is python lib for airtest
 ## install
 install use pip.
 ```
-pip install git+http://git.mt.nie.netease.com/hzsunshx/pyairtest.git
+pip install -U git+http://git.mt.nie.netease.com/hzsunshx/pyairtest.git
 ```
 
 ## write test case

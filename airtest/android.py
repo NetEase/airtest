@@ -32,6 +32,7 @@ def _wait_until(until_func, interval=0.5, max_retry=10):
 
 def hello():
     print 'hello world'
+    log.debug('debue info')
 
 class AndroidDevice(object):
     def __init__(self, serialno=None):
@@ -42,10 +43,13 @@ class AndroidDevice(object):
         serialno = self.adb.getProperty('ro.boot.serialno')
         log.debug('wake phone: brand:{brand}, serialno:{serialno}'.format(
             brand=brand, serialno=serialno))
-        self.adb.wake()
-        if not self.adb.isScreenOn():
-            time.sleep(1)
-        log.debug('isScreenOn: %s', self.adb.isScreenOn())
+        try:
+            self.adb.wake()
+            if not self.adb.isScreenOn():
+                time.sleep(1)
+            log.debug('isScreenOn: %s', self.adb.isScreenOn())
+        except:
+            print 'Device not support screen detect'
 
     def setImageDir(self, imgdir='.'):
         self._imgdir = imgdir
@@ -66,9 +70,9 @@ class AndroidDevice(object):
         log.info('convery: %s', message)
         print 'message'
 
-    def touchXY(self, x, y, eventType=adbclient.DOWN_AND_UP):
+    def touch(self, x, y, eventType=adbclient.DOWN_AND_UP):
         log.debug('touch position %s', (x, y))
-        self.adb.touchXY(x, y, eventType)
+        self.adb.touch(x, y, eventType)
 
     def wait(self, timeout=None):
         log.warn('not finished')
@@ -88,7 +92,12 @@ class AndroidDevice(object):
     def back(self):
         '''
         '''
-        pass
+        log.debug('touch %s', 'BACK')
+        self.adb.shell('input keyevent BACK')
+
+    def menu(self):
+        log.debug('touch %s', 'MENU')
+        self.adb.shell('input keyevent MENU')
 
     def drap(self, fromxy, toxy):
         print 'drap', fromxy, toxy

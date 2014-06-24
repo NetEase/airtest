@@ -4,7 +4,7 @@
 
 '''
 Usage:
-    air.test [-c FILE]
+    air.test [-c FILE] [-s SERIALNO]
 
 Options:
     -h --help   Show this screen
@@ -67,6 +67,7 @@ def main():
         sys.exit(1)
     print 'ARGUMENTS:', arguments
     serialno = arguments.get('-s', '10.242.74.241:5555')
+    exec_cmd('adb', 'start-server', timeout=10)
     out = subprocess.check_output(['adb', '-s', serialno, 'get-state'])
     if out.strip() != 'device': 
         print 'device(%s) not ready, current state:%s' %(serialno, out.strip())

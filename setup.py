@@ -20,4 +20,5 @@ setup(
       entry_points='''
       [console_scripts]
       air.test = airtest.cli:main
+      snapshot = airtest.snapshot:main
       ''')
