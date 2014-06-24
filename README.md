@@ -3,9 +3,9 @@ pyairtest
 this is python lib for airtest
 
 ## install
-install from source:
+install use pip.
 ```
-python setup.py install
+pip install git+http://git.mt.nie.netease.com/hzsunshx/pyairtest.git
 ```
 
 ## write test case
@@ -18,10 +18,6 @@ app.click('start.png')
 
 ## run test case
 the command tool `air.test` is also installed when run setup.py.
-
-run below command for more help.
-```sh
-air.test -h
 ```
 
 config file `air.json` is needed by `air.test`. here is an example
@@ -36,7 +32,7 @@ config file `air.json` is needed by `air.test`. here is an example
 }
 ```
 
-cmd will be called by
+command will be called by `air.test` after successfully installed apk.
 ```sh
 bash -c "python main.py -s ${SERIALNO}"
 ```
