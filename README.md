@@ -8,6 +8,13 @@ install use pip.
 pip install -U git+http://git.mt.nie.netease.com/hzsunshx/pyairtest.git
 ```
 
+you have to install `androidviewclient` and `pillow` by easy\_install.
+```sh
+easy_install androidviewclient
+easy_install pillow
+```
+It is very for windows users for you can find packages from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>
+
 ## write test case
 after installed successfully. you can import like
 ```python
