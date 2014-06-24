@@ -10,7 +10,7 @@ import os
 import time
 import requests
 
-from simplelog import sl as log
+from airtest.simplelog import sl as log
 from com.dtmilano.android.viewclient import ViewClient 
 from com.dtmilano.android.viewclient import adbclient
 
