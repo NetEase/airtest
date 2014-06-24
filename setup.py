@@ -16,7 +16,11 @@ setup(
       author_email='codeskyblue@gmail.com',
 
       packages = find_packages(),
-      install_requires=['androidviewclient', 'requests', 'docopt'],
+      install_requires=[
+          'androidviewclient >= 7.1.1', 
+          'requests >= 2.3.0', 
+          'docopt >= 0.6.2'
+          ],
       entry_points='''
       [console_scripts]
       air.test = airtest.cli:main
