@@ -17,7 +17,7 @@ setup(
 
       packages = find_packages(),
       install_requires=[
-          'androidviewclient >= 7.1.1', 
+          #'androidviewclient >= 7.1.1', 
           'requests >= 2.3.0', 
           'docopt >= 0.6.2'
           ],
