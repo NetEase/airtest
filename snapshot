@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+# coding: utf-8
+from com.dtmilano.android.viewclient import ViewClient 
+from simplelog import sl as log
+
+def main():
+    log.debug('connect to device')
+    c, _ = ViewClient.connectToDeviceOrExit(verbose=False) #, serialno='10.242.74.241:5555')
+    c.wake()
+    #c.unlock()
+    #import time
+    #time.sleep(1)
+    print 'isScreenOn:', c.isScreenOn()
+    print 'brand:', c.getProperty('ro.product.brand')
+    print 'saving snapshot to "screenshot.png"'
+    s = c.takeSnapshot()
+    s.save('screenshot.png', 'PNG')
+
+if __name__ == '__main__':
+    main()
