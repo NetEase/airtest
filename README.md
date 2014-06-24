@@ -18,7 +18,6 @@ app.click('start.png')
 
 ## run test case
 the command tool `air.test` is also installed when run setup.py.
-```
 
 config file `air.json` is needed by `air.test`. here is an example
 ```json
