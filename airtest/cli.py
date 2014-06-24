@@ -25,7 +25,8 @@ def exec_cmd(*cmds, **kwargs):
     @arguments env=None, timeout=3
     may raise Error
     '''
-    env = kwargs.get('env')
+    env = os.environ.copy()
+    env.update(kwargs.get('env', {}))
     timeout = kwargs.get('timeout', 120)
     try:
         import sh
