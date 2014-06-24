@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: simplelog
+Version: 0.21
+Summary: Simple interface for logging in python
+Home-page: kevinslin.com
+Author: Kevin S Lin
+Author-email: kevinslin8@gmail.com
+License: UNKNOWN
+Description: Simple logging interface for python
+Platform: UNKNOWN
