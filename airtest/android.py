@@ -75,10 +75,12 @@ def hello():
 
 class AndroidDevice(object):
     def __init__(self, serialno=None):
-        self._serialno = serialno
         self._imgdir = None
         self._last_point = None
-        self.adb, _ = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
+        self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
+
+        self.vc = ViewClient(self.adb, serialno)
+        ViewClient.connectToDeviceOrExit()
         brand = self.adb.getProperty('ro.product.brand')
         serialno = self.adb.getProperty('ro.boot.serialno')
         log.debug('wake phone: brand:{brand}, serialno:{serialno}'.format(
@@ -91,10 +93,15 @@ class AndroidDevice(object):
         except:
             print 'Device not support screen detect'
 
+    def _getShape(self):
+        width = self.adb.getProperty("display.width")
+        height = self.adb.getProperty("display.height")
+        return (width, height)
+
     def setImageDir(self, imgdir='.'):
         self._imgdir = imgdir
 
-    def _save_screen(self, filename):
+    def _saveScreen(self, filename):
         filename = _random_name(filename)
         self.takeSnapshot(filename)
         return filename
@@ -130,7 +137,7 @@ class AndroidDevice(object):
         find image location
         @return list of find points
         '''
-        screen = self._save_screen('where-XXXXXXXX.png')
+        screen = self._saveScreen('where-XXXXXXXX.png')
         return _image_locate(screen, imgfile)
 
     def exists(self, imgfile):
@@ -143,10 +150,10 @@ class AndroidDevice(object):
             p = pts[0]
             self.touch(*p)
 
-    def click(self, imgfile=None, delay=0.5):
+    def click(self, imgfile=None, delay=1.0):
         '''
         '''
-        time.sleep(delay)
+        self.sleep(delay)
         if imgfile:
             self.takeSnapshot('screenshot.png')
             log.debug('locate postion where to touch')
@@ -156,8 +163,36 @@ class AndroidDevice(object):
         else:
             pos = self._last_point
         print 'click', imgfile, pos
-        _record(AT_CLICK, position=pos)
-        self.adb.touch(pos[0], pos[1])
+        (x, y) = (pos[0], pos[1])
+        w, h = self._getShape()
+        # check if horizontal
+        if w > h: 
+            x, y = y, h-x
+        _record(AT_CLICK, position=(x, y))
+        self.adb.touch(x, y)
+
+    def clickByText(self, text, dump=True, delay=1.0):
+        self.sleep(delay)
+        if dump:
+            log.debug('dump icons')
+            self.vc.dump()
+        b = self.vc.findViewWithText(text)
+        if b:
+            (x, y) = b.getXY()
+            log.debug('click x: %d y: %d', x, y)
+            b.touch()
+        else:
+            raise Exception('text(%s) not found' % text)
+
+    def sleep(self, secs=1.0):
+        '''
+        Sleeps for the specified number of seconds
+
+        @param secs: float (number of seconds)
+        @return None
+        '''
+        log.debug('SLEEP %ds', secs)
+        time.sleep(secs)
 
     #@record(AT_CLICK)
     def home(self):
@@ -190,7 +225,3 @@ def _image_locate(origin_file, query_file):
         raise Exception(resp.get('error'))
     pts = r.json()['pts']
     return pts
-    #if not pts:
-    #    return None
-        #raise Exception("Image not match")
-    #return pts
