@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#!/usr/bin/env python
 # coding: utf-8
 #
 '''
@@ -8,8 +11,11 @@ basic operation for a game(like a user does)
 import os
 import time
 import requests
-
+import json
 import logging
+import random
+import string
+
 from com.dtmilano.android.viewclient import ViewClient 
 from com.dtmilano.android.viewclient import adbclient
 
@@ -17,18 +23,51 @@ DEBUG = os.getenv("DEBUG")=="true"
 
 logging.basicConfig(format = '%(asctime)s - %(levelname)s: %(message)s', level = logging.DEBUG)  
 log = logging.getLogger('root')
+random.seed(time.time())
 
-def _wait_until(until_func, interval=0.5, max_retry=10):
+def _wait_until(until_func, interval=0.5, max_retry=10, args=(), kwargs={}):
     '''
     @return True(when found), False(when not found)
     '''
+    log.debug('wait func: %s', until_func.__name__)
     retry = 0
     while retry < max_retry:
         retry += 1
-        if until_func():
-            return True
+        ret = until_func(*args, **kwargs)
+        if ret:
+            return ret
+        log.debug('wait until: %s, sleep: %s', until_func.__name__, interval)
         time.sleep(interval)
-    return False
+    return None
+
+# AT = ACTION
+AT_KEYEVENT = 'KEYEVENT'
+AT_CLICK = 'CLICK'
+AT_WAIT = 'WAIT'
+
+def _random_name(name):
+    out = []
+    for c in name:
+        if c == 'X':
+            c = random.choice(string.ascii_lowercase)
+        out.append(c)
+    return ''.join(out)
+
+def record(action):
+    d = {'action': action}
+    def wrapper(fn):
+        d.update({'func_name': fn.__name__})
+        def decorator(fn, *args, **kwargs):
+            print json.dumps(d)
+            print type(fn), fn, args, kwargs
+            fn(*args, **kwargs)
+        return decorator
+    return wrapper
+
+def _record(action, images=[], **kwargs):
+    d = {'action': action, 'images': images}
+    d.update(kwargs)
+    print json.dumps(d)
 
 def hello():
     print 'hello world'
@@ -38,6 +77,7 @@ class AndroidDevice(object):
     def __init__(self, serialno=None):
         self._serialno = serialno
         self._imgdir = None
+        self._last_point = None
         self.adb, _ = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
         brand = self.adb.getProperty('ro.product.brand')
         serialno = self.adb.getProperty('ro.boot.serialno')
@@ -54,6 +94,11 @@ class AndroidDevice(object):
     def setImageDir(self, imgdir='.'):
         self._imgdir = imgdir
 
+    def _save_screen(self, filename):
+        filename = _random_name(filename)
+        self.takeSnapshot(filename)
+        return filename
+
     def takeSnapshot(self, filename=None):
         ''' @return PIL image '''
         log.debug('take snapshot and save to '+filename)
@@ -65,30 +110,61 @@ class AndroidDevice(object):
     def startActivity(self, appname):
         return self.adb.startActivity(appname)
 
-    def tag(self, message):
-        ''' message including screenshot '''
-        log.info('convery: %s', message)
-        print 'message'
-
     def touch(self, x, y, eventType=adbclient.DOWN_AND_UP):
         log.debug('touch position %s', (x, y))
         self.adb.touch(x, y, eventType)
 
-    def wait(self, timeout=None):
-        log.warn('not finished')
+    def wait(self, imgfile, interval=0.5, max_retry=5):
+        '''
+        wait until some picture exists
+        '''
+        _record(AT_WAIT)
+        pts = _wait_until(self.where, args=(imgfile,), interval=interval, max_retry=max_retry)
+        if not pts:
+            raise Exception('wait fails')
+        self._last_point = pts[0]
+        return
 
-    def click(self, imgfile, delay=0.5):
+    def where(self, imgfile):
         '''
+        find image location
+        @return list of find points
         '''
-        self.takeSnapshot('screenshot.png')
-        log.debug('locate postion where to touch')
-        if self._imgdir:
-            imgfile = os.path.join(self._imgdir, imgfile)
-        pos = _image_locate('screenshot.png', imgfile)
-        print 'click', imgfile, pos
-        self.adb.touch(pos[0], pos[1])
+        screen = self._save_screen('where-XXXXXXXX.png')
+        return _image_locate(screen, imgfile)
+
+    def exists(self, imgfile):
+        return True if self.where(imgfile) else False
+
+    def clickIfExists(self, imgfile, delay=0.5):
         time.sleep(delay)
+        pts = self.where(imgfile)
+        if pts:
+            p = pts[0]
+            self.touch(*p)
 
+    def click(self, imgfile=None, delay=0.5):
+        '''
+        '''
+        time.sleep(delay)
+        if imgfile:
+            self.takeSnapshot('screenshot.png')
+            log.debug('locate postion where to touch')
+            if self._imgdir:
+                imgfile = os.path.join(self._imgdir, imgfile)
+            pos = _image_locate('screenshot.png', imgfile)[0]
+        else:
+            pos = self._last_point
+        print 'click', imgfile, pos
+        _record(AT_CLICK, position=pos)
+        self.adb.touch(pos[0], pos[1])
+
+    #@record(AT_CLICK)
+    def home(self):
+        _record(AT_KEYEVENT, name='HOME')
+        log.debug('touch %s', 'HOME')
+        self.adb.shell('input keyevent HOME')
+        
     def back(self):
         '''
         '''
@@ -110,9 +186,11 @@ def _image_locate(origin_file, query_file):
     r = requests.post('http://beta.mt.nie.netease.com/api/image/locate', files=files)
     resp = r.json()
     if resp.get('error'):
+        log.error('image locate: %s', resp.get('error'))
         raise Exception(resp.get('error'))
     pts = r.json()['pts']
-    if not pts:
-        raise Exception("Image not match")
-    return pts[0]
-
+    return pts
+    #if not pts:
+    #    return None
+        #raise Exception("Image not match")
+    #return pts

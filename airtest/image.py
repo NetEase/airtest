@@ -75,8 +75,7 @@ def find_image_position(origin='origin.png', query='query.png', outfile=None):
             good.append(m)
     print len(kp1), len(kp2), 'good cnt:', len(good)
 
-    if len(good)*1.0/len(kp1) < 0.3 or len(good) >= MIN_MATCH_COUNT:
-    #if len(good)<MIN_MATCH_COUNT:
+    if len(good)*1.0/len(kp1) < 0.3 and len(good) < MIN_MATCH_COUNT:
         print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
         return img2.shape, img1.shape, []
 
