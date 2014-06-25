@@ -4,12 +4,13 @@
 
 '''
 Usage:
-    air.test [--skip-install] [-c FILE] -s <SERIALNO>
+    air.test [--skip-install] [-c FILE] [-H htmldir] -s <SERIALNO>
 
 Options:
     -h --help       Show this screen
     -c FILE         Specify config file [default: air.json]
     -s SERIALNO     Specify devices serialno(needed)
+    -H htmldir      Save html report
     --skip-install  Skip install apk [default: false]
 '''
 

@@ -143,12 +143,12 @@ class AndroidDevice(object):
     def exists(self, imgfile):
         return True if self.where(imgfile) else False
 
-    def clickIfExists(self, imgfile, delay=0.5):
-        time.sleep(delay)
-        pts = self.where(imgfile)
-        if pts:
-            p = pts[0]
-            self.touch(*p)
+    #def clickIfExists(self, imgfile, delay=0.5):
+    #    time.sleep(delay)
+    #    pts = self.where(imgfile)
+    #    if pts:
+    #        p = pts[0]
+    #        self.touch(*p)
 
     def click(self, imgfile=None, delay=1.0):
         '''
@@ -194,22 +194,15 @@ class AndroidDevice(object):
         log.debug('SLEEP %ds', secs)
         time.sleep(secs)
 
-    #@record(AT_CLICK)
+    def keyevent(name):
+        log.debug('keyevent touch %s', name)
+        self.adb.shell('input keyevent HOME')
+
     def home(self):
         _record(AT_KEYEVENT, name='HOME')
         log.debug('touch %s', 'HOME')
         self.adb.shell('input keyevent HOME')
         
-    def back(self):
-        '''
-        '''
-        log.debug('touch %s', 'BACK')
-        self.adb.shell('input keyevent BACK')
-
-    def menu(self):
-        log.debug('touch %s', 'MENU')
-        self.adb.shell('input keyevent MENU')
-
     def drap(self, fromxy, toxy):
         print 'drap', fromxy, toxy
 

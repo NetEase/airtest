@@ -5,7 +5,7 @@ this is python lib for airtest
 ## install
 install use pip.
 ```
-pip install -U git+http://git.mt.nie.netease.com/hzsunshx/pyairtest.git
+pip install -U git+https://github.com/blackair/airtest.git
 ```
 
 you have to install `androidviewclient` and `pillow` by easy\_install.
@@ -32,8 +32,8 @@ config file `air.json` is needed by `air.test`. here is an example
   "cmd": "python main.py -s ${SERIALNO}",
   "android": {
     "apk_url": "http://10.246.13.110:10001/demo-release-signed.apk",
-    "package": "com.netease.h15",
-    "activity": "org.cocos2dx.lua.AppActivity"
+    "package": "com.netease.xxx",
+    "activity": "main.activity"
   }
 }
 ```
