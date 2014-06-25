@@ -46,3 +46,6 @@ bash -c "python main.py -s ${SERIALNO}"
 ## good luck
 author: hzsunshx
 email: hzsunshx@corp.netease.com
+
+## License
+This project is under the MIT License. See the LICENSE file for the full license text.
