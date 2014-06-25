@@ -4,7 +4,7 @@
 
 '''
 Usage:
-    air.test [--skip-install] [-c FILE] [-s SERIALNO]
+    air.test [--skip-install] [-c FILE] -s <SERIALNO>
 
 Options:
     -h --help       Show this screen
@@ -65,7 +65,7 @@ def run_android(jsonfile, serialno, skip_install=False):
 
 def main():
     arguments = docopt(__doc__, version='0.1')
-    print 'ARGUMENTS:', arguments
+    print 'ARGUMENTS:', json.dumps(arguments)
     cnf = arguments.get('-c')
     if not os.path.exists(cnf):
         print 'Can not found conf file: %s' %(cnf)

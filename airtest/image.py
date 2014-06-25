@@ -52,10 +52,13 @@ def find_image_position(origin='origin.png', query='query.png', outfile=None):
     # Initiate SIFT detector
     sift = cv2.SIFT()
 
-    # find the keypoints and descriptors with SIFT
-    kp1, des1 = sift.detectAndCompute(img1,None)
-    kp2, des2 = sift.detectAndCompute(img2,None)
-    print len(kp1), len(kp2)
+    try:
+        # find the keypoints and descriptors with SIFT
+        kp1, des1 = sift.detectAndCompute(img1,None)
+        kp2, des2 = sift.detectAndCompute(img2,None)
+        print len(kp1), len(kp2)
+    except:
+        return img2.shape, img1.shape, []
 
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
@@ -72,7 +75,7 @@ def find_image_position(origin='origin.png', query='query.png', outfile=None):
             good.append(m)
     print len(kp1), len(kp2), 'good cnt:', len(good)
 
-    if len(good)*1.0/len(kp1) < 0.3 and len(good) >= MIN_MATCH_COUNT:
+    if len(good)*1.0/len(kp1) < 0.3 or len(good) >= MIN_MATCH_COUNT:
     #if len(good)<MIN_MATCH_COUNT:
         print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
         return img2.shape, img1.shape, []
