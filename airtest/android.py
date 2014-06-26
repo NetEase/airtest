@@ -72,7 +72,7 @@ def hello():
     print 'hello world'
     log.debug('debue info')
 
-@patch.record
+@patch.record()
 class AndroidDevice(object):
     def __init__(self, serialno=None):
         self._imgdir = None
