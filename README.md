@@ -58,9 +58,6 @@ app.drap('apple.png', 'plate.png')
 (x1, y1), (x2, y2) = (w*0.2, h*0.5), (w*0.8, h*0.5)
 app.drag((x1,y1), (x2,y2))
 
-# get image position
-(x, y) = app.where('apple.png')
-
 # type text
 app.type('www.baidu.com\n') # type text and call keyevnet ENTER
 
@@ -70,6 +67,10 @@ app.home()
 # back and menu(only for android)
 app.keyevent('BACK')
 app.keyevent('MENU')
+
+# not finished below
+# get image position(TODO)
+(x, y) = app.find('apple.png')
 ```
 
 ## run test case
