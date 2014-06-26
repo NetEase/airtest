@@ -191,15 +191,40 @@ class AndroidDevice(object):
         log.debug('SLEEP %ds', secs)
         time.sleep(secs)
 
-    def keyevent(name):
+    def keyevent(self, name):
         log.debug('keyevent touch %s', name)
-        self.adb.shell('input keyevent HOME')
+        self.adb.shell('input keyevent '+name)
 
     def home(self):
-        _record(AT_KEYEVENT, name='HOME')
+        #_record(AT_KEYEVENT, name='HOME')
         log.debug('touch %s', 'HOME')
         self.adb.shell('input keyevent HOME')
         
+    def enter(self):
+        self.adb.press('KEYCODE_ENTER')
+
+    def type(self, text):
+        log.debug('type text: %s', repr(text))
+        for c in text:
+            self.adb.type(c)
+        return
+        #s = []
+        #for c in text:
+        #    print repr(c)
+        #    if c == '\n':
+        #        if s:
+        #            print s
+        #            for char in s:
+        #                self.adb.type(char)
+        #            #self.adb.type(''.join(s))
+        #            s = []
+        #        print 'enter'
+        #        self.adb.press('KEYCODE_BACK')
+        #    else:
+        #        s.append(c)
+        #if s:
+        #    self.adb.type(''.join(s))
+
     def drap(self, fromxy, toxy):
         print 'drap', fromxy, toxy
 
