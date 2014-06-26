@@ -7,20 +7,28 @@ install use pip.
 ```
 pip install -U git+https://github.com/blackair/airtest.git
 ```
+`androidviewclient` is not working well with pip, you have to install it with `easy_install`.
 
-you have to install `androidviewclient` and `pillow` by easy\_install.
-```sh
-easy_install androidviewclient
-easy_install pillow
-```
-It is very for windows users for you can find packages from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>
+`pillow` is also needed.
+
+* Mac: run `brew install pillow`
+* Windows: download pillow from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>
+* Linux: A little complicated. It's better to install from source.
+
+the command `adb` is should be found in $PATH
+
+after finish install. you can use import airtest. and can run `air.test` and `snapshot`.
 
 ## write test case
 after installed successfully. you can import like
 ```python
 import airtest
-app = airtest.connect('xx8123a')
-app.click('start.png')
+serialno = 'xxxxx888882111' # get it by call: adb devices
+app = airtest.connect(serialno)
+if app.exists('apple.png'):
+    app.click('buy.png')
+app.wait('finish.png')
+app.click('confirm.png')
 ```
 
 ## run test case
