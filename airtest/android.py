@@ -13,6 +13,8 @@ import logging
 import random
 import string
 
+from airtest import image, patch
+
 from com.dtmilano.android.viewclient import ViewClient 
 from com.dtmilano.android.viewclient import adbclient
 
@@ -70,6 +72,7 @@ def hello():
     print 'hello world'
     log.debug('debue info')
 
+@patch.record
 class AndroidDevice(object):
     def __init__(self, serialno=None):
         self._imgdir = None
@@ -90,10 +93,19 @@ class AndroidDevice(object):
         except:
             print 'Device not support screen detect'
 
+    def _imgfor(self, name):
+        if self._imgdir:
+            return os.path.join(self._imgdir, name)
+        return name
+
     def _getShape(self):
         width = self.adb.getProperty("display.width")
         height = self.adb.getProperty("display.height")
         return (width, height)
+    
+    def shape(self):
+        ''' get screen width and height '''
+        return self._getShape()
 
     def setImageDir(self, imgdir='.'):
         self._imgdir = imgdir
@@ -123,10 +135,10 @@ class AndroidDevice(object):
         wait until some picture exists
         '''
         _record(AT_WAIT)
-        pts = _wait_until(self.where, args=(imgfile,), interval=interval, max_retry=max_retry)
-        if not pts:
+        pt = _wait_until(self.where, args=(imgfile,), interval=interval, max_retry=max_retry)
+        if not pt:
             raise Exception('wait fails')
-        self._last_point = pts[0]
+        self._last_point = pt
         return
 
     def where(self, imgfile):
@@ -135,17 +147,11 @@ class AndroidDevice(object):
         @return list of find points
         '''
         screen = self._saveScreen('where-XXXXXXXX.png')
-        return _image_locate(screen, imgfile)
+        pts = _image_locate(screen, imgfile)
+        return pts and pts[0]
 
     def exists(self, imgfile):
         return True if self.where(imgfile) else False
-
-    #def clickIfExists(self, imgfile, delay=0.5):
-    #    time.sleep(delay)
-    #    pts = self.where(imgfile)
-    #    if pts:
-    #        p = pts[0]
-    #        self.touch(*p)
 
     def click(self, imgfile=None, delay=1.0):
         '''
@@ -154,16 +160,15 @@ class AndroidDevice(object):
         if imgfile:
             self.takeSnapshot('screenshot.png')
             log.debug('locate postion where to touch')
-            if self._imgdir:
-                imgfile = os.path.join(self._imgdir, imgfile)
-            pos = _image_locate('screenshot.png', imgfile)[0]
+            pos = _image_locate('screenshot.png', self._imgfor(imgfile))[0]
         else:
             pos = self._last_point
         print 'click', imgfile, pos
         (x, y) = (pos[0], pos[1])
         w, h = self._getShape()
         # check if horizontal
-        if w > h: 
+        if w > h:
+            log.debug('Screen rotate, width(%d), height(%d)', w, h)
             x, y = y, h-x
         _record(AT_CLICK, position=(x, y))
         self.adb.touch(x, y)
@@ -201,42 +206,59 @@ class AndroidDevice(object):
         self.adb.shell('input keyevent HOME')
         
     def enter(self):
-        self.adb.press('KEYCODE_ENTER')
+        self.adb.press('ENTER')
 
     def type(self, text):
         log.debug('type text: %s', repr(text))
         for c in text:
-            self.adb.type(c)
-        return
-        #s = []
-        #for c in text:
-        #    print repr(c)
-        #    if c == '\n':
-        #        if s:
-        #            print s
-        #            for char in s:
-        #                self.adb.type(char)
-        #            #self.adb.type(''.join(s))
-        #            s = []
-        #        print 'enter'
-        #        self.adb.press('KEYCODE_BACK')
-        #    else:
-        #        s.append(c)
-        #if s:
-        #    self.adb.type(''.join(s))
+            if c == '\n':
+                self.adb.press('ENTER')
+            else:
+                self.adb.type(c)
 
-    def drap(self, fromxy, toxy):
-        print 'drap', fromxy, toxy
+    def drag(self, f, to):
+        ''' 
+        @param duration: duration of the event in ms
+        '''
+        # the duration seems not working. no matter how larger I set, nothing changes.
+        duration=500
+        variable = {}
+        def to_point(raw):
+            global screen
+            if isinstance(raw, list) or isinstance(raw, tuple):
+                return raw
+            if isinstance(raw, basestring):
+                screen = variable.get('screen')
+                if not screen:
+                    variable['screen'] = self._saveScreen('where-XXXXXXXX.png')
+                return _image_locate_one(variable['screen'], self._imgfor(raw))
+            else:
+                raise Exception('invalid type')
+        fpt, tpt = to_point(f), to_point(to)
+        return self.adb.drag(fpt, tpt, duration)
+
+def _image_locate_one(orig, query):
+    pts = _image_locate(orig, query)
+    if len(pts) > 1:
+        raise Exception('too many same query images')
+    if len(pts) == 0:
+        raise Exception('query image not found')
+    return pts[0]
 
 def _image_locate(origin_file, query_file):
     '''
     image match
     '''
-    files={'origin': open(origin_file, 'rb'), 'query': open(query_file, 'rb')}
-    r = requests.post('http://beta.mt.nie.netease.com/api/image/locate', files=files)
-    resp = r.json()
-    if resp.get('error'):
-        log.error('image locate: %s', resp.get('error'))
-        raise Exception(resp.get('error'))
-    pts = r.json()['pts']
+    log.debug('search image(%s) from(%s)', query_file, origin_file)
+    pts = image.locate_image(origin_file, query_file)
     return pts
+
+    # when use http API, call function below
+    # files={'origin': open(origin_file, 'rb'), 'query': open(query_file, 'rb')}
+    # r = requests.post('http://beta.mt.nie.netease.com/api/image/locate', files=files)
+    # resp = r.json()
+    # if resp.get('error'):
+    #     log.error('image locate: %s', resp.get('error'))
+    #     raise Exception(resp.get('error'))
+    # pts = r.json()['pts']
+    # return pts

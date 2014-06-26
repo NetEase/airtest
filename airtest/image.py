@@ -6,6 +6,7 @@ __author__ = 'hzsunshx'
 import cv2
 
 MIN_MATCH_COUNT = 8
+DEBUG=True
 
 def _middlePoint(pts):
     def add(p1, p2):
@@ -16,34 +17,40 @@ def _middlePoint(pts):
         return math.sqrt(l2)
     # debug
     for p in pts:
-        print 'Point:', p.pt
+        if DEBUG: print 'Point:', p.pt
     length = len(pts)
     sumx, sumy = reduce(add, [p.pt for p in pts])
     point = sumx/length, sumy/length
-    print 'step1: result=', point
+    if DEBUG: print 'step1: result=', point
 
     # filter out ok points
     avg_distance = sum([distance(point, p.pt) for p in pts])/length
-    print 'avg distance=', avg_distance
+    if DEBUG: print 'avg distance=', avg_distance
     good = []
     sumx, sumy = 0.0, 0.0
     for p in pts:
-        print 'point: %s, distance: %.2f' %(p.pt, distance(p.pt, point))
+        if DEBUG: print 'point: %s, distance: %.2f' %(p.pt, distance(p.pt, point))
         if distance(p.pt, point) < 1.2*avg_distance:
             good.append(p.pt)
             sumx += p.pt[0]
             sumy += p.pt[1]
         else:
-            print 'not good', p.pt
-    print 'step1: result=', point
+            if DEBUG: print 'not good', p.pt
+    if DEBUG: print 'step1: result=', point
     point = map(long, (sumx/len(good), sumy/len(good)))
-    print 'step2: point=', point
+    if DEBUG: print 'step2: point=', point
     return point
 
 def find_image_position(origin='origin.png', query='query.png', outfile=None):
+    img1 = cv2.imread(query, 0) # query image(small)
+    img2 = cv2.imread(origin, 0) # train image(big)
+    points = locate_image(origin, query, outfile)
+    return img2.shape, img1.shape, points
+
+def locate_image(origin='orig.png', query='query.png', outfile=None):
     '''
     find all image positions
-    @return None if not found else a tuple: (origin.shape, query.shape, postions)
+    @return points founded
     might raise Exception
     '''
     img1 = cv2.imread(query, 0) # query image(small)
@@ -56,9 +63,9 @@ def find_image_position(origin='origin.png', query='query.png', outfile=None):
         # find the keypoints and descriptors with SIFT
         kp1, des1 = sift.detectAndCompute(img1,None)
         kp2, des2 = sift.detectAndCompute(img2,None)
-        print len(kp1), len(kp2)
+        if DEBUG: print len(kp1), len(kp2)
     except:
-        return img2.shape, img1.shape, []
+        return []
 
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
@@ -73,11 +80,11 @@ def find_image_position(origin='origin.png', query='query.png', outfile=None):
     for m,n in matches:
         if m.distance < 0.7*n.distance:
             good.append(m)
-    print len(kp1), len(kp2), 'good cnt:', len(good)
+    if DEBUG: print len(kp1), len(kp2), 'good cnt:', len(good)
 
     if len(good)*1.0/len(kp1) < 0.3 and len(good) < MIN_MATCH_COUNT:
-        print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
-        return img2.shape, img1.shape, []
+        if DEBUG: print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
+        return []
 
     queryPts = []
     trainPts = []
@@ -90,7 +97,7 @@ def find_image_position(origin='origin.png', query='query.png', outfile=None):
 
     img3 = cv2.drawKeypoints(img2, trainPts)
     point = _middlePoint(trainPts)
-    print 'position in', point
+    if DEBUG: print 'position in', point
 
     if outfile:
         edge = 10
@@ -98,9 +105,9 @@ def find_image_position(origin='origin.png', query='query.png', outfile=None):
         bottom_right = (point[0]+edge, point[1]+edge)
         cv2.rectangle(img3, top_left, bottom_right, 255, 2)
         cv2.imwrite(outfile, img3)
-    return img2.shape, img1.shape, [point]
+    return [point]
 
 if __name__ == '__main__':
-    pts = find_image_position('image/mule.png', 'image/template.png', 
-        outfile='image/train.png')
+    pts = find_image_position('testdata/mule.png', 'testdata/football.png', 
+        outfile='testdata/debug.png')
     print pts
