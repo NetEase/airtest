@@ -5,6 +5,27 @@ import os
 import json
 import time
 
+from functools import partial
+
+def attachmethod(target):
+    if isinstance(target, type):
+        def decorator(func):
+            setattr(target, func.__name__, func)
+    else:
+        def decorator(func):
+            setattr(target, func.__name__, partial(func, target))
+    return decorator
+
+def fuckit(fn):
+    def decorator(*argv, **kwargs):
+        try:
+            return fn(*argv, **kwargs)
+        except Exception as e:
+            argv.extend([k+'='+v for k, v in kwargs.items()])
+            print 'function(%s(%s)) panic(%s). fuckit' %(fn.__name__, ' ,'.join(argv), e)
+            return None
+    return decorator
+
 def record(cls):
     ''' decorator for class '''
     logfile = os.getenv('PYTEST_LOGFILE', 'log/pytest.log')
@@ -27,6 +48,7 @@ def record(cls):
                     print >>logfd, json.dumps({'action': name, 'argv': argv, 'kwargs': kwargs})
                     logfd.flush()
                     return obj(*argv, **kwargs)
+                func_wrapper.__doc__ = obj.__doc__ # keep the doc
                 return func_wrapper
             return obj
     return NewClass
