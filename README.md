@@ -49,7 +49,7 @@ app.wait('finish.png')
 app.exists('apple.png')
 
 # drap one place to and onother place
-app.drap('apple.png', 'plate.png')
+app.drag('apple.png', 'plate.png')
 
 # get screen size(width and height)
 (w, h) = app.shape()
