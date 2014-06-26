@@ -30,13 +30,46 @@ after finish install. you can use import airtest. and can run `air.test` and `sn
 ## write test case
 after installed successfully. you can import like
 ```python
+# import python lib
 import airtest
-serialno = 'xxxxx888882111' # get it by call: adb devices
+
+# get serialno by call: adb devices
+serialno = 'xxxxx888882111'
+
+# connect to your android devices
 app = airtest.connect(serialno)
-if app.exists('apple.png'):
-    app.click('buy.png')
-app.wait('finish.png')
+
+# click by image file
 app.click('confirm.png')
+
+# wait until image shows
+app.wait('finish.png')
+
+# judge if image exists
+app.exists('apple.png')
+
+# drap one place to and onother place
+app.drap('apple.png', 'plate.png')
+
+# get screen size(width and height)
+(w, h) = app.shape()
+
+# drap by position
+(x1, y1), (x2, y2) = (w*0.2, h*0.5), (w*0.8, h*0.5)
+app.drag((x1,y1), (x2,y2))
+
+# get image position
+(x, y) = app.where('apple.png')
+
+# type text
+app.type('www.baidu.com\n') # type text and call keyevnet ENTER
+
+# press home
+app.home()
+
+# back and menu(only for android)
+app.keyevent('BACK')
+app.keyevent('MENU')
 ```
 
 ## run test case
