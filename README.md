@@ -7,6 +7,14 @@ install use pip.
 ```
 pip install -U git+https://github.com/blackair/airtest.git
 ```
+
+Other python lib requirements which may not resolved by pip.
+
+* numpy
+* pillow
+* opencv
+* androidviewclient
+
 `androidviewclient` is not working well with pip, you have to install it with `easy_install`.
 
 `pillow` is also needed.
