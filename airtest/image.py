@@ -47,9 +47,10 @@ def find_image_position(origin='origin.png', query='query.png', outfile=None):
     points = locate_image(origin, query, outfile)
     return img2.shape, img1.shape, points
 
-def locate_image(origin='orig.png', query='query.png', outfile=None):
+def locate_image(origin='orig.png', query='query.png', outfile=None, threshold=0.3):
     '''
     find all image positions
+    @param threshold(float): [0, 1) the bigger the better
     @return points founded
     might raise Exception
     '''
@@ -82,7 +83,12 @@ def locate_image(origin='orig.png', query='query.png', outfile=None):
             good.append(m)
     if DEBUG: print len(kp1), len(kp2), 'good cnt:', len(good)
 
-    if len(good)*1.0/len(kp1) < 0.3 and len(good) < MIN_MATCH_COUNT:
+    if len(good)*1.0/len(kp1) < threshold:
+        if DEBUG: print "blew threshold: %.2f" %(threshold)
+        return []
+
+    #if len(good)*1.0/len(kp1) < 0.3 and 
+    if len(good) < MIN_MATCH_COUNT:
         if DEBUG: print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
         return []
 
