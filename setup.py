@@ -16,10 +16,14 @@ setup(
       author_email='codeskyblue@gmail.com',
 
       packages = find_packages(),
+      package_data={
+          'airtest': ['template.html']
+        },
       install_requires=[
           #'androidviewclient >= 7.1.1', 
           'requests >= 2.3.0', 
-          'docopt >= 0.6.2'
+          'docopt >= 0.6.2',
+          'pystache == 0.5.4'
           ],
       entry_points='''
       [console_scripts]

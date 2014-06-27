@@ -52,22 +52,6 @@ def _random_name(name):
         out.append(c)
     return ''.join(out)
 
-def record(action):
-    d = {'action': action}
-    def wrapper(fn):
-        d.update({'func_name': fn.__name__})
-        def decorator(fn, *args, **kwargs):
-            print json.dumps(d)
-            print type(fn), fn, args, kwargs
-            fn(*args, **kwargs)
-        return decorator
-    return wrapper
-
-def _record(action, images=[], **kwargs):
-    d = {'action': action, 'images': images}
-    d.update(kwargs)
-    print json.dumps(d)
-
 def hello():
     print 'hello world'
     log.debug('debue info')

@@ -1,0 +1,4 @@
+{"function": "setImageDir", "args": ["image"], "kwargs": {}}
+{"function": "shape", "args": [], "kwargs": {}}
+{"function": "drag", "args": ["rili.png", "voice.png"], "kwargs": {}}
+{"function": "takeSnapshot", "args": ["where-olkrwwui.png"], "kwargs": {}}
