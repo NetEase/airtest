@@ -4,6 +4,7 @@
 import os
 import json
 import time
+import threading
 
 from functools import partial
 
@@ -17,12 +18,12 @@ def attachmethod(target):
     return decorator
 
 def fuckit(fn):
-    def decorator(*argv, **kwargs):
+    def decorator(*args, **kwargs):
         try:
-            return fn(*argv, **kwargs)
+            return fn(*args, **kwargs)
         except Exception as e:
-            argv.extend([k+'='+v for k, v in kwargs.items()])
-            print 'function(%s(%s)) panic(%s). fuckit' %(fn.__name__, ' ,'.join(argv), e)
+            args.extend([k+'='+v for k, v in kwargs.items()])
+            print 'function(%s(%s)) panic(%s). fuckit' %(fn.__name__, ' ,'.join(args), e)
             return None
     return decorator
 
@@ -43,12 +44,30 @@ def record(logfile=None):
                     if obj.__name__.startswith('_'):
                         return obj
                     print 'record:', name
-                    def func_wrapper(*argv, **kwargs):
-                        print >>logfd, json.dumps({'function': name, 'argv': argv, 'kwargs': kwargs})
+                    def func_wrapper(*args, **kwargs):
+                        print >>logfd, json.dumps({'function': name, 'args': args, 'kwargs': kwargs})
                         logfd.flush()
-                        return obj(*argv, **kwargs)
+                        return obj(*args, **kwargs)
                     func_wrapper.__doc__ = obj.__doc__ # keep the doc
                     return func_wrapper
                 return obj
         return NewClass
     return wrapper
+
+def go(fn):
+    def decorator(*args, **kwargs):
+        t = threading.Thread(target=fn, args=args, kwargs=kwargs)
+        t.setDaemon(True)
+        t.start()
+        return t
+    return decorator
+
+# test code
+if __name__ == '__main__':
+    @go
+    def say_hello(sleep=0.3, message='hello world'):
+        time.sleep(sleep)
+        print message
+    t1 = say_hello(0.1)
+    t2 = say_hello(0.5, 'this message should not showed')
+    t1.join()
