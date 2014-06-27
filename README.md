@@ -27,6 +27,10 @@ the command `adb` is should be found in $PATH
 
 after finish install. you can use import airtest. and can run `air.test` and `snapshot`.
 
+for windows: Another way is download my packed python and extracted to `C:\Python27`
+
+Download: <http://pan.baidu.com/s/1pJpxroZ>
+
 ## write test case
 after installed successfully. you can import like
 ```python
