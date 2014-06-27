@@ -3,16 +3,22 @@
 #
 
 '''
+phone(android|iphone) autotest framework
 Usage:
-    air.test [--skip-install] [-c FILE] [-H htmldir] -s <SERIALNO>
+    air.test (runtest|install|uninstall) [-p PLATFORM] [SERIALNO]
+    air.test log2html -H <HTMLDIR>
+    air.test snapshot [-p PLATFORM] [SERIALNO]
+    air.test all [--steps STEPS] [-H HTMLDIR] [-p PLATFORM] [SERIALNO]
 
 Options:
     -h --help       Show this screen
-    -c FILE         Specify config file [default: air.json]
+    -p PLATFORM     android or iphone [default: android]
     -s SERIALNO     Specify devices serialno(needed)
-    -H htmldir      Save html report
-    --skip-install  Skip install apk [default: false]
+    --steps STEPS   the steps one by one [default: install,runtest,log2html,uninstall]
+    -H HTMLDIR      Save html report
 '''
+
+__version__ = '0.1.0627'
 
 import json
 import sys
@@ -21,11 +27,55 @@ import urllib
 import subprocess
 
 from docopt import docopt
+from com.dtmilano.android.viewclient import ViewClient 
+
+import airtest
 from airtest.base import exec_cmd
+from airtest import log2html
 
 def urlretrieve(url, filename=None):
     print 'DOWNLOAD:', url, '->', filename
     return urllib.urlretrieve(url, filename)
+
+F = {} #json.load(open(jsonfile, 'r'))
+platform = 'android'
+serialno = ''
+
+def xpath(*paths):
+    v=F
+    for p in paths:
+        v = v.get(p, {})
+    return v if v else None
+
+def run_snapshot():
+    if platform == 'android':
+        c, _ = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
+        c.takeSnapshot().save('screen.png')
+    else:
+        print 'not supported:', platform
+
+def run_install():
+    if platform == 'android':
+        #urlretrieve(xpath(platform, 'apk_url'), 'test.apk')
+        #exec_cmd('adb', '-s', serialno, 'install', '-r', 'test.apk')
+        package, activity = xpath(platform, 'package'), xpath(platform, 'activity')
+        exec_cmd('adb', 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
+    else:
+        print 'not supported:', platform
+
+def run_uninstall():
+    if platform == 'android':
+        exec_cmd('adb', '-s', serialno, 'uninstall', xpath(platform, 'package'))
+    else:
+        print 'not supported:', platform
+
+def run_runtest():
+    env = {'SERIALNO': serialno}
+    exec_cmd(xpath('cmd'), shell=True, env=env)
+
+def run_log2html():
+    if F.get('logfile') and F.get('htmldir'):
+        log2html.render(F.get('logfile'), F.get('htmldir'))
 
 def run_android(jsonfile, serialno, skip_install=False):
     d = json.load(open(jsonfile, 'r'))
@@ -50,14 +100,46 @@ def run_android(jsonfile, serialno, skip_install=False):
     #pass
 
 def main():
+    global F, platform, serialno
     arguments = docopt(__doc__, version='0.1')
-    print 'ARGUMENTS:', json.dumps(arguments)
-    cnf = arguments.get('-c')
-    if not os.path.exists(cnf):
-        print 'Can not found conf file: %s' %(cnf)
-        sys.exit(1)
-    serialno = arguments.get('-s')
+    devices = [dev for dev in airtest.getDevices() if dev[1] != 'unknown']
+    if len(devices) != 1:
+        sys.exit('can determine which devices to use, use adb devices to see details.')
+    arguments['SERIALNO'] = devices[0][0]
+
+    serialno = arguments['SERIALNO']
+    platform = arguments.get('-p', 'android')
+
+    print 'PREPARE platform: %s' %(platform)
+    print 'PREPARE serialno: %s' %(serialno)
     exec_cmd('adb', 'start-server', timeout=10)
+
+    print arguments
+    cnf = 'air.json'
+    if not os.path.exists(cnf):
+        sys.exit('config file require: %s' %(cnf))
+    F = json.load(open(cnf))
+    if not 'logfile' in F:
+        F['logfile'] = 'log/airtest.log'
+    if arguments.get('-H'):
+        F['htmldir'] = arguments.get('-H')
+
+    if arguments['all']:
+        for step in arguments['--steps'].split(','):
+            fn = globals().get('run_'+step)
+            if not fn or not callable(fn):
+                sys.exit('no such step: %s' %(step))
+            print 'STEP:', step
+            #fn()
+        return
+    for action in ['install', 'uninstall', 'log2html', 'runtest', 'snapshot']:
+        if arguments[action]:
+            print 'RUN:', action
+            return globals().get('run_'+action)()
+    return
+
+    cnf = arguments.get('-c')
+    serialno = arguments.get('-s')
     out = subprocess.check_output(['adb', '-s', serialno, 'get-state'])
     if out.strip() != 'device': 
         print 'device(%s) not ready, current state:%s' %(serialno, out.strip())

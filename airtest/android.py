@@ -13,7 +13,7 @@ import logging
 import random
 import string
 
-from airtest import image, patch
+from airtest import image, patch, base
 
 from com.dtmilano.android.viewclient import ViewClient 
 from com.dtmilano.android.viewclient import adbclient
@@ -62,6 +62,7 @@ class AndroidDevice(object):
         self._imgdir = None
         self._last_point = None
         self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
+        self.adb.reconnect = True # this way is more stable
 
         self.vc = ViewClient(self.adb, serialno)
         ViewClient.connectToDeviceOrExit()
@@ -113,12 +114,13 @@ class AndroidDevice(object):
     def touch(self, x, y, eventType=adbclient.DOWN_AND_UP):
         log.debug('touch position %s', (x, y))
         self.adb.touch(x, y, eventType)
+        #base.exec_cmd('adb', '-s', self._serialno, 
+                #'shell', 'input', 'tap', '%d'%x, '%d'%y)
 
     def wait(self, imgfile, interval=0.5, max_retry=5):
         '''
         wait until some picture exists
         '''
-        _record(AT_WAIT)
         pt = _wait_until(self.where, args=(imgfile,), interval=interval, max_retry=max_retry)
         if not pt:
             raise Exception('wait fails')
@@ -147,14 +149,14 @@ class AndroidDevice(object):
             pos = _image_locate('screenshot.png', self._imgfor(imgfile))[0]
         else:
             pos = self._last_point
-        print 'click', imgfile, pos
         (x, y) = (pos[0], pos[1])
-        w, h = self._getShape()
+        print 'click', imgfile, pos
         # check if horizontal
+        w, h = self._getShape()
         if w > h:
             log.debug('Screen rotate, width(%d), height(%d)', w, h)
+            log.debug('(%d, %d) -> (%d, %d)', x, y, y, h-x)
             x, y = y, h-x
-        _record(AT_CLICK, position=(x, y))
         self.adb.touch(x, y)
 
     def clickByText(self, text, dump=True, delay=1.0):
@@ -185,7 +187,6 @@ class AndroidDevice(object):
         self.adb.shell('input keyevent '+name)
 
     def home(self):
-        #_record(AT_KEYEVENT, name='HOME')
         log.debug('touch %s', 'HOME')
         self.adb.shell('input keyevent HOME')
         
