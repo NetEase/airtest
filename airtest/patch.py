@@ -29,12 +29,16 @@ def fuckit(fn):
 
 def record(logfile=None):
     ''' decorator for class '''
-    logfile = os.getenv('PYTEST_LOGFILE', 'log/pytest.log')
+    logfile = os.getenv('AIRTEST_LOGFILE', 'log/airtest.log')
+    print logfile
     if os.path.exists(logfile):
         backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
         os.rename(logfile, backfile)
     else:
-        os.makedirs(os.path.dirname(logfile))
+        try:
+            os.makedirs(os.path.dirname(logfile))
+        except:
+            pass
     logfd = open(logfile, 'w')
     def wrapper(cls):
         class NewClass(cls):

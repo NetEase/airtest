@@ -28,10 +28,16 @@ def render(logfile, htmlfile):
     items.append({'image': 'xxx.png'})
     for line in open(logfile):
         d = json.loads(line)
-        args = d.get('args')
-        args.extend([k+'='+v for k, v in d.get('kwargs').items()])
-        cmdstr = '{func}({argv})'.format(func=d.get('function'), argv=' ,'.join(["'"+s+"'" for s in args]))
-        items.append({'cmd': cmdstr})
+        if d.get('function'):
+            args = d.get('args')
+            args.extend([k+'='+v for k, v in d.get('kwargs').items()])
+            cmdstr = '{func}({argv})'.format(func=d.get('function'), 
+                    argv=' ,'.join(["'%s'"%s for s in args]))
+            items.append({'cmd': cmdstr})
+        elif d.get('result'):
+            data['result'] = {'status': d.get('result'), 'detail': d.get('detail')}
+
+
     out = pystache.render(template.decode('utf-8'), data)
     with open(htmlfile, 'w') as file:
         file.write(out.encode('utf-8'))

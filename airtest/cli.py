@@ -56,8 +56,8 @@ def run_snapshot():
 
 def run_install():
     if platform == 'android':
-        #urlretrieve(xpath(platform, 'apk_url'), 'test.apk')
-        #exec_cmd('adb', '-s', serialno, 'install', '-r', 'test.apk')
+        urlretrieve(xpath(platform, 'apk_url'), 'test.apk')
+        exec_cmd('adb', '-s', serialno, 'install', '-r', 'test.apk')
         package, activity = xpath(platform, 'package'), xpath(platform, 'activity')
         exec_cmd('adb', 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
     else:
@@ -75,7 +75,7 @@ def run_runtest():
 
 def run_log2html():
     if F.get('logfile') and F.get('htmldir'):
-        log2html.render(F.get('logfile'), F.get('htmldir'))
+        log2html.render(F.get('logfile'), os.path.join(F.get('htmldir'), 'index.html'))
 
 def run_android(jsonfile, serialno, skip_install=False):
     d = json.load(open(jsonfile, 'r'))
@@ -120,7 +120,9 @@ def main():
         sys.exit('config file require: %s' %(cnf))
     F = json.load(open(cnf))
     if not 'logfile' in F:
-        F['logfile'] = 'log/airtest.log'
+        logfile = 'log/airtest.log'
+        F['logfile'] = logfile
+        os.environ['AIRTEST_LOGFILE'] = logfile
     if arguments.get('-H'):
         F['htmldir'] = arguments.get('-H')
 
@@ -130,7 +132,12 @@ def main():
             if not fn or not callable(fn):
                 sys.exit('no such step: %s' %(step))
             print 'STEP:', step
-            #fn()
+            try:
+                fn()
+            except Exception as e:
+                with open(logfile, 'a') as file:
+                    file.write(json.dumps({'result': 'failed', 'detail': str(e)}))
+
         return
     for action in ['install', 'uninstall', 'log2html', 'runtest', 'snapshot']:
         if arguments[action]:
