@@ -127,6 +127,7 @@ def main():
         F['htmldir'] = arguments.get('-H')
 
     if arguments['all']:
+        exitcode = 0
         for step in arguments['--steps'].split(','):
             fn = globals().get('run_'+step)
             if not fn or not callable(fn):
@@ -136,8 +137,10 @@ def main():
                 fn()
             except Exception as e:
                 with open(logfile, 'a') as file:
-                    file.write(json.dumps({'result': 'failed', 'detail': str(e)}))
+                    file.write(json.dumps({'step': step, 'result': 'failed', 'detail': str(e)}))
+                    exitcode=1
 
+        sys.exit(exitcode)
         return
     for action in ['install', 'uninstall', 'log2html', 'runtest', 'snapshot']:
         if arguments[action]:
