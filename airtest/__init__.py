@@ -1,6 +1,6 @@
 #coding: utf-8
 #
-__all__=['android', 'image', 'base']
+__all__=['android', 'image', 'base', 'patch']
 
 import subprocess
 

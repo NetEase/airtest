@@ -75,6 +75,9 @@ class AndroidDevice(object):
             if not self.adb.isScreenOn():
                 time.sleep(1)
             log.debug('isScreenOn: %s', self.adb.isScreenOn())
+            if self.adb.isLocked():
+                (w, h) = self._getShape()
+                app.drag((w*0.2, h*0.5), (w*0.6, h*0.5))
         except:
             print 'Device not support screen detect'
 
@@ -91,6 +94,12 @@ class AndroidDevice(object):
     def shape(self):
         ''' get screen width and height '''
         return self._getShape()
+
+    def setThreshold(self, threshold):
+        '''
+        @param threshold(float): (0, 1] suggest 0.5
+        '''
+        self._threshold = threshold
 
     def setImageDir(self, imgdir='.'):
         self._imgdir = imgdir
@@ -121,32 +130,33 @@ class AndroidDevice(object):
         '''
         wait until some picture exists
         '''
-        pt = _wait_until(self.where, args=(imgfile,), interval=interval, max_retry=max_retry)
+        pt = _wait_until(self.find, args=(imgfile,), interval=interval, max_retry=max_retry)
         if not pt:
             raise Exception('wait fails')
         self._last_point = pt
         return
 
-    def where(self, imgfile):
+    def find(self, imgfile):
         '''
         find image location
         @return list of find points
         '''
-        screen = self._saveScreen('where-XXXXXXXX.png')
-        pts = _image_locate(screen, imgfile)
+        screen = self._saveScreen('find-XXXXXXXX.png')
+        pts = _image_locate(screen, self._imgfor(imgfile), self._threshold)
         return pts and pts[0]
 
     def exists(self, imgfile):
-        return True if self.where(imgfile) else False
+        return True if self.find(imgfile) else False
 
     def click(self, imgfile=None, delay=1.0):
         '''
         '''
         self.sleep(delay)
         if imgfile:
-            self.takeSnapshot('screenshot.png')
-            log.debug('locate postion where to touch')
-            pos = _image_locate('screenshot.png', self._imgfor(imgfile))[0]
+            #self.takeSnapshot('screenshot.png')
+            log.debug('locate postion to touch')
+            pos = self.find(imgfile)
+            #pos = _image_locate('screenshot.png', self._imgfor(imgfile))[0]
         else:
             pos = self._last_point
         (x, y) = (pos[0], pos[1])
@@ -215,7 +225,7 @@ class AndroidDevice(object):
             if isinstance(raw, basestring):
                 screen = variable.get('screen')
                 if not screen:
-                    variable['screen'] = self._saveScreen('where-XXXXXXXX.png')
+                    variable['screen'] = self._saveScreen('screen-XXXXXXXX.png')
                 return _image_locate_one(variable['screen'], self._imgfor(raw))
             else:
                 raise Exception('invalid type')
@@ -230,12 +240,12 @@ def _image_locate_one(orig, query):
         raise Exception('query image not found')
     return pts[0]
 
-def _image_locate(origin_file, query_file):
+def _image_locate(origin_file, query_file, threshold):
     '''
     image match
     '''
     log.debug('search image(%s) from(%s)', query_file, origin_file)
-    pts = image.locate_image(origin_file, query_file)
+    pts = image.locate_image(origin_file, query_file, threshold=threshold)
     return pts
 
     # when use http API, call function below
