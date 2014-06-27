@@ -97,6 +97,9 @@ command will be called by `air.test` after successfully installed apk.
 bash -c "python main.py -s ${SERIALNO}"
 ```
 
+* take screen snapshot by run: `air.test snapshot`
+* run test by run: `air.test runtest`
+
 ## good luck
 author: hzsunshx
 email: hzsunshx@corp.netease.com
