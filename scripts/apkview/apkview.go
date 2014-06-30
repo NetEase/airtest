@@ -22,14 +22,17 @@ func init() {
 var (
 	format  = flag.String("f", "{{.package}}/{{.activity}}", "output format")
 	apkpath = flag.String("apk", "", "android pkg path")
+	quite   = flag.Bool("q", false, "suppress debug info")
 )
 
 func ParseApk() error {
 	toolpath := filepath.Join(SelfDir(), "apktool.jar")
 	fmt.Println(toolpath)
 	c := exec.Command("java", "-jar", toolpath, "decode", "--force", *apkpath, TMPAPKPATH)
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
+	if !*quite {
+		c.Stdout = os.Stdout
+		c.Stderr = os.Stderr
+	}
 	return c.Run()
 }
 
