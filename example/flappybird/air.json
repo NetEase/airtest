@@ -1,8 +1,8 @@
 {
-  "cmd": "python main.py ${SERIALNO}",
+  "cmd": "python main.py $SERIALNO",
   "android": {
-    "apk_url": "http://zgmh.gdl.netease.com/zgmh_pub.apk",
-    "package": "com.netease.zgmh",
-    "activity": "com.netease.Sanguo.Sanguo"
+    "apk_url": "ftp://10.246.13.180/publish/com.dotgears.flappybird-bf978c69c8e594e6fe301b677e69acbc.apk",
+    "package": "com.dotgears.flappybird",
+    "activity": "com.dotgears.flappy.SplashScreen"
   }
 }

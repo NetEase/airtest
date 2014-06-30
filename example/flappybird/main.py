@@ -1,17 +1,34 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+'''
+flappybird test example
+'''
+
+import sys
+#sys.path.insert(0, 'Z:\workspace\pyairtest')
 import os
 import airtest
 
-serialno = os.getenv('SERIALNO')
-w, h = 1920, 1080
-app = airtest.connect(serialno)
-#app.touch(143, 968)
-#app.touch(968, h-143) #143, 968)
-#if app.exists('confirm.png'):
-#    app.click('confirm.png')
-app.click('quickenter.png')
-app.click('checkbox.png')
-app.type('blue\n')
-app.click('boy.png')
-app.click('enter.png')
-app.click('tianxia.png')
-#app.touch(1805, 942)
+#reload(airtest)
+
+serialno = ''
+
+def test():
+    app = airtest.connect(serialno)
+
+    app.sleep(1)
+    app.setThreshold(0.1)
+    app.click('start.png')
+    app.sleep(2)
+    w, h = app.shape()
+    app.touch(w*0.5, h*0.5)
+
+    app.sleep(4)
+    app.setThreshold(0.5)
+    assert app.exists('gameover.png')
+
+if __name__ == '__main__':
+    serialno = os.getenv('SERIALNO', default='4d005f1f9df03107')
+    print 'SERIALNO:', serialno
+    test()
