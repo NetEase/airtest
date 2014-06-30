@@ -13,7 +13,11 @@ import (
 	"text/template"
 )
 
-const TMPAPKPATH = "tmpapk-directory"
+var TMPAPKPATH string
+
+func init() {
+	TMPAPKPATH, _ = ioutil.TempDir(".", "apktmp-") //"tmpapk-directory"
+}
 
 var (
 	format  = flag.String("f", "{{.package}}/{{.activity}}", "output format")
@@ -57,6 +61,7 @@ func ParseManifest() (pkgname string, activity string, err error) {
 }
 
 func main() {
+	defer os.RemoveAll(TMPAPKPATH)
 	flag.Parse()
 	if *apkpath == "" {
 		log.Fatal("need apkpath")
@@ -64,7 +69,6 @@ func main() {
 	if err := ParseApk(); err != nil {
 		log.Fatal(err)
 	}
-	defer os.RemoveAll(TMPAPKPATH)
 
 	pkgname, activity, err := ParseManifest()
 	if err != nil {
