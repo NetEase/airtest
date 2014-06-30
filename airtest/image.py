@@ -5,10 +5,11 @@ __author__ = 'hzsunshx'
 
 import cv2
 
-MIN_MATCH_COUNT = 8
+MIN_MATCH_COUNT = 2
 DEBUG=True
 
 def _middlePoint(pts):
+    DEBUG=False
     def add(p1, p2):
         return (p1[0]+p2[0], p1[1]+p2[1])
     def distance(p1, p2):
@@ -79,7 +80,7 @@ def locate_image(origin='orig.png', query='query.png', outfile=None, threshold=0
     # store all the good matches as per Lowe's ratio test.
     good = []
     for m,n in matches:
-        if m.distance < 0.7*n.distance:
+        if m.distance < 0.8*n.distance:
             good.append(m)
     if DEBUG: print len(kp1), len(kp2), 'good cnt:', len(good)
 
