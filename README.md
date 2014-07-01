@@ -3,33 +3,27 @@ pyairtest
 this is python lib for airtest
 
 ## install
-install use pip.
+install using pip.
 ```
 pip install -U git+https://github.com/blackair/airtest.git
 ```
 
-Other python lib requirements which may not resolved by pip.
+Other python lib required which may need installing by yourself.
 
-* numpy
-* pillow
-* opencv
-* androidviewclient
+1. numpy
+1. pillow
+1. opencv
+1. androidviewclient
+1. adb (the android platform tools)
+1. appium (the ios platform tools)
 
-`androidviewclient` is not working well with pip, you have to install it with `easy_install`.
-
-`pillow` is also needed.
 
 * Mac: run `brew install pillow`
 * Windows: download pillow from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>
 * Linux: A little complicated. It's better to install from source.
 
-the command `adb` is should be found in $PATH
-
-after finish install. you can use import airtest. and can run `air.test` and `snapshot`.
-
-for windows: Another way is download my packed python and extracted to `C:\Python27`
-
-Download: <http://pan.baidu.com/s/1pJpxroZ>
+For windows: some resources can be found here:
+Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
 
 ## write test case
 after installed successfully. you can import like

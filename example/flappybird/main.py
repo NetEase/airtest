@@ -23,10 +23,12 @@ def test():
     app.sleep(2)
     w, h = app.shape()
     app.touch(w*0.5, h*0.5)
+    app.sleep(0.5)
+    app.touch(w*0.5, h*0.5)
 
-    app.sleep(4)
-    app.setThreshold(0.5)
-    assert app.exists('gameover.png')
+    #app.sleep(4)
+    #app.setThreshold(0.5)
+    #assert app.exists('gameover.png')
 
 if __name__ == '__main__':
     serialno = os.getenv('SERIALNO', default='4d005f1f9df03107')
