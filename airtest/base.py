@@ -29,5 +29,7 @@ def exec_cmd(*cmds, **kwargs):
         r = c(*cmds[1:], _err_to_out=True, _out=sys.stdout, _env=env, _timeout=timeout)
     except ImportError:
         print 'RUN(timeout=XX):', ' '.join(cmds)
+        if shell:
+            cmds = ' '.join(cmds)
         r = subprocess.Popen(cmds, env=env, stdout=sys.stdout, stderr=sys.stderr, shell=shell)
     print r.wait()
