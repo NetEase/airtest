@@ -23,7 +23,7 @@ def test():
     app.sleep(2)
     w, h = app.shape()
     app.touch(w*0.5, h*0.5)
-    app.sleep(0.5)
+    app.sleep(0.06)
     app.touch(w*0.5, h*0.5)
 
     #app.sleep(4)
