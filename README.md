@@ -9,18 +9,24 @@ pip install -U git+https://github.com/blackair/airtest.git
 ```
 
 Other python lib required which may need installing by yourself.
-
 1. numpy
 1. pillow
 1. opencv
-1. androidviewclient
-1. adb (the android platform tools)
-1. appium (the ios platform tools)
 
+### For android test (on any platform)
+1. adb: <http://developer.android.com/tools/help/adb.html>
+1. AndroidViewClient: `easy_install --upgrade androidviewclient`
+1. opencv
+1. pillow
+    * Windows: download pillow from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>
+    * Linux: A little complicated. It's better to install from source.
 
-* Mac: run `brew install pillow`
-* Windows: download pillow from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>
-* Linux: A little complicated. It's better to install from source.
+### For ios test (only on Mac OS)
+1. brew: <http://brew.sh/>
+1. appium: `brew install node; npm install -g appium`
+1. Appium-Python-Client: `pip install Appium-Python-Client`
+1. opencv: `brew tap homebrew/science; brew install opencv` 
+1. pillow: `brew install pillow`
 
 For windows: some resources can be found here:
 Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
