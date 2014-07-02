@@ -72,6 +72,21 @@ class AndroidDevice(object):
         except:
             print 'Device not support screen detect'
 
+    def _fixPoint(self, (x, y)):
+        (w, h) = self._getShape() # when rotate w > h
+        width, height = min(w, h), max(w, h)
+        if isinstance(x, float) and x <= 1.0:
+            x = int(width*x)
+        if isinstance(y, float) and y <= 1.0:
+            y = int(width*y)
+        if w != width:
+            log.debug('Screen rotate, width(%d), height(%d)', w, h)
+            log.debug('(%d, %d) -> (%d, %d)', x, y, y, h-x)
+            x, y = y, width-x
+        return (x, y)
+
+
+        pass
     def _imgfor(self, name):
         if self._imgdir:
             return os.path.join(self._imgdir, name)
@@ -139,26 +154,22 @@ class AndroidDevice(object):
     def exists(self, imgfile):
         return True if self.find(imgfile) else False
 
-    def click(self, imgfile=None, delay=1.0):
+    def click(self, pt):
         '''
+        @param pt(string or list(x, y)): point to click, when string is image file
         '''
-        self.sleep(delay)
-        if imgfile:
-            #self.takeSnapshot('screenshot.png')
+        if isinstance(pt, basestring):
             log.debug('locate postion to touch')
-            pos = self.find(imgfile)
-            #pos = _image_locate('screenshot.png', self._imgfor(imgfile))[0]
-        else:
-            pos = self._last_point
-        (x, y) = (pos[0], pos[1])
-        print 'click', imgfile, pos
-        # check if horizontal
-        w, h = self._getShape()
-        if w > h:
-            log.debug('Screen rotate, width(%d), height(%d)', w, h)
-            log.debug('(%d, %d) -> (%d, %d)', x, y, y, h-x)
-            x, y = y, h-x
+            pt = self.find(pt)
+        (x, y) = self._fixPoint(pt)
+        print 'click', imgfile, (x, y)
         self.adb.touch(x, y)
+        # check if horizontal
+        # w, h = self._getShape()
+        # if w > h:
+        #     log.debug('Screen rotate, width(%d), height(%d)', w, h)
+        #     log.debug('(%d, %d) -> (%d, %d)', x, y, y, h-x)
+        #     x, y = y, h-x
 
     def clickByText(self, text, dump=True, delay=1.0):
         self.sleep(delay)
@@ -172,6 +183,27 @@ class AndroidDevice(object):
             b.touch()
         else:
             raise Exception('text(%s) not found' % text)
+
+    def drag(self, fpt, tpt, duration=500):
+        ''' 
+        @param fpt,tpt: (x, y) or image filepath, from point and to point
+        @param duration: duration of the event in ms
+        '''
+        # the duration seems not working. no matter how larger I set, nothing changes.
+        variable = {}
+        def to_point(raw):
+            if isinstance(raw, list) or isinstance(raw, tuple):
+                return self._fixPoint(raw)
+            if isinstance(raw, basestring):
+                screen = variable.get('screen')
+                if not screen:
+                    variable['screen'] = self._saveScreen('screen-XXXXXXXX.png')
+                pt = _image_locate_one(variable['screen'], self._imgfor(raw))
+                return pt
+            raise RuntimeError('unknown type')
+
+        fpt, tpt = to_point(fpt), to_point(tpt)
+        return self.adb.drag(fpt, tpt, duration)
 
     def sleep(self, secs=1.0):
         '''
@@ -202,36 +234,16 @@ class AndroidDevice(object):
             else:
                 self.adb.type(c)
 
-    def drag(self, f, to):
-        ''' 
-        @param duration: duration of the event in ms
-        '''
-        # the duration seems not working. no matter how larger I set, nothing changes.
-        duration=500
-        variable = {}
-        def to_point(raw):
-            global screen
-            if isinstance(raw, list) or isinstance(raw, tuple):
-                return raw
-            if isinstance(raw, basestring):
-                screen = variable.get('screen')
-                if not screen:
-                    variable['screen'] = self._saveScreen('screen-XXXXXXXX.png')
-                return _image_locate_one(variable['screen'], self._imgfor(raw))
-            else:
-                raise Exception('invalid type')
-        fpt, tpt = to_point(f), to_point(to)
-        return self.adb.drag(fpt, tpt, duration)
 
 def _image_locate_one(orig, query):
     pts = _image_locate(orig, query)
     if len(pts) > 1:
-        raise Exception('too many same query images')
+        raise RuntimeError('too many same query images')
     if len(pts) == 0:
-        raise Exception('query image not found')
+        raise RuntimeError('query image not found')
     return pts[0]
 
-def _image_locate(origin_file, query_file, threshold):
+def _image_locate(origin_file, query_file, threshold=0.5):
     '''
     image match
     '''
