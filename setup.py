@@ -8,7 +8,7 @@ with open('README.md') as f:
 
 setup(
       name='airtest',
-      version='0.1.0630',
+      version='0.1.0702',
       description='mobile test(black air) python lib',
       long_description=long_description,
 
@@ -24,7 +24,7 @@ setup(
           'requests >= 2.3.0', 
           'docopt >= 0.6.2',
           'pystache == 0.5.4',
-          'Appium-Python-Client == 0.8'
+          #'Appium-Python-Client == 0.8'
           ],
       entry_points='''
       [console_scripts]

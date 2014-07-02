@@ -7,13 +7,15 @@ basic operation for a game(like a user does)
 
 import os
 import time
-import requests
-import json
+# import requests
+# import json
 import logging
 import random
 import string
 
-from airtest import image, patch, base
+from airtest import image
+from airtest import patch
+# from airtest import base
 
 from com.dtmilano.android.viewclient import ViewClient 
 from com.dtmilano.android.viewclient import adbclient
@@ -68,7 +70,7 @@ class AndroidDevice(object):
             log.debug('isScreenOn: %s', self.adb.isScreenOn())
             if self.adb.isLocked():
                 (w, h) = self._getShape()
-                app.drag((w*0.2, h*0.5), (w*0.6, h*0.5))
+                self.drag((w*0.2, h*0.5), (w*0.6, h*0.5))
         except:
             print 'Device not support screen detect'
 
@@ -162,7 +164,7 @@ class AndroidDevice(object):
             log.debug('locate postion to touch')
             pt = self.find(pt)
         (x, y) = self._fixPoint(pt)
-        print 'click', imgfile, (x, y)
+        print 'click', (x, y)
         self.adb.touch(x, y)
         # check if horizontal
         # w, h = self._getShape()
