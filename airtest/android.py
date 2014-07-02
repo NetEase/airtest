@@ -87,8 +87,6 @@ class AndroidDevice(object):
             x, y = y, width-x
         return (x, y)
 
-
-        pass
     def _imgfor(self, name):
         if self._imgdir:
             return os.path.join(self._imgdir, name)

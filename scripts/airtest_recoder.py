@@ -34,11 +34,21 @@ def getShape():
 def getScale():
     rawx, rawy = getRawShape()
     w, h = getShape()
-    return float(rawx)/float(w), float(rawy)/float(h)
+    width, height = min(w, h), max(w, h)
+    print '#raw', rawx, rawy
+    print '# screen.width:', width
+    print '# screen.height:', height
+    if width == w:
+        print "def click(x, y): app.touch(x, y)"
+    else:
+        print "def click(x, y): app.touch(y, %s-x)" %(width)
+    #print 'import time'
+    #print 'begin = time.time()'
+    return float(rawx)/float(width), float(rawy)/float(height)
 
 def getDeviceId():
     output = subprocess.check_output('adb devices', shell=True)
-    match = re.search(r'([\w\d]+)\s+device\s*$', output)
+    match = re.search(r'([\w\d:.]+)\s+device\s*$', output)
     if match:
         return match.group(1)
     raise RuntimeError("Couldn't find avaliable device")
@@ -48,11 +58,11 @@ def main():
     lastOper = ''
     touchStart = 0
     start = time.time()
+    begin = time.time()
 
-    scaleX, scaleY = getScale()
     deviceId = getDeviceId()
-
-    print "import airtest\napp = airtest.connect('%s')\n" %(deviceId)
+    print "import airtest\napp = airtest.connect('%s')\n\n" %(deviceId)
+    scaleX, scaleY = getScale()
 
     # plen()
     while True:
@@ -71,6 +81,7 @@ def main():
             ys.append(value)
         elif oper == 'SYN_MT_REPORT':
             if lastOper == oper:
+                #print >>sys.stderr, xs[0], ys[0]
                 xs = map(lambda x: x/scaleX, xs)
                 ys = map(lambda y: y/scaleY, ys)
                 if len(xs) != 0 and len(ys) != 0: # something went wrong
@@ -80,9 +91,11 @@ def main():
                     duration = time.time()-touchStart
                     # print 'Duration:', duration
                     if dist < 50:
-                        print 'app.touch(%d, %d)' %(x1, y1)
+                        print 'click(%d, %d)' %(x1, y1)
                     else:
                         print 'app.drag((%d, %d), (%d, %d))' %(x1, y1, x2, y2)
+                    #print 'print "auto=%.2f"' % float(time.time()-begin)
+                    #print 'print "delay=", time.time()-begin'
                 xs, ys = [], []
             else:
                 if len(xs) == 1:
