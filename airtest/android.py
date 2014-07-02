@@ -199,7 +199,7 @@ class AndroidDevice(object):
                 if not screen:
                     variable['screen'] = self._saveScreen('screen-XXXXXXXX.png')
                 pt = _image_locate_one(variable['screen'], self._imgfor(raw))
-                return pt
+                return self._fixPoint(pt)
             raise RuntimeError('unknown type')
 
         fpt, tpt = to_point(fpt), to_point(tpt)
@@ -243,7 +243,7 @@ def _image_locate_one(orig, query):
         raise RuntimeError('query image not found')
     return pts[0]
 
-def _image_locate(origin_file, query_file, threshold=0.5):
+def _image_locate(origin_file, query_file, threshold=0.3):
     '''
     image match
     '''
