@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#
+# 2014/07/02 by codeskyblue
+#
 '''
 convert adb event to air.test program
 usage is simple:
