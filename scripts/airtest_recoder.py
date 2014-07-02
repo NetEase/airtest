@@ -14,10 +14,15 @@ import time
 import subprocess
 import re
 
-dev = '/dev/input/event1'
+DEVSCREEN = '/dev/input/event1'
+
+__header__ = '''
+import airtest
+app = airtest.connect("{id}")
+'''
 
 def getRawShape():
-    output = subprocess.check_output('adb shell getevent -p '+dev, shell=True)
+    output = subprocess.check_output('adb shell getevent -p '+DEVSCREEN, shell=True)
     re.compile(r'0035.*max (\d+)')
     max_x = re.search(r'0035.*max (\d+)', output).group(1)
     max_y = re.search(r'0036.*max (\d+)', output).group(1)
@@ -42,6 +47,7 @@ def getScale():
         print "def click(x, y): app.touch(x, y)"
     else:
         print "def click(x, y): app.touch(y, %s-x)" %(width)
+    print "def sleep(d): app.sleep(d)"
     #print 'import time'
     #print 'begin = time.time()'
     return float(rawx)/float(width), float(rawy)/float(height)
@@ -61,13 +67,13 @@ def main():
     begin = time.time()
 
     deviceId = getDeviceId()
-    print "import airtest\napp = airtest.connect('%s')\n\n" %(deviceId)
+    print __header__.format(id=deviceId)
     scaleX, scaleY = getScale()
 
     # plen()
     while True:
         line = sys.stdin.readline()
-        if not line.startswith('/dev/input/event1'):
+        if not line.startswith(DEVSCREEN):
             continue
         channel, event, oper, value = line.split()
         # print event, oper, value#int(value, 16)
@@ -81,28 +87,30 @@ def main():
             ys.append(value)
         elif oper == 'SYN_MT_REPORT':
             if lastOper == oper:
-                #print >>sys.stderr, xs[0], ys[0]
                 xs = map(lambda x: x/scaleX, xs)
                 ys = map(lambda y: y/scaleY, ys)
-                if len(xs) != 0 and len(ys) != 0: # something went wrong
+                if len(xs) != 0 and len(ys) != 0: # every thing is OK
                     (x1, y1), (x2, y2) = (xs[0], ys[0]), (xs[-1], ys[-1])
                     dist = ((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))**0.5
 
                     duration = time.time()-touchStart
                     # print 'Duration:', duration
+                    # touch up
                     if dist < 50:
                         print 'click(%d, %d)' %(x1, y1)
                     else:
                         print 'app.drag((%d, %d), (%d, %d))' %(x1, y1, x2, y2)
-                    #print 'print "auto=%.2f"' % float(time.time()-begin)
-                    #print 'print "delay=", time.time()-begin'
                 xs, ys = [], []
             else:
                 if len(xs) == 1:
-                    print 'app.sleep(%.1f)' % float(time.time()-start)
+                    # touch down
+                    print 'sleep(%.2f)' % float(time.time()-start)
                     start = time.time()
                     touchStart = time.time()      
         lastOper = oper
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print 'Exit'

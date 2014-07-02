@@ -10,12 +10,12 @@ import sys
 import os
 import airtest
 
-#reload(airtest)
+def main():
+    serialno, pkgname = os.getenv('SERIALNO'), os.getenv('PKGNAME')
+    print 'SERIALNO:', serialno
+    print 'PKGNAME:', pkgname
 
-serialno = ''
-
-def test():
-    app = airtest.connect(serialno)
+    app = airtest.connect(serialno, pkgname)
 
     app.sleep(1)
     app.setThreshold(0.1)
@@ -23,14 +23,14 @@ def test():
     app.sleep(2)
     w, h = app.shape()
     app.touch(w*0.5, h*0.5)
-    app.sleep(0.06)
+    app.sleep(0.03)
+    app.touch(w*0.5, h*0.5)
+    app.sleep(0.03)
     app.touch(w*0.5, h*0.5)
 
-    #app.sleep(4)
+    app.sleep(4)
     #app.setThreshold(0.5)
     #assert app.exists('gameover.png')
 
 if __name__ == '__main__':
-    serialno = os.getenv('SERIALNO', default='4d005f1f9df03107')
-    print 'SERIALNO:', serialno
-    test()
+    main()

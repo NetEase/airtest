@@ -8,7 +8,7 @@ with open('README.md') as f:
 
 setup(
       name='airtest',
-      version='0.1.0702',
+      version='0.1.0702-fix',
       description='mobile test(black air) python lib',
       long_description=long_description,
 

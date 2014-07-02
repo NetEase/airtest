@@ -2,60 +2,19 @@
 # -*- coding: utf-8 -*-
 
 '''
-basic operation for a game(like a user does)
+iphone and ipad
 '''
 
 import os
 import time
-import requests
-import json
-import logging
-import random
-import string
 from PIL import Image
 
-from airtest import image, patch, base
-
+# from airtest import patch
+from airtest import image
+from airtest import base
 from appium import webdriver
 
-DEBUG = os.getenv("DEBUG")=="true"
-adbclient = None
-
-logging.basicConfig(format = '%(asctime)s - %(levelname)s: %(message)s', level = logging.DEBUG)  
-log = logging.getLogger('root')
-random.seed(time.time())
-
-
-def _wait_until(until_func, interval=0.5, max_retry=10, args=(), kwargs={}):
-    '''
-    @return True(when found), False(when not found)
-    '''
-    log.debug('wait func: %s', until_func.__name__)
-    retry = 0
-    while retry < max_retry:
-        retry += 1
-        ret = until_func(*args, **kwargs)
-        if ret:
-            return ret
-        log.debug('wait until: %s, sleep: %s', until_func.__name__, interval)
-        time.sleep(interval)
-    return None
-
-
-# AT = ACTION
-AT_KEYEVENT = 'KEYEVENT'
-AT_CLICK = 'CLICK'
-AT_WAIT = 'WAIT'
-
-
-def _random_name(name):
-    out = []
-    for c in name:
-        if c == 'X':
-            c = random.choice(string.ascii_lowercase)
-        out.append(c)
-    return ''.join(out)
-
+log = base.getLogger('ios')
 
 #@patch.record()
 class IosDevice(object):
@@ -97,6 +56,11 @@ class IosDevice(object):
         log.debug('IosDevice real resolution: width:{width}, height:{height}'.format(
             width=self.width_real, height=self.height_real))
 
+    def _saveScreen(self, filename):
+        filename = base.random_name(filename)
+        self.takeSnapshot(filename)
+        return filename
+    
     def shape(self):
         ''' get screen width and height '''
         return self._getShape()
@@ -111,11 +75,6 @@ class IosDevice(object):
     def setImageDir(self, imgdir='.'):
         self._imgdir = imgdir
 
-    def _saveScreen(self, filename):
-        filename = _random_name(filename)
-        self.takeSnapshot(filename)
-        return filename
-
     def takeSnapshot(self, filename="lastest.png"):
         ''' @return PIL image '''
         log.debug('take snapshot and save to '+filename)
@@ -128,16 +87,14 @@ class IosDevice(object):
     def touch(self, x, y, eventType=None):
         log.debug('touch position %s', (x, y))
         self.driver.tap([(x, y)])
-        #base.exec_cmd('adb', '-s', self._serialno, 
-                #'shell', 'input', 'tap', '%d'%x, '%d'%y)
 
     def wait(self, imgfile, interval=0.5, max_retry=5):
         '''
         wait until some picture exists
         '''
-        pt = _wait_until(self.where, args=(imgfile,), interval=interval, max_retry=max_retry)
+        pt = base.wait_until(self.where, args=(imgfile,), interval=interval, max_retry=max_retry)
         if not pt:
-            raise Exception('wait fails')
+            raise RuntimeError('wait fails')
         self._last_point = pt
         return
 
@@ -185,7 +142,7 @@ class IosDevice(object):
             log.debug('click x: %d y: %d', x, y)
             b.touch()
         else:
-            raise Exception('text(%s) not found' % text)
+            raise RuntimeError('text(%s) not found' % text)
 
     def sleep(self, secs=1.0):
         '''
@@ -228,16 +185,16 @@ class IosDevice(object):
                     variable['screen'] = self._saveScreen('where-XXXXXXXX.png')
                 return _image_locate_one(variable['screen'], self._imgfor(raw))
             else:
-                raise Exception('invalid type')
+                raise RuntimeError('invalid type')
         fpt, tpt = to_point(f), to_point(to)
         return self.driver.swipe(fpt[0], fpt[1], tpt[0], tpt[1], duration)
 
 def _image_locate_one(orig, query):
     pts = _image_locate(orig, query)
     if len(pts) > 1:
-        raise Exception('too many same query images')
+        raise RuntimeError('too many same query images')
     if len(pts) == 0:
-        raise Exception('query image not found')
+        raise RuntimeError('query image not found')
     return pts[0]
 
 def _image_locate(origin_file, query_file):

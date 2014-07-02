@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#!/usr/bin/env python
 # coding: utf-8
 #
 
@@ -18,13 +21,12 @@ Options:
     -H HTMLDIR      Save html report
 '''
 
-__version__ = '0.1.0627'
+__version__ = '0.1.0702'
 
 import json
 import sys
 import os
 import urllib
-import subprocess
 
 from docopt import docopt
 from com.dtmilano.android.viewclient import ViewClient 
@@ -70,34 +72,30 @@ def run_uninstall():
         print 'not supported:', platform
 
 def run_runtest():
-    env = {'SERIALNO': serialno}
+    env = {'SERIALNO': serialno, 'PKGNAME': xpath(platform, 'package')}
     exec_cmd(xpath('cmd'), shell=True, env=env)
 
 def run_log2html():
     if F.get('logfile') and F.get('htmldir'):
         log2html.render(F.get('logfile'), os.path.join(F.get('htmldir'), 'index.html'))
 
-def run_android(jsonfile, serialno, skip_install=False):
-    d = json.load(open(jsonfile, 'r'))
-    def xpath(*paths):
-        v=d
-        for p in paths:
-            v = v.get(p, {})
-        return v if v else None
-    package = xpath('android', 'package')
-    activity = xpath('android', 'activity')
-    apk_url = xpath('android', 'apk_url')
+# def run_android(jsonfile, serialno, skip_install=False):
+#     d = json.load(open(jsonfile, 'r'))
+#     def xpath(*paths):
+#         v=d
+#         for p in paths:
+#             v = v.get(p, {})
+#         return v if v else None
+#     package = xpath('android', 'package')
+#     activity = xpath('android', 'activity')
+#     apk_url = xpath('android', 'apk_url')
 
-    env = {'SERIALNO': serialno}
-    if not skip_install:
-        urlretrieve(apk_url, 'test.apk')
-        exec_cmd('adb', '-s', serialno, 'install', '-r', 'test.apk')
-        exec_cmd('adb', 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
-    exec_cmd('bash', '-c', xpath('cmd'), env=env)
-    #try:
-    #finally:
-    #exec_cmd('adb', '-s', serialno, 'uninstall', package)
-    #pass
+#     env = {'SERIALNO': serialno}
+#     if not skip_install:
+#         urlretrieve(apk_url, 'test.apk')
+#         exec_cmd('adb', '-s', serialno, 'install', '-r', 'test.apk')
+#         exec_cmd('adb', 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
+#     exec_cmd('bash', '-c', xpath('cmd'), env=env)
 
 def main():
     global F, platform, serialno
@@ -148,13 +146,13 @@ def main():
             return globals().get('run_'+action)()
     return
 
-    cnf = arguments.get('-c')
-    serialno = arguments.get('-s')
-    out = subprocess.check_output(['adb', '-s', serialno, 'get-state'])
-    if out.strip() != 'device': 
-        print 'device(%s) not ready, current state:%s' %(serialno, out.strip())
-        sys.exit(2)
-    run_android(cnf, serialno, skip_install=arguments.get('--skip-install'))
+    # cnf = arguments.get('-c')
+    # serialno = arguments.get('-s')
+    # out = subprocess.check_output(['adb', '-s', serialno, 'get-state'])
+    # if out.strip() != 'device': 
+    #     print 'device(%s) not ready, current state:%s' %(serialno, out.strip())
+    #     sys.exit(2)
+    # run_android(cnf, serialno, skip_install=arguments.get('--skip-install'))
 
 if __name__ == '__main__':
     main()

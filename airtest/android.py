@@ -9,54 +9,27 @@ import os
 import time
 # import requests
 # import json
-import logging
-import random
-import string
 
 from airtest import image
 from airtest import patch
-# from airtest import base
+from airtest import base
 
 from com.dtmilano.android.viewclient import ViewClient 
 from com.dtmilano.android.viewclient import adbclient
 
 DEBUG = os.getenv("DEBUG")=="true"
-
-logging.basicConfig(format = '%(asctime)s - %(levelname)s: %(message)s', level = logging.DEBUG)  
-log = logging.getLogger('root')
-random.seed(time.time())
-
-def _wait_until(until_func, interval=0.5, max_retry=10, args=(), kwargs={}):
-    '''
-    @return True(when found), False(when not found)
-    '''
-    log.debug('wait func: %s', until_func.__name__)
-    retry = 0
-    while retry < max_retry:
-        retry += 1
-        ret = until_func(*args, **kwargs)
-        if ret:
-            return ret
-        log.debug('wait until: %s, sleep: %s', until_func.__name__, interval)
-        time.sleep(interval)
-    return None
-
-def _random_name(name):
-    out = []
-    for c in name:
-        if c == 'X':
-            c = random.choice(string.ascii_lowercase)
-        out.append(c)
-    return ''.join(out)
+ 
+log = base.getLogger('android')
 
 @patch.record()
 class AndroidDevice(object):
-    def __init__(self, serialno=None):
+    def __init__(self, serialno=None, pkgname=None):
         self._imgdir = None
         self._last_point = None
+
+        self.pkgname = pkgname
         self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
         self.adb.reconnect = True # this way is more stable
-
         self.vc = ViewClient(self.adb, serialno)
         ViewClient.connectToDeviceOrExit()
         brand = self.adb.getProperty('ro.product.brand')
@@ -73,6 +46,18 @@ class AndroidDevice(object):
                 self.drag((w*0.2, h*0.5), (w*0.6, h*0.5))
         except:
             print 'Device not support screen detect'
+
+        @base.go
+        def monitor(interval=3):
+            print 'MONITOR:'
+            while True:
+                start = time.time()
+                mem = self._getMem()
+                dur = time.time()-start
+                if interval > dur:
+                    print 'MEM:', mem
+                    time.sleep(interval-dur)
+        monitor()
 
     def _fixPoint(self, (x, y)):
         (w, h) = self._getShape() # when rotate w > h
@@ -97,6 +82,11 @@ class AndroidDevice(object):
         height = self.adb.getProperty("display.height")
         return (width, height)
     
+    def _saveScreen(self, filename):
+        filename = base.random_name(filename)
+        self.takeSnapshot(filename)
+        return filename
+
     def shape(self):
         ''' get screen width and height '''
         return self._getShape()
@@ -107,38 +97,26 @@ class AndroidDevice(object):
         '''
         self._threshold = threshold
 
-    def setImageDir(self, imgdir='.'):
-        self._imgdir = imgdir
-
-    def _saveScreen(self, filename):
-        filename = _random_name(filename)
-        self.takeSnapshot(filename)
-        return filename
-
-    def takeSnapshot(self, filename=None):
-        ''' @return PIL image '''
+    def takeSnapshot(self, filename):
+        ''' save screen snapshot '''
         log.debug('take snapshot and save to '+filename)
         pil = self.adb.takeSnapshot(reconnect=True)
-        if filename:
-            pil.save(filename)
-        return pil
-
-    def startActivity(self, appname):
-        return self.adb.startActivity(appname)
+        pil.save(filename)
 
     def touch(self, x, y, eventType=adbclient.DOWN_AND_UP):
+        '''
+        same as adb -s ${SERIALNO} shell input tap x y
+        '''
         log.debug('touch position %s', (x, y))
         self.adb.touch(x, y, eventType)
-        #base.exec_cmd('adb', '-s', self._serialno, 
-                #'shell', 'input', 'tap', '%d'%x, '%d'%y)
 
     def wait(self, imgfile, interval=0.5, max_retry=5):
         '''
         wait until some picture exists
         '''
-        pt = _wait_until(self.find, args=(imgfile,), interval=interval, max_retry=max_retry)
+        pt = base.wait_until(self.find, args=(imgfile,), interval=interval, max_retry=max_retry)
         if not pt:
-            raise Exception('wait fails')
+            raise RuntimeError('wait fails')
         self._last_point = pt
         return
 
@@ -164,12 +142,6 @@ class AndroidDevice(object):
         (x, y) = self._fixPoint(pt)
         print 'click', (x, y)
         self.adb.touch(x, y)
-        # check if horizontal
-        # w, h = self._getShape()
-        # if w > h:
-        #     log.debug('Screen rotate, width(%d), height(%d)', w, h)
-        #     log.debug('(%d, %d) -> (%d, %d)', x, y, y, h-x)
-        #     x, y = y, h-x
 
     def clickByText(self, text, dump=True, delay=1.0):
         self.sleep(delay)
@@ -182,7 +154,7 @@ class AndroidDevice(object):
             log.debug('click x: %d y: %d', x, y)
             b.touch()
         else:
-            raise Exception('text(%s) not found' % text)
+            raise RuntimeError('text(%s) not found' % text)
 
     def drag(self, fpt, tpt, duration=500):
         ''' 
@@ -198,7 +170,7 @@ class AndroidDevice(object):
                 screen = variable.get('screen')
                 if not screen:
                     variable['screen'] = self._saveScreen('screen-XXXXXXXX.png')
-                pt = _image_locate_one(variable['screen'], self._imgfor(raw))
+                pt = find_image(variable['screen'], self._imgfor(raw), self._threshold)
                 return self._fixPoint(pt)
             raise RuntimeError('unknown type')
 
@@ -234,9 +206,33 @@ class AndroidDevice(object):
             else:
                 self.adb.type(c)
 
+    def _getMem(self):#, package='com.netease.rz'):
+        command = 'adb -s %s shell dumpsys meminfo' % self._serialno
+        mem_info = base.check_output(command).splitlines()
+        # self.adb.shell('dumpsys meminfo').splitlines()
+        #print '\n'.join(mem_info)
+        try:
+            xym_mem = filter(lambda x: self.pkgname in x, mem_info)[0].split()[0]
+            mem = float(xym_mem) / 1024
+            log.info("mem_info:%s" % mem)
+            return mem
+        except IndexError:
+            log.error("mem_info error")
+            return None
 
-def _image_locate_one(orig, query):
-    pts = _image_locate(orig, query)
+    def _getCpu(self):
+        cpu_info = self.adb.shell('dumpsys cpuinfo').splitlines()
+        try:
+            xym_cpu = filter(lambda x: self.pkgname in x, cpu_info)[0].split()[0]
+            cpu = float(xym_cpu[:-1])
+            log.info("cpu_info:%s" % cpu)
+            return cpu
+        except IndexError:
+            log.error("cpu_info error")
+            return None
+
+def find_image(orig, query, threshold):
+    pts = _image_locate(orig, query, threshold)
     if len(pts) > 1:
         raise RuntimeError('too many same query images')
     if len(pts) == 0:
