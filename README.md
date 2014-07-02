@@ -9,9 +9,6 @@ pip install -U git+https://github.com/blackair/airtest.git
 ```
 
 Other python lib required which may need installing by yourself.
-1. numpy
-1. pillow
-1. opencv
 
 ### For android test (on any platform)
 1. adb: <http://developer.android.com/tools/help/adb.html>
