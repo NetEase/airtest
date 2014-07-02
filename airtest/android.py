@@ -39,11 +39,6 @@ def _wait_until(until_func, interval=0.5, max_retry=10, args=(), kwargs={}):
         time.sleep(interval)
     return None
 
-# AT = ACTION
-AT_KEYEVENT = 'KEYEVENT'
-AT_CLICK = 'CLICK'
-AT_WAIT = 'WAIT'
-
 def _random_name(name):
     out = []
     for c in name:
@@ -51,10 +46,6 @@ def _random_name(name):
             c = random.choice(string.ascii_lowercase)
         out.append(c)
     return ''.join(out)
-
-def hello():
-    print 'hello world'
-    log.debug('debue info')
 
 @patch.record()
 class AndroidDevice(object):
@@ -189,7 +180,7 @@ class AndroidDevice(object):
         @param secs: float (number of seconds)
         @return None
         '''
-        log.debug('SLEEP %ds', secs)
+        log.debug('SLEEP %.2fs', secs)
         time.sleep(secs)
 
     def keyevent(self, name):
