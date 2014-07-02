@@ -25,6 +25,7 @@ logging.basicConfig(format = '%(asctime)s - %(levelname)s: %(message)s', level =
 log = logging.getLogger('root')
 random.seed(time.time())
 
+
 def _wait_until(until_func, interval=0.5, max_retry=10, args=(), kwargs={}):
     '''
     @return True(when found), False(when not found)
@@ -40,10 +41,12 @@ def _wait_until(until_func, interval=0.5, max_retry=10, args=(), kwargs={}):
         time.sleep(interval)
     return None
 
+
 # AT = ACTION
 AT_KEYEVENT = 'KEYEVENT'
 AT_CLICK = 'CLICK'
 AT_WAIT = 'WAIT'
+
 
 def _random_name(name):
     out = []
@@ -53,9 +56,6 @@ def _random_name(name):
         out.append(c)
     return ''.join(out)
 
-def hello():
-    print 'hello world'
-    log.debug('debue info')
 
 #@patch.record()
 class IosDevice(object):
@@ -65,14 +65,14 @@ class IosDevice(object):
         self.url = 'http://127.0.0.1:4723/wd/hub'
 
         log.debug("IosDevice start connecting...it may take a minute")
-        self.driver = self.connect()
+        self.driver = self._connect()
 
         self.width, self.height = self._getShape()
         self._getShapeReal()
         log.debug('IosDevice connected: width:{width}, height:{height}'.format(
             width=self.width, height=self.height))
 
-    def connect(self):
+    def _connect(self):
         return webdriver.Remote(
             command_executor=self.url,
             desired_capabilities={
@@ -90,7 +90,6 @@ class IosDevice(object):
         width, height = screen_size["width"], screen_size["height"]
         return (width, height)
 
-
     def _getShapeReal(self):
         screen_shot = self.takeSnapshot()
         img = Image.open(screen_shot)
@@ -102,7 +101,7 @@ class IosDevice(object):
         ''' get screen width and height '''
         return self._getShape()
 
-    def cvtXY(self, x, y):
+    def _cvtXY(self, x, y):
         """convert x,y from device real resolution to action input resolution"""
         x_input = x * self.width / self.width_real
         y_input = y * self.height / self.height_real
@@ -165,7 +164,7 @@ class IosDevice(object):
         else:
             pos = self._last_point
         (x, y) = (pos[0], pos[1])
-        x, y = self.cvtXY(x, y)
+        x, y = self._cvtXY(x, y)
         print 'click', imgfile, x, y
         # check if horizontal
         w, h = self._getShape()
