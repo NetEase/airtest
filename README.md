@@ -5,7 +5,7 @@ this is python lib for airtest
 ## install
 install using pip.
 ```
-pip install -U git+https://github.com/blackair/airtest.git
+pip install -U airtest
 ```
 
 Other python lib required which may need installing by yourself.

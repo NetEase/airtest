@@ -12,7 +12,7 @@ except:
 
 setup(
       name='airtest',
-      version='0.1.0703.01',
+      version='0.1.0703.02',
       description='mobile test(black air) python lib',
       long_description=long_description,
 
@@ -33,5 +33,4 @@ setup(
       entry_points='''
       [console_scripts]
       air.test = airtest.cli:main
-      snapshot = airtest.snapshot:main
       ''')
