@@ -1,4 +1,4 @@
-pyairtest
+airtest
 =====
 this is python lib for airtest
 
