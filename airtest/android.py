@@ -21,6 +21,47 @@ DEBUG = os.getenv("DEBUG")=="true"
  
 log = base.getLogger('android')
 
+def getMem(serialno, package):
+    '''
+    @param package(string): android package name
+    @return float: the memory, unit MB
+    '''
+    command = 'adb -s %s shell dumpsys meminfo' % serialno
+    mem_info = base.check_output(command).splitlines()
+    try:
+        xym_mem = filter(lambda x: package in x, mem_info)[0].split()[0]
+        mem = float(xym_mem) / 1024
+        log.info("mem_info:%s" % mem)
+        return mem
+    except IndexError:
+        log.error("mem_info error")
+        return None
+
+def getCpu(serialno, package):
+    '''
+    @param package(string): android package name
+    @return float: the cpu usage
+    '''
+    command = 'adb -s %s shell dumpsys cpuinfo' % serialno
+    cpu_info = base.check_output(command).splitlines()
+    try:
+        xym_cpu = filter(lambda x: package in x, cpu_info)[0].split()[0]
+        cpu = float(xym_cpu[:-1])
+        log.info("cpu_info:%s" % cpu)
+        return cpu
+    except IndexError:
+        log.error("cpu_info error")
+        return None
+
+def find_image(orig, query, threshold):
+    pts = _image_locate(orig, query, threshold)
+    if len(pts) > 1:
+        raise RuntimeError('too many same query images')
+    if len(pts) == 0:
+        raise RuntimeError('query image not found')
+    return pts[0]
+
+
 @patch.record()
 class AndroidDevice(object):
     def __init__(self, serialno=None, pkgname=None):
@@ -207,50 +248,10 @@ class AndroidDevice(object):
                 self.adb.type(c)
 
     def _getMem(self):
-        return getMen(self.pkgname)
+        return getMem(self._serialno, self.pkgname)
 
     def _getCpu(self):
-        return getCpu(self.pkgname)
-
-def getMem(package):
-    '''
-    @param package(string): android package name
-    @return float: the memory, unit MB
-    '''
-    command = 'adb -s %s shell dumpsys meminfo' % self._serialno
-    mem_info = base.check_output(command).splitlines()
-    try:
-        xym_mem = filter(lambda x: package in x, mem_info)[0].split()[0]
-        mem = float(xym_mem) / 1024
-        log.info("mem_info:%s" % mem)
-        return mem
-    except IndexError:
-        log.error("mem_info error")
-        return None
-
-def getCpu(package):
-    '''
-    @param package(string): android package name
-    @return float: the cpu usage
-    '''
-    command = 'adb -s %s shell dumpsys cpuinfo' % self._serialno
-    cpu_info = base.check_output(command).splitlines()
-    try:
-        xym_cpu = filter(lambda x: package in x, cpu_info)[0].split()[0]
-        cpu = float(xym_cpu[:-1])
-        log.info("cpu_info:%s" % cpu)
-        return cpu
-    except IndexError:
-        log.error("cpu_info error")
-        return None
-
-def find_image(orig, query, threshold):
-    pts = _image_locate(orig, query, threshold)
-    if len(pts) > 1:
-        raise RuntimeError('too many same query images')
-    if len(pts) == 0:
-        raise RuntimeError('query image not found')
-    return pts[0]
+        return getCpu(self._serialno, self.pkgname)
 
 def _image_locate(origin_file, query_file, threshold=0.3):
     '''

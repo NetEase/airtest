@@ -12,6 +12,7 @@ Usage:
     air.test log2html -H <HTMLDIR>
     air.test snapshot [-p PLATFORM] [SERIALNO]
     air.test all [--steps STEPS] [-H HTMLDIR] [-p PLATFORM] [SERIALNO]
+    air.test update
 
 Options:
     -h --help       Show this screen
@@ -61,7 +62,7 @@ def run_install():
         urlretrieve(xpath(platform, 'apk_url'), 'test.apk')
         exec_cmd('adb', '-s', serialno, 'install', '-r', 'test.apk')
         package, activity = xpath(platform, 'package'), xpath(platform, 'activity')
-        exec_cmd('adb', 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
+        exec_cmd('adb', '-s', serialno, 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
     else:
         print 'not supported:', platform
 
@@ -78,6 +79,9 @@ def run_runtest():
 def run_log2html():
     if F.get('logfile') and F.get('htmldir'):
         log2html.render(F.get('logfile'), os.path.join(F.get('htmldir'), 'index.html'))
+
+def run_update():
+    exec_cmd('pip', 'install', '--upgrade', 'airtest')
 
 # def run_android(jsonfile, serialno, skip_install=False):
 #     d = json.load(open(jsonfile, 'r'))
@@ -100,9 +104,14 @@ def run_log2html():
 def main():
     global F, platform, serialno
     arguments = docopt(__doc__, version='0.1')
+
+    if arguments['update']:
+        return run_update()
+
+    # check devices
     devices = [dev for dev in airtest.getDevices() if dev[1] != 'unknown']
     if len(devices) != 1:
-        sys.exit('can determine which devices to use, use adb devices to see details.')
+        sys.exit("can't determine which devices to use, please run: 'adb devices'")
     arguments['SERIALNO'] = devices[0][0]
 
     serialno = arguments['SERIALNO']
@@ -155,4 +164,7 @@ def main():
     # run_android(cnf, serialno, skip_install=arguments.get('--skip-install'))
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print 'Exited by user'
