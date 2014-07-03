@@ -5,7 +5,7 @@ this is python lib for airtest
 ## install
 install using pip.
 ```
-pip install -U git+https://git.mt.nie.netease.com/blackair/airtest.git
+pip install -U git+http://git.mt.nie.netease.com/hzsunshx/airtest.git
 ```
 
 Other python lib required which may need installing by yourself.
