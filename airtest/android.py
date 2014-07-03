@@ -206,30 +206,43 @@ class AndroidDevice(object):
             else:
                 self.adb.type(c)
 
-    def _getMem(self):#, package='com.netease.rz'):
-        command = 'adb -s %s shell dumpsys meminfo' % self._serialno
-        mem_info = base.check_output(command).splitlines()
-        # self.adb.shell('dumpsys meminfo').splitlines()
-        #print '\n'.join(mem_info)
-        try:
-            xym_mem = filter(lambda x: self.pkgname in x, mem_info)[0].split()[0]
-            mem = float(xym_mem) / 1024
-            log.info("mem_info:%s" % mem)
-            return mem
-        except IndexError:
-            log.error("mem_info error")
-            return None
+    def _getMem(self):
+        return getMen(self.pkgname)
 
     def _getCpu(self):
-        cpu_info = self.adb.shell('dumpsys cpuinfo').splitlines()
-        try:
-            xym_cpu = filter(lambda x: self.pkgname in x, cpu_info)[0].split()[0]
-            cpu = float(xym_cpu[:-1])
-            log.info("cpu_info:%s" % cpu)
-            return cpu
-        except IndexError:
-            log.error("cpu_info error")
-            return None
+        return getCpu(self.pkgname)
+
+def getMem(package):
+    '''
+    @param package(string): android package name
+    @return float: the memory, unit MB
+    '''
+    command = 'adb -s %s shell dumpsys meminfo' % self._serialno
+    mem_info = base.check_output(command).splitlines()
+    try:
+        xym_mem = filter(lambda x: package in x, mem_info)[0].split()[0]
+        mem = float(xym_mem) / 1024
+        log.info("mem_info:%s" % mem)
+        return mem
+    except IndexError:
+        log.error("mem_info error")
+        return None
+
+def getCpu(package):
+    '''
+    @param package(string): android package name
+    @return float: the cpu usage
+    '''
+    command = 'adb -s %s shell dumpsys cpuinfo' % self._serialno
+    cpu_info = base.check_output(command).splitlines()
+    try:
+        xym_cpu = filter(lambda x: package in x, cpu_info)[0].split()[0]
+        cpu = float(xym_cpu[:-1])
+        log.info("cpu_info:%s" % cpu)
+        return cpu
+    except IndexError:
+        log.error("cpu_info error")
+        return None
 
 def find_image(orig, query, threshold):
     pts = _image_locate(orig, query, threshold)
