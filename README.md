@@ -25,8 +25,11 @@ Other python lib required which may need installing by yourself.
 1. opencv: `brew tap homebrew/science; brew install opencv` 
 1. pillow: `brew install pillow`
 
-For windows: some resources can be found here:
+### For windows: 
+some resources can be found here:
 Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
+
+**and python should be 32bit**
 
 ## write test case
 after installed successfully. you can import like
