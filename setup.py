@@ -3,12 +3,16 @@
 
 from setuptools import setup, find_packages
 
-with open('README.md') as f:
-    long_description = f.read()
+long_description = ''
+try:
+    with open('README.md') as f:
+        long_description = f.read()
+except:
+    pass
 
 setup(
       name='airtest',
-      version='0.1.0702-fix',
+      version='0.1.0703.01',
       description='mobile test(black air) python lib',
       long_description=long_description,
 
