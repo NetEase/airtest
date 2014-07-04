@@ -61,18 +61,38 @@ def find_image(orig, query, threshold):
         raise RuntimeError('query image not found')
     return pts[0]
 
+def rotate_point((x, y), (w, h), d):
+    '''
+    @param (x,y): input point
+    @param (w,h): width and height
+    @param d(string): one of UP,DOWN,LEFT,RIGHT
+    @return (x, y): rotated point
+    '''
+    if d == 'UP':
+        return x, y
+    if d == 'DOWN':
+        return w-x, y-y
+    if d == 'RIGHT':
+        return y, w-x
+    if d == 'LEFT':
+        return h-y, x
 
 @patch.record()
 class AndroidDevice(object):
     def __init__(self, serialno=None, pkgname=None):
-        self._imgdir = None
         self._last_point = None
         self._threshold = 0.3 # for findImage
+        self._rotation = None # UP,DOWN,LEFT,RIGHT
 
         self.pkgname = pkgname
-
         self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
         self.adb.reconnect = True # this way is more stable
+
+        w = self.adb.getProperty("display.width")
+        h = self.adb.getProperty("display.height")
+        self._width = min(w, h)
+        self._height = max(w, h)
+
         self.vc = ViewClient(self.adb, serialno)
         ViewClient.connectToDeviceOrExit()
         brand = self.adb.getProperty('ro.product.brand')
@@ -106,22 +126,23 @@ class AndroidDevice(object):
         monitor()
 
     def _fixPoint(self, (x, y)):
-        (w, h) = self._getShape() # when rotate w > h
-        width, height = min(w, h), max(w, h)
+        width, height = self._width, self._height
         if isinstance(x, float) and x <= 1.0:
             x = int(width*x)
         if isinstance(y, float) and y <= 1.0:
             y = int(width*y)
-        if w != width:
-            log.debug('Screen rotate, width(%d), height(%d)', w, h)
-            log.debug('(%d, %d) -> (%d, %d)', x, y, y, h-x)
-            x, y = y, width-x
-        return (x, y)
-
-    def _imgfor(self, name):
-        if self._imgdir:
-            return os.path.join(self._imgdir, name)
-        return name
+        rotation = self._rotation
+        if not rotation:
+            (w, h) = self._getShape() # when rotate w > h
+            if w != width:
+                rotation = 'RIGHT'
+            else:
+                rotation = 'UP'
+        nx, ny = rotate_point((x, y), (width, height), rotation)
+        if rotation != 'UP':
+            log.debug('Screen rotate direction(%s), width(%d), height(%d)', rotation, w, h)
+            log.debug('(%d, %d) -> (%d, %d)', x, y, nx, ny)
+        return (nx, ny)
 
     def _getShape(self):
         width = self.adb.getProperty("display.width")
@@ -137,11 +158,23 @@ class AndroidDevice(object):
         ''' get screen width and height '''
         return self._getShape()
 
+    def globalSet(self, m={}):
+        '''
+        app setting, be careful you should known what you are doing.
+        @parma m(dict): eg:{"threshold": 0.3}
+        '''
+        keys = ['threshold']
+        for k,v in m.items():
+            if hasattr(self, '_'+k):
+                setattr(self, '_'+k, v)
+            else:
+                print 'not have such setting: %s' %(k)
+
     def setThreshold(self, threshold):
         '''
         @param threshold(float): (0, 1] suggest 0.5
         '''
-        self._threshold = threshold
+        self.globalSet({'threshold': threshold})
 
     def takeSnapshot(self, filename):
         ''' save screen snapshot '''
@@ -172,7 +205,7 @@ class AndroidDevice(object):
         @return list of find points
         '''
         screen = self._saveScreen('find-XXXXXXXX.png')
-        pts = _image_locate(screen, self._imgfor(imgfile), self._threshold)
+        pts = _image_locate(screen, imgfile, self._threshold)
         return pts and pts[0]
 
     def exists(self, imgfile):
@@ -216,7 +249,7 @@ class AndroidDevice(object):
                 screen = variable.get('screen')
                 if not screen:
                     variable['screen'] = self._saveScreen('screen-XXXXXXXX.png')
-                pt = find_image(variable['screen'], self._imgfor(raw), self._threshold)
+                pt = find_image(variable['screen'], raw, self._threshold)
                 return self._fixPoint(pt)
             raise RuntimeError('unknown type')
 

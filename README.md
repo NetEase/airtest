@@ -100,6 +100,20 @@ bash -c "python main.py -s ${SERIALNO}"
 * take screen snapshot by run: `air.test snapshot`
 * run test by run: `air.test runtest`
 
+## about phone rotation
+phone has 4 directions: `UP,DOWN,LEFT,RIGHT`
+
+change rotation through
+```
+app.globalSet({'rotation': 'RIGHT'})
+```
+
+change image recognize sensitivity
+```
+# threshold range [0, 1), if set to 1, then app can't recognize anything
+app.globalSet({'threshold': 0.3}) 
+```
+
 ## good luck
 author: hzsunshx
 email: hzsunshx@corp.netease.com
