@@ -42,7 +42,7 @@ def urlretrieve(url, filename=None):
 
 F = {} #json.load(open(jsonfile, 'r'))
 platform = 'android'
-serialno = ''
+serialno = None
 
 def xpath(*paths):
     v=F
@@ -51,9 +51,16 @@ def xpath(*paths):
     return v if v else None
 
 def run_snapshot():
+    global serialno
+    if not serialno:
+        ds = airtest.getDevices()
+        if len(ds) == 1:
+            serialno=ds[0][0]
+
     if platform == 'android':
-        c, _ = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
+        c, _ = ViewClient.connectToDeviceOrExit(serialno=serialno)
         c.takeSnapshot().save('screen.png')
+        print 'screenshot save to "screen.png"'
     else:
         print 'not supported:', platform
 
@@ -81,32 +88,16 @@ def run_log2html():
         log2html.render(F.get('logfile'), os.path.join(F.get('htmldir'), 'index.html'))
 
 def run_update():
-    exec_cmd('pip', 'install', '--upgrade', 'airtest')
-
-# def run_android(jsonfile, serialno, skip_install=False):
-#     d = json.load(open(jsonfile, 'r'))
-#     def xpath(*paths):
-#         v=d
-#         for p in paths:
-#             v = v.get(p, {})
-#         return v if v else None
-#     package = xpath('android', 'package')
-#     activity = xpath('android', 'activity')
-#     apk_url = xpath('android', 'apk_url')
-
-#     env = {'SERIALNO': serialno}
-#     if not skip_install:
-#         urlretrieve(apk_url, 'test.apk')
-#         exec_cmd('adb', '-s', serialno, 'install', '-r', 'test.apk')
-#         exec_cmd('adb', 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
-#     exec_cmd('bash', '-c', xpath('cmd'), env=env)
+    exec_cmd('pip', 'install', '--upgrade', 'git+http://git.mt.nie.netease.com/hzsunshx/airtest.git')
 
 def main():
     global F, platform, serialno
     arguments = docopt(__doc__, version='0.1')
 
-    if arguments['update']:
-        return run_update()
+    for action in ['snapshot', 'update']:
+        if arguments[action]:
+            print 'RUN:', action
+            return globals().get('run_'+action)()
 
     # check devices
     devices = [dev for dev in airtest.getDevices() if dev[1] != 'unknown']
@@ -149,19 +140,11 @@ def main():
 
         sys.exit(exitcode)
         return
-    for action in ['install', 'uninstall', 'log2html', 'runtest', 'snapshot']:
+    for action in ['install', 'uninstall', 'log2html', 'runtest']:
         if arguments[action]:
             print 'RUN:', action
             return globals().get('run_'+action)()
     return
-
-    # cnf = arguments.get('-c')
-    # serialno = arguments.get('-s')
-    # out = subprocess.check_output(['adb', '-s', serialno, 'get-state'])
-    # if out.strip() != 'device': 
-    #     print 'device(%s) not ready, current state:%s' %(serialno, out.strip())
-    #     sys.exit(2)
-    # run_android(cnf, serialno, skip_install=arguments.get('--skip-install'))
 
 if __name__ == '__main__':
     try:

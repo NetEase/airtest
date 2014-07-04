@@ -35,7 +35,7 @@ def getMem(serialno, package):
         return mem
     except IndexError:
         log.error("mem_info error")
-        return None
+        return 0
 
 def getCpu(serialno, package):
     '''
@@ -51,7 +51,7 @@ def getCpu(serialno, package):
         return cpu
     except IndexError:
         log.error("cpu_info error")
-        return None
+        return 0
 
 def find_image(orig, query, threshold):
     pts = _image_locate(orig, query, threshold)
@@ -98,7 +98,7 @@ class AndroidDevice(object):
         brand = self.adb.getProperty('ro.product.brand')
         serialno = self.adb.getProperty('ro.boot.serialno')
         log.debug('wake phone: brand:{brand}, serialno:{serialno}'.format(
-            brand=brand, serialno=serialno))
+            brand=brand, serialno=self._serialno))
         try:
             self.adb.wake()
             if not self.adb.isScreenOn():
