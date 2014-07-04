@@ -104,5 +104,13 @@ bash -c "python main.py -s ${SERIALNO}"
 author: hzsunshx
 email: hzsunshx@corp.netease.com
 
+## development document
+AndroidKeyMap: <http://developer.android.com/reference/android/view/KeyEvent.html>
+
+used by call, eg
+```
+app.press("HOME")
+```
+
 ## License
 This project is under the MIT License. See the [LICENSE](LICENSE) file for the full license text.
