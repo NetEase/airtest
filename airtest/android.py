@@ -67,8 +67,10 @@ class AndroidDevice(object):
     def __init__(self, serialno=None, pkgname=None):
         self._imgdir = None
         self._last_point = None
+        self._threshold = 0.3 # for findImage
 
         self.pkgname = pkgname
+
         self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
         self.adb.reconnect = True # this way is more stable
         self.vc = ViewClient(self.adb, serialno)
@@ -90,7 +92,10 @@ class AndroidDevice(object):
 
         @base.go
         def monitor(interval=3):
-            print 'MONITOR:'
+            log.debug('MONITOR started')
+            if not self.pkgname:
+                log.debug('MONITOR finished, no package provided')
+                return
             while True:
                 start = time.time()
                 mem = self._getMem()
@@ -241,9 +246,14 @@ class AndroidDevice(object):
 
     def type(self, text):
         log.debug('type text: %s', repr(text))
+        keymap = {
+                '\n': 'ENTER',
+                ' ': 'SPACE',
+                '\t': 'TAB',
+                }
         for c in text:
-            if c == '\n':
-                self.adb.press('ENTER')
+            if c in keymap:
+                self.adb.press(keymap[c])
             else:
                 self.adb.type(c)
 
