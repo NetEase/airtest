@@ -18,16 +18,14 @@ def main():
     app = airtest.connect(serialno, pkgname)
 
     app.sleep(1)
-    app.setThreshold(0.1)
+    app.globalSet({'threshold': 0.1})
+    #app.setThreshold(0.1)
     app.click('start.png')
     app.sleep(2)
     w, h = app.shape()
-    app.touch(w*0.5, h*0.5)
-    app.sleep(0.03)
-    app.touch(w*0.5, h*0.5)
-    app.sleep(0.03)
-    app.touch(w*0.5, h*0.5)
-
+    for i in range(5):
+        app.touch(w*0.5, h*0.5)
+        app.sleep(0.02)
     app.sleep(4)
     #app.setThreshold(0.5)
     #assert app.exists('gameover.png')

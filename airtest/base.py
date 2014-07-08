@@ -36,7 +36,13 @@ def exec_cmd(*cmds, **kwargs):
     '''
     env = os.environ.copy()
     env.update(kwargs.get('env', {}))
-    for key in env: env[key] = str(env[key]).encode('utf-8') # fix encoding
+    envcopy = {}
+    for key in env: 
+        try:
+            envcopy[key] = str(env[key]).encode('utf-8') # fix encoding
+        except:
+            print 'IGNORE BAD ENV KEY:', repr(key)
+    env = envcopy
 
     timeout = kwargs.get('timeout', 120)
     shell = kwargs.get('shell', False)

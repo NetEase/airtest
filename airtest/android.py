@@ -132,9 +132,12 @@ class AndroidDevice(object):
                 start = time.time()
                 mem = self._getMem()
                 jlog.writeline({'type':'record', 'mem':mem})
+                cpu = self._getCpu()
+                jlog.writeline({'type':'record', 'cpu':cpu})
                 dur = time.time()-start
                 if interval > dur:
                     print 'MEM:', mem
+                    print 'CPU:', cpu
                     time.sleep(interval-dur)
         monitor()
 
