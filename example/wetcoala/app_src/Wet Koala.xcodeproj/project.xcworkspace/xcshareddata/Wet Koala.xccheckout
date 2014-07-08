@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>7AF8AAF0-AB51-4C18-A1EB-1C59A00376B9</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Wet Koala</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>E0B0364B-68AA-4B61-80B9-8C5E6E3B6DA6</key>
+		<string>https://github.com/haruair/Koala-Hates-Rain</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Wet Koala.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>E0B0364B-68AA-4B61-80B9-8C5E6E3B6DA6</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/haruair/Koala-Hates-Rain</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>E0B0364B-68AA-4B61-80B9-8C5E6E3B6DA6</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>E0B0364B-68AA-4B61-80B9-8C5E6E3B6DA6</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Koala-Hates-Rain</string>
+		</dict>
+	</array>
+</dict>
+</plist>
