@@ -18,6 +18,12 @@ def getLogger(name='root'):
 
 log = getLogger('base')
 
+def makedirs(dirname):
+    try:
+        os.makedirs(dirname)
+    except:
+        pass
+
 def dirname(name):
     if os.path.isabs(name):
         return os.path.dirname(name)

@@ -7,12 +7,11 @@ basic operation for a game(like a user does)
 
 import os
 import time
-# import requests
-# import json
 
 from airtest import image
 from airtest import patch
 from airtest import base
+from airtest import jsonlog
 
 from com.dtmilano.android.viewclient import ViewClient 
 from com.dtmilano.android.viewclient import adbclient
@@ -77,12 +76,18 @@ def rotate_point((x, y), (w, h), d):
     if d == 'LEFT':
         return h-y, x
 
-@patch.record()
+# log file
+logfile = os.getenv('AIRTEST_LOGFILE', 'log/airtest.log')
+jlog = jsonlog.JSONLog(logfile)
+jlog.writeline({"nice": "good"})
+
+@patch.record(logfile)
 class AndroidDevice(object):
     def __init__(self, serialno=None, pkgname=None):
         self._last_point = None
         self._threshold = 0.3 # for findImage
         self._rotation = None # UP,DOWN,LEFT,RIGHT
+        self._tmpdir = 'tmp'
 
         self.pkgname = pkgname
         self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
@@ -119,6 +124,7 @@ class AndroidDevice(object):
             while True:
                 start = time.time()
                 mem = self._getMem()
+                jlog.writeline({'type':'record', 'mem':mem})
                 dur = time.time()-start
                 if interval > dur:
                     print 'MEM:', mem
@@ -150,7 +156,7 @@ class AndroidDevice(object):
         return (width, height)
     
     def _saveScreen(self, filename):
-        filename = base.random_name(filename)
+        filename = os.path.join(self._tmpdir, base.random_name(filename))
         self.takeSnapshot(filename)
         return filename
 

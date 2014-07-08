@@ -8,6 +8,9 @@ import threading
 
 from functools import partial
 
+from airtest import base
+from airtest import jsonlog
+
 def attachmethod(target):
     if isinstance(target, type):
         def decorator(func):
@@ -29,17 +32,14 @@ def fuckit(fn):
 
 def record(logfile=None):
     ''' decorator for class '''
-    logfile = os.getenv('AIRTEST_LOGFILE', 'log/airtest.log')
-    print logfile
     if os.path.exists(logfile):
         backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
         os.rename(logfile, backfile)
     else:
-        try:
-            os.makedirs(os.path.dirname(logfile))
-        except:
-            pass
-    logfd = open(logfile, 'w')
+        base.makedirs(base.dirname(logfile))
+
+    jlog = jsonlog.JSONLog(logfile)
+    #logfd = open(logfile, 'w')
     def wrapper(cls):
         class NewClass(cls):
             def __getattribute__(self, name):
@@ -49,9 +49,11 @@ def record(logfile=None):
                         return obj
                     print 'record:', name
                     def func_wrapper(*args, **kwargs):
-                        print >>logfd, json.dumps({'function': name, 'args': args, 'kwargs': kwargs})
-                        logfd.flush()
+                        jlog.writeline({'timestamp': int(time.time()), 'function': name, 'args': args, 'kwargs': kwargs})
                         return obj(*args, **kwargs)
+
+                        #print >>logfd, json.dumps({'timestamp': int(time.time()), {'function': name, 'args': args, 'kwargs': kwargs})
+                        #logfd.flush()
                     func_wrapper.__doc__ = obj.__doc__ # keep the doc
                     return func_wrapper
                 return obj
