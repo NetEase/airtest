@@ -115,8 +115,13 @@ app.globalSet({'threshold': 0.3})
 ```
 
 ## good luck
-author: hzsunshx
-email: hzsunshx@corp.netease.com
+author: 
+
+hzsunshx hzsunshx@corp.netease.com
+
+刘欣 gzliuxin@corp.netease.com
+
+熊博 gzxiongbo@corp.netease.com
 
 ## development document
 AndroidKeyMap: <http://developer.android.com/reference/android/view/KeyEvent.html>
