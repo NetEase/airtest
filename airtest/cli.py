@@ -135,7 +135,7 @@ def main():
                 fn()
             except Exception as e:
                 with open(logfile, 'a') as file:
-                    file.write(json.dumps({'step': step, 'result': 'failed', 'detail': str(e)}))
+                    file.write(json.dumps({'type':'cli', 'step':step, 'result':'failed', 'detail': str(e)}))
                     exitcode=1
 
         sys.exit(exitcode)

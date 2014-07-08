@@ -30,15 +30,12 @@ def fuckit(fn):
             return None
     return decorator
 
-def record(logfile=None):
+def record(jlog=None):
     ''' decorator for class '''
-    if os.path.exists(logfile):
-        backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
-        os.rename(logfile, backfile)
-    else:
-        base.makedirs(base.dirname(logfile))
+    if not jlog:
+        print 'WARN: no log specfied'
 
-    jlog = jsonlog.JSONLog(logfile)
+    #jlog = jsonlog.JSONLog(logfile)
     #logfd = open(logfile, 'w')
     def wrapper(cls):
         class NewClass(cls):
@@ -49,7 +46,7 @@ def record(logfile=None):
                         return obj
                     print 'record:', name
                     def func_wrapper(*args, **kwargs):
-                        jlog.writeline({'timestamp': int(time.time()), 'function': name, 'args': args, 'kwargs': kwargs})
+                        jlog.writeline({'type':'func', 'function': name, 'args': args, 'kwargs': kwargs})
                         return obj(*args, **kwargs)
 
                         #print >>logfd, json.dumps({'timestamp': int(time.time()), {'function': name, 'args': args, 'kwargs': kwargs})

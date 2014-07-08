@@ -76,18 +76,25 @@ def rotate_point((x, y), (w, h), d):
     if d == 'LEFT':
         return h-y, x
 
-# log file
+# prepare log and tmp dir
 logfile = os.getenv('AIRTEST_LOGFILE', 'log/airtest.log')
+if os.path.exists(logfile):
+    backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
+    os.rename(logfile, backfile)
+else:
+    base.makedirs(base.dirname(logfile))
 jlog = jsonlog.JSONLog(logfile)
-jlog.writeline({"nice": "good"})
 
-@patch.record(logfile)
+@patch.record(jlog)
 class AndroidDevice(object):
     def __init__(self, serialno=None, pkgname=None):
         self._last_point = None
         self._threshold = 0.3 # for findImage
         self._rotation = None # UP,DOWN,LEFT,RIGHT
         self._tmpdir = 'tmp'
+
+        if not os.path.exists(self._tmpdir):
+            base.makedirs(self._tmpdir)
 
         self.pkgname = pkgname
         self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
@@ -184,6 +191,7 @@ class AndroidDevice(object):
 
     def takeSnapshot(self, filename):
         ''' save screen snapshot '''
+        jlog.writeline({'type':'snapshot', 'filename':filename})
         log.debug('take snapshot and save to '+filename)
         pil = self.adb.takeSnapshot(reconnect=True)
         pil.save(filename)
