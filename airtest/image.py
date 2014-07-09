@@ -1,120 +1,156 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__author__ = 'hzsunshx'
-
+import numpy as np
 import cv2
+import time
 
-MIN_MATCH_COUNT = 2
-DEBUG=True
+MIN_MATCH_COUNT = 5
 
-def _middlePoint(pts):
-    DEBUG=False
-    def add(p1, p2):
-        return (p1[0]+p2[0], p1[1]+p2[1])
-    def distance(p1, p2):
-        import math
-        l2 = (p1[0]-p2[0])*(p1[0]-p2[0]) + (p1[1]-p2[1])*(p1[1]-p2[1])
-        return math.sqrt(l2)
-    # debug
-    for p in pts:
-        if DEBUG: print 'Point:', p.pt
-    length = len(pts)
-    sumx, sumy = reduce(add, [p.pt for p in pts])
-    point = sumx/length, sumy/length
-    if DEBUG: print 'step1: result=', point
+def locate_image(orig, quer, outf='debug.png', threshold=0.3):
+    pt = locate_one_image(orig, quer, outf, threshold)
+    if pt:
+        return [pt]
+    return None
 
-    # filter out ok points
-    avg_distance = sum([distance(point, p.pt) for p in pts])/length
-    if DEBUG: print 'avg distance=', avg_distance
-    good = []
-    sumx, sumy = 0.0, 0.0
-    for p in pts:
-        if DEBUG: print 'point: %s, distance: %.2f' %(p.pt, distance(p.pt, point))
-        if distance(p.pt, point) < 1.2*avg_distance:
-            good.append(p.pt)
-            sumx += p.pt[0]
-            sumy += p.pt[1]
-        else:
-            if DEBUG: print 'not good', p.pt
-    if DEBUG: print 'step1: result=', point
-    point = map(long, (sumx/len(good), sumy/len(good)))
-    if DEBUG: print 'step2: point=', point
-    return point
-
-def find_image_position(origin='origin.png', query='query.png', outfile=None):
-    img1 = cv2.imread(query, 0) # query image(small)
-    img2 = cv2.imread(origin, 0) # train image(big)
-    points = locate_image(origin, query, outfile)
-    return img2.shape, img1.shape, points
-
-def locate_image(origin='orig.png', query='query.png', outfile=None, threshold=0.3):
+def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',threshold=0.3):
     '''
-    find all image positions
-    @param threshold(float): [0, 1) the bigger the better
-    @return points founded
-    might raise Exception
-    '''
-    img1 = cv2.imread(query, 0) # query image(small)
-    img2 = cv2.imread(origin, 0) # train image(big)
+    Locate one image position
 
+    @param origin: string (target filename)
+    @param query: string (image need to search)
+    @param threshold: float (range [0, 1), the lower the more ease to match)
+    @return None if not found, (x,y) point if found
+    '''
+    threshold = 1 - threshold
+    img1 = cv2.imread(query,0) # queryImage,gray
+    img2 = cv2.imread(origin,0) # originImage,gray
+    target_img = cv2.imread(origin,1) # originImage    
     # Initiate SIFT detector
     sift = cv2.SIFT()
-
     try:
         # find the keypoints and descriptors with SIFT
         kp1, des1 = sift.detectAndCompute(img1,None)
         kp2, des2 = sift.detectAndCompute(img2,None)
-        if DEBUG: print len(kp1), len(kp2)
     except:
-        return []
-
+        return None
+    #search and match the 
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
     search_params = dict(checks = 50)
-
-    # flann
     flann = cv2.FlannBasedMatcher(index_params, search_params)
-    matches = flann.knnMatch(des1, des2, k=2)
-
-    # store all the good matches as per Lowe's ratio test.
+    matches = flann.knnMatch(des1,des2,k=2)
+    
+    thresh_num = len(kp1)
+    print "thresh: ", thresh_num
+    t = thresh_num*0.1
+    threshod = int(thresh_num*0.1)
+    if t > float(threshod+0.5):
+        threshod += 1
+    print threshod
+    #store all the good matches as per Lowe's ratio test.
     good = []
     for m,n in matches:
-        if m.distance < 0.8*n.distance:
+        if m.distance < threshold*n.distance: # threshold = 0.7
             good.append(m)
-    if DEBUG: print len(kp1), len(kp2), 'good cnt:', len(good)
+    if len(good)>MIN_MATCH_COUNT:
+        src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
+        dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+        #origin_img match keypoints
+        r,c,d = dst_pts.shape
+        if r < 1:
+            print "NO MATCH POINT"
+            return None
+        for i in range(r):
+            x = dst_pts[i][c-1][d-2]
+            y = dst_pts[i][c-1][d-1]
+            cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+        h,w = img1.shape
+        pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+        dst = cv2.perspectiveTransform(pts,M)
+        row,col,dim = dst.shape
+        #print row,col,dim
+        if row < 1:
+            print "NO MATCH POINT"
+            cv2.imwrite(outfile,target_img)
+            return None
+        center = dst[row-1][col-1]
+        for i in range(row-1):
+            center += dst[i][col-1] 
+        if row < 1:
+            print "NO Match"
+            return None
+        else:
+            center_x = int(center[0]/row)
+            center_y = int(center[1]/row)
+            if outfile:
+                cv2.rectangle(target_img,(int(center_x-w/2),int(center_y-h/2)),(int(center_x+w/2),int(center_y+h/2)),(0,0,255),1,0)
+                cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
+                cv2.imwrite(outfile,target_img)
+            print "center point: ", center_x, center_y
+            return [center_x, center_y]
 
-    if len(good)*1.0/len(kp1) < threshold:
-        if DEBUG: print "blew threshold: %.2f" %(threshold)
-        return []
-
-    #if len(good)*1.0/len(kp1) < 0.3 and 
-    if len(good) < MIN_MATCH_COUNT:
-        if DEBUG: print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
-        return []
-
-    queryPts = []
-    trainPts = []
-    for dm in good:
-        queryPts.append(kp1[dm.queryIdx])
-        trainPts.append(kp2[dm.trainIdx])
-
-    img3 = cv2.drawKeypoints(img1, queryPts)
-    cv2.imwrite('image/query.png', img3)
-
-    img3 = cv2.drawKeypoints(img2, trainPts)
-    point = _middlePoint(trainPts)
-    if DEBUG: print 'position in', point
-
-    if outfile:
-        edge = 10
-        top_left = (point[0]-edge, point[1]-edge)
-        bottom_right = (point[0]+edge, point[1]+edge)
-        cv2.rectangle(img3, top_left, bottom_right, 255, 2)
-        cv2.imwrite(outfile, img3)
-    return [point]
+    else:
+        dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+        print dst_pts
+        row,col,dim = dst_pts.shape
+        print row,col,dim
+        if (row < 1) | (row < threshod):
+            print "NO MATCH POINT"
+            if outfile:
+                cv2.imwrite(outfile,target_img)
+            return []
+        for i in range(row):
+            x = dst_pts[i][col-1][dim-2]
+            y = dst_pts[i][col-1][dim-1]
+            cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
+        center = dst_pts[row-1][col-1]
+        h,w = img1.shape
+        for i in range(row-1):
+            center += dst_pts[i][col-1] 
+        if row < 1:
+            print "NO Match"
+            return []
+        else:
+            center_x = int(center[0]/row)
+            center_y = int(center[1]/row)
+            if outfile:
+                cv2.rectangle(target_img,(int(center_x-w/2),int(center_y-h/2)),(int(center_x+w/2),int(center_y+h/2)),(0,0,255),1,0)
+                cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
+                cv2.imwrite(outfile,target_img)
+            print "center point: ", center_x, center_y
+            return [center_x, center_y]
 
 if __name__ == '__main__':
-    pts = find_image_position('testdata/mule.png', 'testdata/football.png', 
-        outfile='testdata/debug.png')
+    starttime = time.clock()
+    pts = locate_image('testdata/target.png','testdata/query.png','testdata/debug.png',0.3)
     print pts
+    endtime = time.clock()
+    print endtime-starttime
+    print "center point: ", pts
+    if len(pts) < 1:
+        print "Match Failure"
+        exit(0)
+    center_x = pts[0]
+    center_y = pts[1]
+    point = []
+    #read the location information of the object in the origin image
+    with open('testdata/data.txt','r') as f:
+        for line in f:
+            point.append(map(float,line.split(',')))
+        print point
+    pt = point[0]
+    #object top_left coordinate
+    topleft_x = int(pt[0])
+    topleft_y = int(pt[1])
+    #print topleft_x, topleft_y
+    #object bottom_right corrdinate
+    bottomright_x = int(pt[2])
+    bottomright_y = int(pt[3])
+    #print bottomright_x, bottomright_y
+    if (topleft_x <= center_x & center_x <= bottomright_x) & (topleft_y <= center_y & center_y <= bottomright_y):
+        print "Match Successfully !!!"
+    else:
+        print "Match Failure !!!"
+    
