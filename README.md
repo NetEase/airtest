@@ -66,8 +66,8 @@ app.click(P)
 
 clickOnAppear(...)
 ```
-app.click(filename, [seconds])
-# eg: app.click('image1.png', 10)
+app.clickOnAppear(filename, [seconds])
+# eg: app.clickOnAppear('image1.png', 10)
 ```
 
 find(...) # find a image position located in screen
