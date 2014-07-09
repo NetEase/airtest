@@ -32,7 +32,12 @@ Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
 
 **and python should be 32bit**
 
-## write test case
+## Check if install OK
+for android
+
+Run [example program](example/flappybird)
+
+## How to use
 after installed successfully. you can import like
 ```
 # import python lib

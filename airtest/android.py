@@ -170,10 +170,6 @@ class AndroidDevice(object):
         self.takeSnapshot(filename)
         return filename
 
-    def shape(self):
-        ''' get screen width and height '''
-        return self._getShape()
-
     def globalSet(self, m={}):
         '''
         app setting, be careful you should known what you are doing.
@@ -206,17 +202,11 @@ class AndroidDevice(object):
         log.debug('touch position %s', (x, y))
         self.adb.touch(x, y, eventType)
 
-    def wait(self, imgfile, seconds=20):
+    def shape(self):
+        ''' 
+        Get screen width and height 
         '''
-        wait until some picture exists
-        '''
-        interval = 1
-        max_retry = int(seconds/interval)
-        pt = base.wait_until(self.find, args=(imgfile,), interval=interval, max_retry=max_retry)
-        if not pt:
-            raise RuntimeError('wait fails')
-        self._last_point = pt
-        return
+        return self._getShape()
 
     def find(self, imgfile):
         '''
@@ -224,7 +214,9 @@ class AndroidDevice(object):
 
         @return (point that found)
         '''
-        screen = self._saveScreen('find-XXXXXXXX.png')
+        screen = self._saveScreen('screen-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
+        if not os.path.exists(imgfile):
+            raise RuntimeError('image file(%s) not exists' %(imgfile))
         pts = _image_locate(screen, imgfile, self._threshold)
         return pts and pts[0]
 
@@ -237,6 +229,19 @@ class AndroidDevice(object):
         screen = self._saveScreen('find-XXXXXXXX.png')
         pts = _image_locate(screen, imgfile, self._threshold)
         return pts
+
+    def wait(self, imgfile, seconds=20):
+        '''
+        Wait until some picture exists
+        @return position when imgfile shows
+        '''
+        interval = 1
+        max_retry = int(seconds/interval)
+        pt = base.wait_until(self.find, args=(imgfile,), interval=interval, max_retry=max_retry)
+        if not pt:
+            raise RuntimeError('wait fails')
+        self._last_point = pt
+        return pt
 
     def exists(self, imgfile):
         return True if self.find(imgfile) else False
@@ -253,6 +258,13 @@ class AndroidDevice(object):
         (x, y) = self._fixPoint(pt)
         print 'click', (x, y)
         self.adb.touch(x, y)
+
+    def clickOnAppear(self, imgfile, seconds=20):
+        '''
+        When imgfile exists, then click it
+        '''
+        p = self.wait(imgfile, seconds)
+        return self.click(p)
 
     def clickByText(self, text, dump=True, delay=1.0):
         self.sleep(delay)
