@@ -77,7 +77,7 @@ def wait_until(fn, interval=0.5, max_retry=10, args=(), kwargs={}):
     '''
     @return True(when found), False(when not found)
     '''
-    # log.debug('wait func: %s', fn.__name__)
+    log.debug('start wait func: %s', fn.__name__)
     retry = 0
     while retry < max_retry:
         retry += 1

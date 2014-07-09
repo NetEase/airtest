@@ -11,12 +11,13 @@ ANDROID = 'android'
 IOS = 'ios'
 SEPRATOR = '::'
 
-def connect(serialno, pkgname=None, device='android'):
+def connect(serialno=None, pkgname=None, device='android'):
     '''
     connect to a mobile phone
     '''   
     if device == ANDROID:
         from airtest import android
+        assert serialno != None
         return android.AndroidDevice(serialno=serialno, pkgname=pkgname)
     elif device == IOS:
         from airtest import ios

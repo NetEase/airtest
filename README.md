@@ -51,7 +51,7 @@ serialno = 'xxxxx888882111'
 deviceType = 'android' # can be windows or ios
 
 # connect to your android devices
-app = airtest.connect(serialno, deviceType)
+app = airtest.connect(serialno, device=deviceType)
 ```
 
 click(...) # click by image file

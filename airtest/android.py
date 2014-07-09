@@ -136,8 +136,6 @@ class AndroidDevice(object):
                 jlog.writeline({'type':'record', 'cpu':cpu})
                 dur = time.time()-start
                 if interval > dur:
-                    print 'MEM:', mem
-                    print 'CPU:', cpu
                     time.sleep(interval-dur)
         monitor()
 
@@ -191,8 +189,9 @@ class AndroidDevice(object):
     def takeSnapshot(self, filename):
         ''' save screen snapshot '''
         jlog.writeline({'type':'snapshot', 'filename':filename})
-        log.debug('take snapshot and save to '+filename)
+        log.debug('start take snapshot')
         pil = self.adb.takeSnapshot(reconnect=True)
+        log.debug('finish take snapshot and save to '+filename)
         pil.save(filename)
 
     def touch(self, x, y, eventType=adbclient.DOWN_AND_UP):
