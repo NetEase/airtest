@@ -173,6 +173,9 @@ app.globalSet({'threshold': 0.3})
 	熊博 gzxiongbo@corp.netease.com
 	- IOS后端接口开发者
 
+	贾强槐 hzjiaqianghuai@corp.netease.com
+	- 图像识别
+
 ## development document
 AndroidKeyMap: <http://developer.android.com/reference/android/view/KeyEvent.html>
 
