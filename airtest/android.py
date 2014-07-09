@@ -206,10 +206,12 @@ class AndroidDevice(object):
         log.debug('touch position %s', (x, y))
         self.adb.touch(x, y, eventType)
 
-    def wait(self, imgfile, interval=0.5, max_retry=5):
+    def wait(self, imgfile, seconds=20):
         '''
         wait until some picture exists
         '''
+        interval = 1
+        max_retry = int(seconds/interval)
         pt = base.wait_until(self.find, args=(imgfile,), interval=interval, max_retry=max_retry)
         if not pt:
             raise RuntimeError('wait fails')
@@ -218,19 +220,32 @@ class AndroidDevice(object):
 
     def find(self, imgfile):
         '''
-        find image location
-        @return list of find points
+        Find image position on screen
+
+        @return (point that found)
         '''
         screen = self._saveScreen('find-XXXXXXXX.png')
         pts = _image_locate(screen, imgfile, self._threshold)
         return pts and pts[0]
+
+    def findAll(self, imgfile):
+        '''
+        Find multi positions that imgfile on screen
+        @return list point that found
+        @warn not finished yet.
+        '''
+        screen = self._saveScreen('find-XXXXXXXX.png')
+        pts = _image_locate(screen, imgfile, self._threshold)
+        return pts
 
     def exists(self, imgfile):
         return True if self.find(imgfile) else False
 
     def click(self, pt):
         '''
-        @param pt(string or list(x, y)): point to click, when string is image file
+        Click
+
+        @param pt: string or list(x, y) (point to click, when string is image file)
         '''
         if isinstance(pt, basestring):
             log.debug('locate postion to touch')
@@ -254,8 +269,10 @@ class AndroidDevice(object):
 
     def drag(self, fpt, tpt, duration=500):
         ''' 
-        @param fpt,tpt: (x, y) or image filepath, from point and to point
-        @param duration: duration of the event in ms
+        Drag from one place to another place
+
+        @param fpt,tpt: filename or position
+        @param duration: float (duration of the event in ms)
         '''
         # the duration seems not working. no matter how larger I set, nothing changes.
         variable = {}
@@ -295,6 +312,11 @@ class AndroidDevice(object):
         self.adb.press('ENTER')
 
     def type(self, text):
+        '''
+        Input some text
+
+        @param text: string (text want to type)
+        '''
         log.debug('type text: %s', repr(text))
         keymap = {
                 '\n': 'ENTER',
