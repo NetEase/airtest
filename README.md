@@ -33,48 +33,81 @@ Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
 
 ## write test case
 after installed successfully. you can import like
-```python
+```
 # import python lib
 import airtest
+```
 
+step1 connect device
+```
 # get serialno by call: adb devices
 serialno = 'xxxxx888882111'
+deviceType = 'android' # can be windows or ios
 
 # connect to your android devices
-app = airtest.connect(serialno)
+app = airtest.connect(serialno, deviceType)
+```
 
-# click by image file
-app.click('confirm.png')
+click(...) # click by image file
+```
+app.click(P)
+# P can be
+# - filename: 'start.png'
+# - position: (100, 200)
+```
 
-# wait until image shows
-app.wait('finish.png')
+find(...) # find a image position located in screen
+```
+(x, y) = app.find(filename)
+```
 
-# judge if image exists
+wait(...) # wait until image shows
+```
+app.wait(filename, [seconds])
+# filename is the image name
+# seconds is the longest time waited.
+# @return position images find, or Raise RuntimeError
+# this is called find(..) to get images position
+```
+
+exists(...) # judge if image exists
+```
 app.exists('apple.png')
+# @return (True|False)
+# just exactly call wait
+```
 
-# drag one place to and onother place
-app.drag('apple.png', 'plate.png')
+drap(...) # drag one place to and onother place
+```
+app.drag(fromP, toP)
+# fromP, toP: like click param, can be filename or position
+```
 
-# get screen size(width and height)
+shape() # get screen size(width and height)
+```
 (w, h) = app.shape()
+# return width and height
+```
 
-# drag by position
+```
+# example of drag from left to right
 (x1, y1), (x2, y2) = (w*0.2, h*0.5), (w*0.8, h*0.5)
 app.drag((x1,y1), (x2,y2))
+```
 
-# type text
+type(...) # type text
+```
 app.type('www.baidu.com\n') # type text and call keyevnet ENTER
+```
 
+keyevent(not recommemd to use now)
+```
 # press home
 app.home()
 
 # back and menu(only for android)
 app.keyevent('BACK')
 app.keyevent('MENU')
-
-# not finished below
-# get image position(TODO)
-(x, y) = app.find('apple.png')
 ```
 
 ## run test case
