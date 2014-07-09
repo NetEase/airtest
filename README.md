@@ -23,7 +23,8 @@ Other python lib required which may need installing by yourself.
 1. appium: `brew install node; npm install -g appium`
 1. Appium-Python-Client: `pip install Appium-Python-Client`
 1. opencv: `brew tap homebrew/science; brew install opencv` 
-1. pillow: `brew install pillow`
+1. pillow: `brew tap Homebrew/python; brew install pillow`
+1. add python environment: `echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/site-packages' >> ~/.bash_profile`
 
 ### For windows: 
 some resources can be found here:
