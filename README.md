@@ -148,14 +148,16 @@ change image recognize sensitivity
 app.globalSet({'threshold': 0.3}) 
 ```
 
-## good luck
-author: 
+## Team
 
-hzsunshx hzsunshx@corp.netease.com
+	孙圣翔 hzsunshx@corp.netease.com
+	- 项目管理员
+	
+	刘欣 gzliuxin@corp.netease.com
+	- IOS后端接口开发者
 
-刘欣 gzliuxin@corp.netease.com
-
-熊博 gzxiongbo@corp.netease.com
+	熊博 gzxiongbo@corp.netease.com
+	- IOS后端接口开发者
 
 ## development document
 AndroidKeyMap: <http://developer.android.com/reference/android/view/KeyEvent.html>
