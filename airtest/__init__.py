@@ -3,9 +3,10 @@
 
 #coding: utf-8
 #
-__all__=['android', 'image', 'base', 'patch', 'ios']
+__all__=['android', 'image', 'base', 'patch', 'ios', 'device']
 
 import subprocess
+import device
 
 ANDROID = 'android'
 IOS = 'ios'
