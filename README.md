@@ -2,6 +2,8 @@ airtest
 =====
 this is python lib for airtest
 
+AirTest PoPo Discuss Group: **1275211**
+
 ## install
 install using pip.
 ```
@@ -60,6 +62,12 @@ app.click(P)
 # P can be
 # - filename: 'start.png'
 # - position: (100, 200)
+```
+
+clickOnAppear(...)
+```
+app.click(filename, [seconds])
+# eg: app.click('image1.png', 10)
 ```
 
 find(...) # find a image position located in screen
