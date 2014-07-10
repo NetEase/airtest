@@ -122,7 +122,7 @@ class AndroidDevice(object):
         except:
             print 'Device not support screen detect'
 
-        @base.go
+        @patch.go
         def monitor(interval=3):
             log.debug('MONITOR started')
             if not self.pkgname:

@@ -3,29 +3,37 @@
 
 #coding: utf-8
 #
-__all__=['android', 'image', 'base', 'patch', 'ios', 'device']
+#__all__=['devsuit', 'android', 'image', 'base', 'patch', 'ios', 'device']
 
 import subprocess
-import device
+
+from airtest import device
+from airtest import devsuit
+
 
 ANDROID = 'android'
 IOS = 'ios'
 SEPRATOR = '::'
 
-def connect(serialno=None, pkgname=None, device='android'):
+def connect(serialno, appname=None, device='android'):
     '''
-    connect to a mobile phone
-    '''   
-    if device == ANDROID:
-        from airtest import android
-        assert serialno != None
-        return android.AndroidDevice(serialno=serialno, pkgname=pkgname)
+    Connect device
+    '''
+    if  device == ANDROID:
+        from airtest.device import android
+        devClass = android.Device
     elif device == IOS:
-        from airtest import ios
-        return ios.IosDevice() # FIXME(not finished)
+        from airtest.device import ios
+        devClass = ios.Device
+    else:
+        raise RuntimeError('device type not recognize')
+
+    return devsuit.DeviceSuit(devClass, serialno, appname=appname)
 
 def getDevices(device='android'):
-    ''' return devices list '''
+    ''' 
+    @return devices list 
+    '''
     subprocess.call(['adb', 'start-server'])
     output = subprocess.check_output(['adb', 'devices'])
     result = []

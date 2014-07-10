@@ -16,10 +16,10 @@ def main():
     print 'PKGNAME:', pkgname
 
     app = airtest.connect(serialno, pkgname)
+    app.sleep(2)
 
     app.globalSet({'threshold': 0.1})
     app.clickOnAppear('start.png')
-    app.sleep(2)
     w, h = app.shape()
     middle_point = (w*0.5, h*0.5)
     for i in range(5):

@@ -11,6 +11,8 @@ from functools import partial
 from airtest import base
 from airtest import jsonlog
 
+log = base.getLogger('patch')
+
 def attachmethod(target):
     if isinstance(target, type):
         def decorator(func):
@@ -58,6 +60,10 @@ def record(jlog=None):
     return wrapper
 
 def go(fn):
+    '''
+    Decorator
+    '''
+    log.info('begin run func(%s) in background', fn.__name__)
     def decorator(*args, **kwargs):
         t = threading.Thread(target=fn, args=args, kwargs=kwargs)
         t.setDaemon(True)

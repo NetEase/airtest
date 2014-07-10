@@ -87,12 +87,3 @@ def wait_until(fn, interval=0.5, max_retry=10, args=(), kwargs={}):
         log.debug('wait until: %s, sleep: %s', fn.__name__, interval)
         time.sleep(interval)
     return None
-
-def go(fn):
-    log.info('run func(%s) in background', fn.__name__)
-    def decorator(*args, **kwargs):
-        t = threading.Thread(target=fn, args=args, kwargs=kwargs)
-        t.setDaemon(True)
-        t.start()
-        return t
-    return decorator

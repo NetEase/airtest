@@ -8,10 +8,8 @@ from airtest import image
 from airtest import base
 from airtest import jsonlog
 from airtest import device
+from airtest import patch
 
-deviceMap = {
-        'android': device.android.Device,
-        }
 log = base.getLogger('devsuit')
 
 def rotate_point((x, y), (w, h), d):
@@ -51,7 +49,7 @@ def get_jsonlog(filename='log/airtest.log'):
     jlog = jsonlog.JSONLog(logfile)
     return jlog
 
-class _DeviceSuit(object):
+class DeviceSuit(object):
     def __init__(self, device, serialno, appname=None):
         self.dev = device(serialno)
         self.appname = appname
@@ -65,7 +63,7 @@ class _DeviceSuit(object):
         self._log = get_jsonlog() # should implementes writeline(dict)
         self._tmpdir = 'tmp'
 
-    @base.go
+    @patch.go
     def _monitor(self, interval=3):
         log.debug('MONITOR started')
         if not self.pkgname:
@@ -167,12 +165,14 @@ class _DeviceSuit(object):
 
     def click(self, SF):
         x, y = self._PS2Point(SF)
+        log.info('click %s point: (%d, %d)', SF, x, y)
         self.dev.touch(x, y)
 
     def clickOnAppear(self, imgfile, seconds=20):
         '''
         When imgfile exists, then click it
         '''
+        log.info('click image file: %s', imgfile)
         p = self.wait(imgfile, seconds)
         return self.click(p)
 
@@ -217,13 +217,17 @@ class _DeviceSuit(object):
         '''
         self.dev.type(text)
 
-def connect(serialno, device='android', appname=None):
-    dev = _DeviceSuit(deviceMap.get(device), serialno, appname=appname)
-    return dev
+    def shape(self):
+        '''
+        Get device shape
 
-if __name__ == '__main__':
-    serialno = '10.242.62.143:5555'
-    deviceType = 'android'
+        @return (width, height)
+        '''
+        return self.dev.shape()
 
-    dev = connect(serialno, device=deviceType)
-    dev.click('hello.png')
+#if __name__ == '__main__':
+#    serialno = '10.242.62.143:5555'
+#    deviceType = 'android'
+#
+#    dev = connect(serialno, device=deviceType)
+#    dev.click('hello.png')
