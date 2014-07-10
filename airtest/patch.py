@@ -63,8 +63,8 @@ def go(fn):
     '''
     Decorator
     '''
-    log.info('begin run func(%s) in background', fn.__name__)
     def decorator(*args, **kwargs):
+        log.info('begin run func(%s) in background', fn.__name__)
         t = threading.Thread(target=fn, args=args, kwargs=kwargs)
         t.setDaemon(True)
         t.start()
