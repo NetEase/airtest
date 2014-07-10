@@ -7,8 +7,8 @@ import time
 
 MIN_MATCH_COUNT = 5
 
-def locate_image(orig, quer, outf='debug.png', threshold=0.3):
-    pt = locate_one_image(orig, quer, outf, threshold)
+def locate_image(orig, quer, outfile='debug.png', threshold=0.3):
+    pt = locate_one_image(orig, quer, outfile, threshold)
     if pt:
         return [pt]
     return None

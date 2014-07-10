@@ -6,13 +6,14 @@
 '''
 convert adb event to air.test program
 usage is simple:
-    adb shell getevent -l | python airtest_recorder.py
+    python airtest_recorder.py output.py
 '''
 
 import sys
 import time
 import subprocess
 import re
+import os
 
 DEVSCREEN = '/dev/input/event1'
 
@@ -44,12 +45,10 @@ def getScale():
     print '# screen.width:', width
     print '# screen.height:', height
     if width == w:
-        print "def click(x, y): app.touch(x, y)"
+        print("def click(x, y): app.touch(x, y)")
     else:
-        print "def click(x, y): app.touch(y, %s-x)" %(width)
-    print "def sleep(d): app.sleep(d)"
-    #print 'import time'
-    #print 'begin = time.time()'
+        print("def click(x, y): app.touch(y, %s-x)", width)
+    print("def sleep(d): app.sleep(d)")
     return float(rawx)/float(width), float(rawy)/float(height)
 
 def getDeviceId():
@@ -59,7 +58,7 @@ def getDeviceId():
         return match.group(1)
     raise RuntimeError("Couldn't find avaliable device")
 
-def main():
+def main(pipe, filename):
     xs, ys = [], []
     lastOper = ''
     touchStart = 0
@@ -67,12 +66,20 @@ def main():
     begin = time.time()
 
     deviceId = getDeviceId()
-    print __header__.format(id=deviceId)
     scaleX, scaleY = getScale()
+
+    def record(fmt, *args):
+        outstr = fmt % args
+        if filename:
+            with open(filename, 'a') as file:
+                file.write(outstr + '\n')
+        print outstr
+
+    record(__header__.format(id=deviceId))
 
     # plen()
     while True:
-        line = sys.stdin.readline()
+        line = pipe.readline()
         if not line.startswith(DEVSCREEN):
             continue
         channel, event, oper, value = line.split()
@@ -97,20 +104,25 @@ def main():
                     # print 'Duration:', duration
                     # touch up
                     if dist < 50:
-                        print 'click(%d, %d)' %(x1, y1)
+                        record('app.click((%d, %d))', x1, y1)
                     else:
-                        print 'app.drag((%d, %d), (%d, %d))' %(x1, y1, x2, y2)
+                        record('app.drag((%d, %d), (%d, %d))', x1, y1, x2, y2)
                 xs, ys = [], []
             else:
                 if len(xs) == 1:
                     # touch down
-                    print 'sleep(%.2f)' % float(time.time()-start)
+                    record('app.sleep(%.2f)', float(time.time()-start))
                     start = time.time()
                     touchStart = time.time()      
         lastOper = oper
 
 if __name__ == '__main__':
     try:
-        main()
+        filename = None if len(sys.argv) == 1 else sys.argv[1]
+        if filename and os.path.exists(filename):
+            os.unlink(filename)
+        p = subprocess.Popen(['adb', 'shell', 'getevent', '-l'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        main(p.stdout, filename)
     except KeyboardInterrupt:
         print 'Exit'
+        p.kill()
