@@ -66,15 +66,15 @@ class DeviceSuit(object):
     @patch.go
     def _monitor(self, interval=3):
         log.debug('MONITOR started')
-        if not self.pkgname:
+        if not self.appname:
             log.debug('MONITOR finished, no package provided')
             return
         while True:
             start = time.time()
-            mem = self._getMem()
-            self._jlog.writeline({'type':'record', 'mem':mem})
-            cpu = self._getCpu()
-            self._jlog.writeline({'type':'record', 'cpu':cpu})
+            mem = self.dev.getMem(self.appname)
+            self._log.writeline({'type':'record', 'mem':mem})
+            cpu = self.dev.getCpu(self.appname)
+            self._log.writeline({'type':'record', 'cpu':cpu})
             dur = time.time()-start
             if interval > dur:
                 time.sleep(interval-dur)
@@ -112,6 +112,15 @@ class DeviceSuit(object):
         filename = os.path.join(self._tmpdir, base.random_name(filename))
         self.dev.snapshot(filename)
         return filename
+
+    def takeSnapshot(self, filename):
+        '''
+        Take screen snapshot
+
+        @param filename: string (base filename want to save as basename)
+        @return string: (filename that really save to)
+        '''
+        return self._saveScreen(filename)
 
     def globalSet(self, m={}):
         '''
@@ -224,6 +233,17 @@ class DeviceSuit(object):
         @return (width, height)
         '''
         return self.dev.shape()
+
+    def keyevent(self, event):
+        '''
+        Send keyevent (only support android and ios)
+
+        @param event: string (one of MENU,BACK,HOME)
+        @return nothing
+        '''
+        if hasattr(self.dev, 'keyevent'):
+            return self.dev.keyevent(event)
+        raise RuntimeError('keyevent not support')
 
 #if __name__ == '__main__':
 #    serialno = '10.242.62.143:5555'
