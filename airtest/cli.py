@@ -85,7 +85,7 @@ def run_runtest():
 
 def run_log2html():
     if F.get('logfile') and F.get('htmldir'):
-        log2html.render(F.get('logfile'), os.path.join(F.get('htmldir'), 'index.html'))
+        log2html.render(F.get('logfile'), F.get('htmldir'))
 
 def run_update():
     exec_cmd('pip', 'install', '--upgrade', 'git+http://git.mt.nie.netease.com/hzsunshx/airtest.git')

@@ -60,24 +60,25 @@ class DeviceSuit(object):
 
         self._threshold = 0.3 # for findImage
         self._rotation = None # UP,DOWN,LEFT,RIGHT
-        self._log = get_jsonlog() # should implementes writeline(dict)
+        self._log = get_jsonlog().writeline # should implementes writeline(dict)
         self._tmpdir = 'tmp'
 
-    @patch.go
-    def _monitor(self, interval=3):
-        log.debug('MONITOR started')
-        if not self.appname:
-            log.debug('MONITOR finished, no package provided')
-            return
-        while True:
-            start = time.time()
-            mem = self.dev.getMem(self.appname)
-            self._log.writeline({'type':'record', 'mem':mem})
-            cpu = self.dev.getCpu(self.appname)
-            self._log.writeline({'type':'record', 'cpu':cpu})
-            dur = time.time()-start
-            if interval > dur:
-                time.sleep(interval-dur)
+        @patch.go
+        def _monitor(interval=3):
+            log.debug('MONITOR started')
+            if not self.appname:
+                log.debug('MONITOR finished, no package provided')
+                return
+            while True:
+                start = time.time()
+                mem = self.dev.getMem(self.appname)
+                self._log({'type':'record', 'mem':mem})
+                cpu = self.dev.getCpu(self.appname)
+                self._log({'type':'record', 'cpu':cpu})
+                dur = time.time()-start
+                if interval > dur:
+                    time.sleep(interval-dur)
+        _monitor()
 
     def _fixPoint(self, (x, y)):
         width, height = self.width, self.height
@@ -111,6 +112,7 @@ class DeviceSuit(object):
 
         filename = os.path.join(self._tmpdir, base.random_name(filename))
         self.dev.snapshot(filename)
+        self._log(dict(action='snapshot', filename=filename))
         return filename
 
     def takeSnapshot(self, filename):
@@ -120,7 +122,8 @@ class DeviceSuit(object):
         @param filename: string (base filename want to save as basename)
         @return string: (filename that really save to)
         '''
-        return self._saveScreen(filename)
+        savefile = self._saveScreen(filename)
+        self._log(dict(type='snapshot', filename=savefile))
 
     def globalSet(self, m={}):
         '''
@@ -144,7 +147,6 @@ class DeviceSuit(object):
         screen = self._saveScreen('screen-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
         pt = find_one_image(screen, imgfile, self._threshold)
         return pt
-        #return pts and pts[0]
 
     def findAll(self, imgfile):
         '''

@@ -24,10 +24,10 @@ def getMem(serialno, package):
     try:
         xym_mem = filter(lambda x: package in x, mem_info)[0].split()[0]
         mem = float(xym_mem) / 1024
-        log.info("mem_info:%s" % mem)
+        log.info("mem: %.2f" % mem)
         return mem
     except IndexError:
-        log.error("mem_info error")
+        log.error("mem error")
         return 0
 
 def getCpu(serialno, package):
@@ -40,7 +40,7 @@ def getCpu(serialno, package):
     try:
         xym_cpu = filter(lambda x: package in x, cpu_info)[0].split()[0]
         cpu = float(xym_cpu[:-1])
-        log.info("cpu_info:%s" % cpu)
+        log.info("cpu: %.2f" % cpu)
         return cpu
     except IndexError:
         log.error("cpu_info error")
