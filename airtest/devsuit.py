@@ -62,6 +62,7 @@ class DeviceSuit(object):
         self._rotation = None # UP,DOWN,LEFT,RIGHT
         self._log = get_jsonlog().writeline # should implementes writeline(dict)
         self._tmpdir = 'tmp'
+        self._log(dict(type='start', timestamp=time.time()))
 
         @patch.go
         def _monitor(interval=3):
@@ -112,7 +113,7 @@ class DeviceSuit(object):
 
         filename = os.path.join(self._tmpdir, base.random_name(filename))
         self.dev.snapshot(filename)
-        self._log(dict(action='snapshot', filename=filename))
+        self._log(dict(type='snapshot', filename=filename))
         return filename
 
     def takeSnapshot(self, filename):

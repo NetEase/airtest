@@ -8,6 +8,7 @@ convert log to html report
 import os
 import json
 import time
+import shutil
 
 import pystache
 
@@ -21,38 +22,61 @@ def render(logfile, htmldir):
     #htmldir = base.dirname(htmlfile)
     if not os.path.exists(htmldir):
         os.makedirs(htmldir)
-    items = []
+    cpus, items = [], []
+    mems, imgs = [], []
     data = {
-            'time': time.strftime('%Y/%m/%d %H:%M:%S'),
+            'info': {
+                'generated_time': time.strftime('%Y/%m/%d %H:%M:%S'),
+            },
             'items': items, 
+            #'cpus': cpus,
+            'cpu_data': None,
+            'mem_data': None,
+            #'mems': mems,
+            'images': imgs,
             }
+    info = data.get('info')
 
-    #items.append({'image': '.png'})
-
+    start_time = 0
     for line in open(logfile):
         d = json.loads(line)
-        timestamp = d.get('timestamp')
+        time_format = '%Y/%m/%d %H:%M:%S'
+        #timestamp = time.strftime(time_format, time.localtime(d.get('timestamp')))
+        timestamp = d.get('timestamp') - start_time
         _type = d.get('type')
-        if _type == 'record':
+        if _type == 'start':
+            start_time = d.get('timestamp')
+        elif _type == 'record':
             mem = d.get('mem')
             if mem:
-                items.append({'time':timestamp, 'mem': mem})
+                mems.append([timestamp, mem])
             cpu = d.get('cpu')
             if cpu:
-                items.append({'time':timestamp, 'cpu': cpu})
+                cpus.append([timestamp, cpu])
+                #cpus.append({'time':timestamp, 'value':cpu})
             #args = d.get('args')
             #args.extend([k+'='+v for k, v in d.get('kwargs').items()])
             #cmdstr = '{func}({argv})'.format(func=d.get('function'), 
             #        argv=' ,'.join(["'%s'"%s for s in args]))
             #items.append({'cmd': cmdstr})
         elif _type == 'snapshot':
-            items.append({'time':timestamp, 'filename':d.get('filename')})
+            filename = d.get('filename')
+            basename = os.path.basename(filename)
+            shutil.copyfile(filename, os.path.join(htmldir, basename))
+            imgs.append({'time':timestamp, 'filename':basename})
         #elif d.get('result'):
         #    data['result'] = {'status': d.get('result'), 'detail': d.get('detail')}
+    data['cpu_data'] = json.dumps(cpus)
+    data['mem_data'] = json.dumps(mems)
+    def average(ss):
+        return reduce(lambda x,y: x+y, [value for _,value in ss])/float(len(ss))
+
+    data['cpu_average'] = average(cpus)
+    data['mem_average'] = average(mems)
 
     tmpldir = os.path.join(base.dirname(__file__), 'htmltemplate')
     for name in os.listdir(tmpldir):
-        if os.path.isdir(name):
+        if os.path.isdir(name) or name.endswith('.swp'):
             continue
         fullpath = os.path.join(tmpldir, name)
         content = open(fullpath).read().decode('utf-8')

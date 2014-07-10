@@ -117,38 +117,12 @@ app.type('www.baidu.com\n') # type text and call keyevnet ENTER
 
 keyevent(not recommemd to use now)
 ```
-# press home
-app.home()
-
 # back and menu(only for android)
 app.keyevent('BACK')
 app.keyevent('MENU')
 ```
 
-## run test case
-the command tool `air.test` is also installed when run setup.py.
-
-config file `air.json` is needed by `air.test`. here is an example
-```json
-{
-  "cmd": "python main.py -s ${SERIALNO}",
-  "android": {
-    "apk_url": "http://10.246.13.110:10001/demo-release-signed.apk",
-    "package": "com.netease.xxx",
-    "activity": "main.activity"
-  }
-}
-```
-
-command will be called by `air.test` after successfully installed apk.
-```sh
-bash -c "python main.py -s ${SERIALNO}"
-```
-
-* take screen snapshot by run: `air.test snapshot`
-* run test by run: `air.test runtest`
-
-## about phone rotation
+## about airtest settting
 phone has 4 directions: `UP,DOWN,LEFT,RIGHT`
 
 change rotation through
@@ -161,6 +135,31 @@ change image recognize sensitivity
 # threshold range [0, 1), if set to 1, then app can't recognize anything
 app.globalSet({'threshold': 0.3}) 
 ```
+
+## run test case
+the command tool `air.test` is also installed when run setup.py.
+
+It's better to start from [example](example)
+
+config file `air.json` is needed by `air.test`. here is an example
+```json
+{
+  "cmd": "python main.py",
+  "android": {
+    "apk_url": "http://10.246.13.110:10001/demo-release-signed.apk",
+    "package": "com.netease.xxx",
+    "activity": "main.activity"
+  }
+}
+```
+
+command will be called by `air.test` after successfully installed apk.
+```sh
+bash -c "python main.py"
+```
+
+* take screen snapshot by run: `air.test snapshot`
+* run test by run: `air.test runtest`
 
 ## Team
 
@@ -181,7 +180,7 @@ AndroidKeyMap: <http://developer.android.com/reference/android/view/KeyEvent.htm
 
 used by call, eg
 ```
-app.press("HOME")
+app.keyevent("HOME")
 ```
 
 ## License
