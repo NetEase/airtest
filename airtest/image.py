@@ -10,19 +10,21 @@ import math
 MIN_MATCH_COUNT = 5
 
 def reremove(list):
-    # order preserving
+    ''' order preserving '''
     checked = []
     for e in list:
         if e not in checked:
-		    checked.append(e)
+            checked.append(e)
     return checked
-def locate_image(orig,quer,outf='debug.png',threshold=0.3):
-    pt = locate_one_image(orig,quer,outf,threshold)
+
+def locate_image(orig,quer,outfile='debug.png',threshold=0.3):
+    pt = locate_one_image(orig, quer, outfile, threshold)
     if pt:
         return [pt]
     return None
+
 def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',threshold=0.3):
-	
+    
     '''
     Locate one image position
 
@@ -34,7 +36,7 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
     threshold = 1- threshold
     img1 = cv2.imread(query,0) # queryImage,gray
     img2 = cv2.imread(origin,0) # originImage,gray
-    target_img = cv2.imread(origin,1) # originImage	
+    target_img = cv2.imread(origin,1) # originImage    
     # Initiate SIFT detector
     sift = cv2.SIFT()
     try:
@@ -42,8 +44,8 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
         kp1, des1 = sift.detectAndCompute(img1,None)
         kp2, des2 = sift.detectAndCompute(img2,None)
     except:
-        return []
-	#search and match the 
+        return None
+    #search and match the 
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
     search_params = dict(checks = 50)
@@ -71,7 +73,7 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
         r,c,d = dst_pts.shape
         if r < 1:
             print "NO MATCH POINT"
-            return []
+            return None
         for i in range(r):
             x = dst_pts[i][c-1][d-2]
             y = dst_pts[i][c-1][d-1]
@@ -84,13 +86,13 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
         if row < 1:
             print "NO MATCH POINT"
             cv2.imwrite(outfile,target_img)
-            return []
+            return None
         center = dst[row-1][col-1]
         for i in range(row-1):
             center += dst[i][col-1] 
         if row < 1:
             print "NO Match"
-            return []
+            return None
         else:
             center_x = int(center[0]/row)
             center_y = int(center[1]/row)
@@ -129,7 +131,7 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
             print "NO Match"
             if outfile:
                 cv2.imwrite(outfile,target_img)
-            return []
+            return None
         for i in range(len(rlist_x)):
             center_sum_x += rlist_x[i]
             center_sum_y += rlist_y[i]
@@ -155,7 +157,7 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
             print "NO Match"
             if outfile:
                 cv2.imwrite(outfile,target_img)
-            return []
+            return None
         else:
             center_x = int(rcenter[0]/rcount)
             center_y = int(rcenter[1]/rcount)
@@ -166,7 +168,7 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
             print "center point: ", center_x, center_y
             return [center_x, center_y]
 
-				
+                
 
 if __name__ == '__main__':
     starttime = time.clock()
@@ -198,4 +200,4 @@ if __name__ == '__main__':
         print "Match Successfully !!!"
     else:
         print "Match Failure !!!"
-	
+    
