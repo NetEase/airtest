@@ -112,7 +112,7 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
             print "NO MATCH POINT"
             if outfile:
                 cv2.imwrite(outfile,target_img)
-            return []
+            return None
         list_x = []
         list_y = []
         for i in range(row):
