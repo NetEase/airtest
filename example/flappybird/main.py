@@ -16,6 +16,9 @@ def main():
     print 'PKGNAME:', pkgname
 
     app = airtest.connect(serialno, pkgname)
+    #app.keyevent('HOME')
+    #return
+
     app.sleep(2)
 
     app.globalSet({'threshold': 0.1})

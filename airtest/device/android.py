@@ -100,6 +100,14 @@ class Device(object):
             else:
                 self.adb.type(c)
 
+    def keyevent(self, event):
+        '''
+        Send keyevent by adb
+
+        @param event: string (one of MENU, HOME, BACK)
+        '''
+        self.adb.shell('input keyevent '+str(event))
+
     def getMem(self, appname):
         return getMem(self._serialno, appname)
 
