@@ -21,7 +21,7 @@ setup(
 
       packages = find_packages(),
       package_data={
-          'airtest': ['htmltemplate']
+          'airtest': ['htmltemplate/*.html', 'htmltemplate/*.js', 'htmltemplate/*.json'],
         },
       install_requires=[
           #'androidviewclient >= 7.1.1', 
