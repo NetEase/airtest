@@ -124,7 +124,7 @@ def main():
     print 'PREPARE serialno: %s' %(serialno)
     exec_cmd('adb', 'start-server', timeout=10)
 
-    print arguments
+    #print arguments
     cnf = 'air.json'
     if not os.path.exists(cnf):
         sys.exit('config file require: %s' %(cnf))
