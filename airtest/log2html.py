@@ -71,8 +71,8 @@ def render(logfile, htmldir):
     def average(ss):
         return reduce(lambda x,y: x+y, [value for _,value in ss])/float(len(ss))
 
-    data['cpu_average'] = average(cpus)
-    data['mem_average'] = average(mems)
+    data['cpu_average'] = round(average(cpus), 2)
+    data['mem_average'] = round(average(mems), 2)
 
     tmpldir = os.path.join(base.dirname(__file__), 'htmltemplate')
     for name in os.listdir(tmpldir):

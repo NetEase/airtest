@@ -48,20 +48,25 @@ def exec_cmd(*cmds, **kwargs):
     shell = kwargs.get('shell', False)
     try:
         import sh
-        print 'RUN(timeout=%ds):'%(timeout), ' '.join(cmds)
+        log.debug('RUN(timeout=%ds): %s'%(timeout, ' '.join(cmds)))
         if shell:
             cmds = list(cmds)
             cmds[:0] = ['bash', '-c']
         c = sh.Command(cmds[0])
-        r = c(*cmds[1:], _err_to_out=True, _out=sys.stdout, _env=env, _timeout=timeout)
+        try:
+            r = c(*cmds[1:], _err_to_out=True, _out=sys.stdout, _env=env, _timeout=timeout)
+        except:
+            log.error('EXEC_CMD error, cmd: %s'%(' '.join(cmds)))
+            raise
     except ImportError:
-        print 'RUN(timeout=XX):', ' '.join(cmds)
+        log.debug('RUN(timeout=XX): %s'%(' '.join(cmds)))
         if shell:
             cmds = ' '.join(cmds)
         r = subprocess.Popen(cmds, env=env, stdout=sys.stdout, stderr=sys.stderr, shell=shell)
-    print r.wait()
+        print r.wait()
 
 def check_output(cmd):
+    #log.debug('CHECK_OUTPUT, cmd: %s' %(cmd))
     return subprocess.check_output(cmd, shell=True)
     
 def random_name(name):

@@ -28,7 +28,7 @@ def connect(serialno, appname=None, device='android'):
     else:
         raise RuntimeError('device type not recognize')
 
-    return devsuit.DeviceSuit(devClass, serialno, appname=appname)
+    return devsuit.DeviceSuit(devClass, device, serialno, appname=appname)
 
 def getDevices(device='android'):
     ''' 

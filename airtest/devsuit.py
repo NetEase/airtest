@@ -3,6 +3,7 @@
 
 import os
 import time
+import json
 
 from airtest import image
 from airtest import base
@@ -33,10 +34,10 @@ def find_multi_image(orig, query, threshold):
     
 def find_one_image(orig, query, threshold):
     pts = image.locate_image(orig, query, threshold=threshold)
+    if not pts:
+        return None # return when nothing found
     if len(pts) > 1:
         raise RuntimeError('too many same query images')
-    if len(pts) == 0:
-        raise RuntimeError('query image not found')
     return pts[0]
 
 def get_jsonlog(filename='log/airtest.log'):    
@@ -50,7 +51,7 @@ def get_jsonlog(filename='log/airtest.log'):
     return jlog
 
 class DeviceSuit(object):
-    def __init__(self, device, serialno, appname=None):
+    def __init__(self, device, deviceType, serialno, appname=None):
         self.dev = device(serialno)
         self.appname = appname
 
@@ -63,9 +64,11 @@ class DeviceSuit(object):
         self._log = get_jsonlog().writeline # should implementes writeline(dict)
         self._tmpdir = 'tmp'
         self._log(dict(type='start', timestamp=time.time()))
+        self._device = deviceType
+        self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
 
         @patch.go
-        def _monitor(interval=3):
+        def _monitor(interval=5):
             log.debug('MONITOR started')
             if not self.appname:
                 log.debug('MONITOR finished, no package provided')
@@ -96,14 +99,20 @@ class DeviceSuit(object):
                 rotation = 'UP'
         nx, ny = rotate_point((x, y), (width, height), rotation)
         if rotation != 'UP':
-            log.debug('Screen rotate direction(%s), width(%d), height(%d)', rotation, w, h)
+            log.debug('screen rotate direction(%s), width(%d), height(%d)', rotation, w, h)
             log.debug('(%d, %d) -> (%d, %d)', x, y, nx, ny)
         return (nx, ny)
 
     def _PS2Point(self, PS):
+        '''
+        Convert PS to point
+        @return (x, y) or None if not found
+        '''
         if isinstance(PS, basestring):
             log.debug('locate postion to touch')
             PS = self.find(PS)
+            if not PS:
+                return None
         (x, y) = self._fixPoint(PS)#(PS[0], PS[1]))#(1L, 2L))
         return (x, y)
 
@@ -141,7 +150,7 @@ class DeviceSuit(object):
         '''
         Find image position on screen
 
-        @return (point that found)
+        @return (point founded or None if not found)
         '''
         if not os.path.exists(imgfile):
             raise RuntimeError('image file(%s) not exists' %(imgfile))
@@ -175,18 +184,54 @@ class DeviceSuit(object):
     def exists(self, imgfile):
         return True if self.find(imgfile) else False
 
-    def click(self, SF):
-        x, y = self._PS2Point(SF)
+    def click(self, SF, seconds=20.0):
+        '''
+        Click function
+        @param seconds: float (if time not exceed, it will retry and retry)
+        '''
+        log.info('CLICK %s' %(SF))
+        start = time.time()
+        while True:
+            point = self._PS2Point(SF)
+            if point:
+                (x, y) = point
+                break
+            if time.time() - start > seconds:
+                raise RuntimeError('func click: timeout(%.2fs), target(%s) not found' %(seconds, SF))
+            log.debug('image file(%s) not found, retry' %(SF))
         log.info('click %s point: (%d, %d)', SF, x, y)
         self.dev.touch(x, y)
 
+    def center(self):
+        '''
+        Center position
+        '''
+        w, h = self.shape()
+        return w/2, h/2
+
     def clickOnAppear(self, imgfile, seconds=20):
         '''
-        When imgfile exists, then click it
+        When imgfile exists, then click it, this func will wait until timeout
         '''
         log.info('click image file: %s', imgfile)
         p = self.wait(imgfile, seconds)
         return self.click(p)
+    
+    def clickIfExists(self, imgfile):
+        '''
+        Click when image file exists
+
+        @return (True|False) if clicked
+        '''
+        log.info('CLICK IF EXISTS: %s' %(imgfile))
+        pt = self.find(imgfile)
+        if pt:
+            log.debug('click for exists %s', imgfile)
+            self.click(pt)
+            return True
+        else:
+            log.debug('ignore for no exists %s', imgfile)
+            return False
 
     def drag(self, fpt, tpt, duration=500):
         ''' 
@@ -247,6 +292,21 @@ class DeviceSuit(object):
         if hasattr(self.dev, 'keyevent'):
             return self.dev.keyevent(event)
         raise RuntimeError('keyevent not support')
+
+    def start(self):
+        '''
+        Start a app
+        '''
+        s = json.load(open(self._configfile))
+        return self.dev.start(s.get(self._device))
+    
+    def stop(self):
+        '''
+        Stop a app
+        '''
+        s = json.load(open(self._configfile))
+        return self.dev.stop(s.get(self._device))
+
 
 #if __name__ == '__main__':
 #    serialno = '10.242.62.143:5555'

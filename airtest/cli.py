@@ -80,8 +80,11 @@ def run_uninstall():
         print 'not supported:', platform
 
 def run_runtest():
-    env = {'SERIALNO': serialno, 'PKGNAME': xpath(platform, 'package')}
-    exec_cmd(xpath('cmd'), shell=True, env=env)
+    env = {
+            'SERIALNO': serialno, 
+            'AIRTEST_PHONENO': serialno,
+            'AIRTEST_APPNAME': xpath(platform, 'package')}
+    exec_cmd(xpath('cmd'), timeout=30*60, shell=True, env=env)
 
 def run_log2html():
     if F.get('logfile') and F.get('htmldir'):

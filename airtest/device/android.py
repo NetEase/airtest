@@ -24,7 +24,7 @@ def getMem(serialno, package):
     try:
         xym_mem = filter(lambda x: package in x, mem_info)[0].split()[0]
         mem = float(xym_mem) / 1024
-        log.info("mem: %.2f" % mem)
+        #log.info("mem: %.2f" % mem)
         return mem
     except IndexError:
         log.error("mem error")
@@ -40,7 +40,7 @@ def getCpu(serialno, package):
     try:
         xym_cpu = filter(lambda x: package in x, cpu_info)[0].split()[0]
         cpu = float(xym_cpu[:-1])
-        log.info("cpu: %.2f" % cpu)
+        #log.info("cpu: %.2f" % cpu)
         return cpu
     except IndexError:
         log.error("cpu_info error")
@@ -113,4 +113,16 @@ class Device(object):
 
     def getCpu(self, appname):
         return getCpu(self._serialno, appname)
+
+    def start(self, dictSet):
+        '''
+        Start a program
+
+        @param dictSet: dict (defined in air.json)
+        '''
+        #exec_cmd('adb', '-s', serialno, 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
+        self.adb.shell('am start -n '+dictSet.get('package')+'/'+dictSet.get('activity'))
+
+    def stop(self, dictSet):
+        self.adb.shell('am force-stop '+dictSet.get('package'))
 

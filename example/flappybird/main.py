@@ -11,13 +11,14 @@ import os
 import airtest
 
 def main():
-    serialno, appname = os.getenv('SERIALNO'), os.getenv('PKGNAME')
+    serialno, appname = os.getenv('SERIALNO'), os.getenv('APPNAME')
     print 'SERIALNO:', serialno
     print 'APPNAME:', appname
 
     app = airtest.connect(serialno, appname=appname)
-    #app.keyevent('HOME')
-    #return
+
+    #app.stop()
+    #app.start()
 
     app.sleep(2)
 
