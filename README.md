@@ -4,6 +4,8 @@ this is python lib for airtest
 
 AirTest PoPo Discuss Group: **1275211**
 
+成功也好，失败也好，或者只想吐槽，欢迎直接反馈到群里。
+
 ## install
 install using pip.
 ```
@@ -137,9 +139,10 @@ app.globalSet({'threshold': 0.3})
 ```
 
 ## run test case
-the command tool `air.test` is also installed when run setup.py.
+It's better to start from [example](example/flappybird)
 
-It's better to start from [example](example)
+### step1: prepare air.json file.
+the command tool `air.test` is installed. If everything goes fine.
 
 config file `air.json` is needed by `air.test`. here is an example
 ```json
@@ -153,13 +156,32 @@ config file `air.json` is needed by `air.test`. here is an example
 }
 ```
 
-command will be called by `air.test` after successfully installed apk.
-```sh
-bash -c "python main.py"
+### step2: prepare the test code
+main.py code example
+```
+import airtest
+
+phoneno = os.getenv('AIRTEST_PHONENO')
+appname = os.getenv('AIRTEST_APPNAME')
+device = os.getenv('DEVICE') or 'android'
+
+app = airtest.connect(phoneno, appname=appname, device=device)
+(width, height) = app.shape() # get device size
+app.click('start.png') # locate start.png position and touch it
 ```
 
-* take screen snapshot by run: `air.test snapshot`
-* run test by run: `air.test runtest`
+So where is `start.png` image file from.
+
+take screen snapshot by run: `air.test snapshot`, screen will save to `screen.png`
+
+cut the image part from it.
+
+### step3: run test code
+1. connect you device. if you use android, `adb devices` should see a devices
+2. install app. `air.test install`
+3. runtest. `air.test runtest`
+4. generate log, and show html in Chrome. `air.test log2html --listen --port=8888 report`
+5. uninstall app. `air.test uninstall`
 
 ## Team
 
