@@ -9,7 +9,7 @@
 phone(android|iphone) autotest framework
 Usage:
     air.test (runtest|install|uninstall) [-p PLATFORM] [SERIALNO]
-    air.test log2html -H <HTMLDIR>
+    air.test log2html [--listen] [--port=PORT] <HTMLDIR>
     air.test snapshot [-p PLATFORM] [SERIALNO]
     air.test all [--steps STEPS] [-H HTMLDIR] [-p PLATFORM] [SERIALNO]
     air.test update
@@ -20,6 +20,7 @@ Options:
     -s SERIALNO     Specify devices serialno(needed)
     --steps STEPS   the steps one by one [default: install,runtest,log2html,uninstall]
     -H HTMLDIR      Save html report
+    --port PORT     for log2html open a webserver to view report [default: 8888]
 '''
 
 __version__ = '0.1.0702'
@@ -28,6 +29,7 @@ import json
 import sys
 import os
 import urllib
+import subprocess
 
 from docopt import docopt
 from com.dtmilano.android.viewclient import ViewClient 
@@ -41,6 +43,7 @@ def urlretrieve(url, filename=None):
     return urllib.urlretrieve(url, filename)
 
 F = {} #json.load(open(jsonfile, 'r'))
+SUBPROCESS = []
 platform = 'android'
 serialno = None
 
@@ -87,8 +90,14 @@ def run_runtest():
     exec_cmd(xpath('cmd'), timeout=30*60, shell=True, env=env)
 
 def run_log2html():
+    print F
     if F.get('logfile') and F.get('htmldir'):
         log2html.render(F.get('logfile'), F.get('htmldir'))
+        if F.get('listen'):
+            p = subprocess.Popen(['python', '-mSimpleHTTPServer', F.get('port')], stdout=sys.stdout, stderr=sys.stderr, cwd=F.get('htmldir'))
+            SUBPROCESS.append(p)
+            p.wait()
+            #os.system('cd %s; python -mSimpleHTTPServer %s' %(F.get('htmldir'), F.get('port')))
 
 def run_update():
     exec_cmd('pip', 'install', '--upgrade', 'git+http://git.mt.nie.netease.com/hzsunshx/airtest.git')
@@ -115,7 +124,7 @@ def main():
     print 'PREPARE serialno: %s' %(serialno)
     exec_cmd('adb', 'start-server', timeout=10)
 
-    #print arguments
+    print arguments
     cnf = 'air.json'
     if not os.path.exists(cnf):
         sys.exit('config file require: %s' %(cnf))
@@ -124,8 +133,12 @@ def main():
         logfile = 'log/airtest.log'
         F['logfile'] = logfile
         os.environ['AIRTEST_LOGFILE'] = logfile
-    if arguments.get('-H'):
-        F['htmldir'] = arguments.get('-H')
+    #if arguments.get('-H'):
+    F['htmldir'] = arguments.get('<HTMLDIR>') or arguments.get('-H')
+        #if arguments.get('<HTMLDIR>'):
+        #    F['htmldir'] = arguments.get('<HTMLDIR>')
+    F['port'] = arguments.get('--port')
+    F['listen'] = arguments.get('--listen')
 
     if arguments['all']:
         exitcode = 0
@@ -153,4 +166,6 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
+        for p in SUBPROCESS:
+            p.kill()
         print 'Exited by user'
