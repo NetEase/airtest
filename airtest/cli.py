@@ -90,7 +90,6 @@ def run_runtest():
     exec_cmd(xpath('cmd'), timeout=30*60, shell=True, env=env)
 
 def run_log2html():
-    print F
     if F.get('logfile') and F.get('htmldir'):
         log2html.render(F.get('logfile'), F.get('htmldir'))
         if F.get('listen'):
@@ -106,7 +105,19 @@ def main():
     global F, platform, serialno
     arguments = docopt(__doc__, version='0.1')
 
-    for action in ['snapshot', 'update']:
+    cnf = 'air.json'
+    if os.path.exists(cnf):
+        F = json.load(open(cnf))
+    if not 'logfile' in F:
+        logfile = 'log/airtest.log'
+        F['logfile'] = logfile
+        os.environ['AIRTEST_LOGFILE'] = logfile
+
+    F['htmldir'] = arguments.get('<HTMLDIR>') or arguments.get('-H')
+    F['port'] = arguments.get('--port')
+    F['listen'] = arguments.get('--listen')
+
+    for action in ['log2html', 'snapshot', 'update']:
         if arguments[action]:
             print 'RUN:', action
             return globals().get('run_'+action)()
@@ -125,21 +136,8 @@ def main():
     exec_cmd('adb', 'start-server', timeout=10)
 
     #print arguments
-    cnf = 'air.json'
     if not os.path.exists(cnf):
         sys.exit('config file require: %s' %(cnf))
-    F = json.load(open(cnf))
-    if not 'logfile' in F:
-        logfile = 'log/airtest.log'
-        F['logfile'] = logfile
-        os.environ['AIRTEST_LOGFILE'] = logfile
-    #if arguments.get('-H'):
-    F['htmldir'] = arguments.get('<HTMLDIR>') or arguments.get('-H')
-        #if arguments.get('<HTMLDIR>'):
-        #    F['htmldir'] = arguments.get('<HTMLDIR>')
-    F['port'] = arguments.get('--port')
-    F['listen'] = arguments.get('--listen')
-
     if arguments['all']:
         exitcode = 0
         for step in arguments['--steps'].split(','):
