@@ -209,14 +209,6 @@ class DeviceSuit(object):
         '''
         w, h = self.shape()
         return w/2, h/2
-
-    def clickOnAppear(self, imgfile, seconds=20):
-        '''
-        When imgfile exists, then click it, this func will wait until timeout
-        '''
-        log.info('click image file: %s', imgfile)
-        p = self.wait(imgfile, seconds)
-        return self.click(p)
     
     def clickIfExists(self, imgfile):
         '''
