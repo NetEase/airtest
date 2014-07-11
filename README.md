@@ -40,107 +40,12 @@ Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
 ## Check if install OK
 for android
 
-Run [example program](example/flappybird)
+Run [flappybird example program](example/flappybird)
 
-## How to use
-after installed successfully. you can import like
-```
-# import python lib
-import airtest
-```
-
-step1 connect device
-```
-# get serialno by call: adb devices
-serialno = 'xxxxx888882111'
-deviceType = 'android' # can be windows or ios
-
-# connect to your android devices
-app = airtest.connect(serialno, device=deviceType)
-```
-
-click(...) # click by image file
-```
-app.click(P)
-# P can be
-# - filename: 'start.png'
-# - position: (100, 200)
-```
-
-clickOnAppear(...)
-```
-app.clickOnAppear(filename, [seconds])
-# eg: app.clickOnAppear('image1.png', 10)
-```
-
-find(...) # find a image position located in screen
-```
-(x, y) = app.find(filename)
-```
-
-wait(...) # wait until image shows
-```
-app.wait(filename, [seconds])
-# filename is the image name
-# seconds is the longest time waited.
-# @return position images find, or Raise RuntimeError
-# this is called find(..) to get images position
-```
-
-exists(...) # judge if image exists
-```
-app.exists('apple.png')
-# @return (True|False)
-# just exactly call wait
-```
-
-drap(...) # drag one place to and onother place
-```
-app.drag(fromP, toP)
-# fromP, toP: like click param, can be filename or position
-```
-
-shape() # get screen size(width and height)
-```
-(w, h) = app.shape()
-# return width and height
-```
-
-```
-# example of drag from left to right
-(x1, y1), (x2, y2) = (w*0.2, h*0.5), (w*0.8, h*0.5)
-app.drag((x1,y1), (x2,y2))
-```
-
-type(...) # type text
-```
-app.type('www.baidu.com\n') # type text and call keyevnet ENTER
-```
-
-keyevent(not recommemd to use now)
-```
-# back and menu(only for android)
-app.keyevent('BACK')
-app.keyevent('MENU')
-```
-
-## about airtest settting
-phone has 4 directions: `UP,DOWN,LEFT,RIGHT`
-
-change rotation through
-```
-app.globalSet({'rotation': 'RIGHT'})
-```
-
-change image recognize sensitivity
-```
-# threshold range [0, 1), if set to 1, then app can't recognize anything
-app.globalSet({'threshold': 0.3}) 
-```
+## check the API reference
+[API ALL HERE](API.md)
 
 ## run test case
-It's better to start from [example](example/flappybird)
-
 ### step1: prepare air.json file.
 the command tool `air.test` is installed. If everything goes fine.
 
