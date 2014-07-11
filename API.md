@@ -3,7 +3,6 @@ API Reference
 
 after installed successfully. you can import like
 ```
-# import python lib
 import airtest
 ```
 
