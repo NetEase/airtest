@@ -19,7 +19,7 @@ app = airtest.connect(serialno, appname=appname, device=device)
 try:
     while True:
         app.sleep(10)
-        app.takeSnapshot('%d.png', int(time.time()))
+        app.takeSnapshot('%d.png' % int(time.time()))
 except KeyboardInterrupt:
     print 'Exit'
 

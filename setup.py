@@ -12,7 +12,7 @@ except:
 
 setup(
       name='airtest',
-      version='0.1.0703.03',
+      version='0.1.0711',
       description='mobile test(black air) python lib',
       long_description=long_description,
 
@@ -21,7 +21,7 @@ setup(
 
       packages = find_packages(),
       package_data={
-          'airtest': ['template.html']
+          'airtest': ['htmltemplate']
         },
       install_requires=[
           #'androidviewclient >= 7.1.1', 
