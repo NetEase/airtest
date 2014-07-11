@@ -189,7 +189,8 @@ class DeviceSuit(object):
         Click function
         @param seconds: float (if time not exceed, it will retry and retry)
         '''
-        log.info('CLICK %s' %(SF))
+        print SF
+        log.info('CLICK %s', SF)
         start = time.time()
         while True:
             point = self._PS2Point(SF)
