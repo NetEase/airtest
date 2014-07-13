@@ -30,7 +30,7 @@ def HistSimilarity(origin='origin.png',query='query.png'):
             hist2 = cv2.calcHist([img2],[0],None,[256],[0.0,255.0])
             retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_CORREL)
             elif img1.ndim ==3 & img2.ndim ==3:
-            # R,G,B split
+            ''' R,G,B split '''
             b1,g1,r1 = cv2.split(img1)
             b2,g2,r2 = cv2.split(img2)
             hist_b1 = cv2.calcHist([b1],[0],None,[256],[0.0,255.0])
@@ -50,10 +50,12 @@ def HistSimilarity(origin='origin.png',query='query.png'):
             hist1 = cv2.calcHist([img1],[0],None,[256],[0.0,255.0])
             hist2 = cv2.calcHist([img2],[0],None,[256],[0.0,255.0])
             retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_CORREL)
+    '''
 	#retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_BHATTACHARYYA)#Bhattacharyya distance
 	#retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_CORREL)#Correlation
 	#retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_CHISQR)#Chi-Square
 	#retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_INTERSECT)#Intersection
+    '''
         return retal
     except:
         return None
@@ -61,15 +63,17 @@ def HistSimilarity(origin='origin.png',query='query.png'):
 def FeatureSimilarity(origin='origin.png',query='query.png'):
     img1 = cv2.imread(query,0) # queryImage,gray
     img2 = cv2.imread(origin,0) # originImage,gray
-    # Initiate SIFT detector
+    ''' Initiate SIFT detector '''
     sift = cv2.SIFT()
     #surf = cv2.SURF()
     try:
-        # find the keypoints and descriptors with SIFT
+        ''' find the keypoints and descriptors with SIFT '''
         kp1, des1 = sift.detectAndCompute(img1,None)
         kp2, des2 = sift.detectAndCompute(img2,None)
+        '''
         #kp1, des1 = surf.detectAndCompute(img1,None)
         #kp2, des2 = surf.detectAndCompute(img2,None)
+        '''
     except:
         return []
     kpnum1 = len(kp1)
@@ -83,7 +87,7 @@ def FeatureSimilarity(origin='origin.png',query='query.png'):
     if kpnum <= 0:
 		retal = 0.0
 		return retal
-    #search the match keypoints
+    ''' search the match keypoints '''
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
     search_params = dict(checks = 50)
@@ -92,7 +96,8 @@ def FeatureSimilarity(origin='origin.png',query='query.png'):
 	
     good = []
     for m,n in matches:
-        if m.distance < 0.7*n.distance: # threshold = 0.7
+        ''' threshold = 0.7 '''
+        if m.distance < 0.7*n.distance: 
             good.append(m)
     kpnum_good = float(len(good))
     print "Good Num: ", kpnum_good
