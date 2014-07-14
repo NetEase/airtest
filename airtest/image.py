@@ -29,7 +29,7 @@ def HistSimilarity(origin='origin.png',query='query.png'):
             hist1 = cv2.calcHist([img1],[0],None,[256],[0.0,255.0])
             hist2 = cv2.calcHist([img2],[0],None,[256],[0.0,255.0])
             retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_CORREL)
-            elif img1.ndim ==3 & img2.ndim ==3:
+        elif img1.ndim ==3 & img2.ndim ==3:
             ''' R,G,B split '''
             b1,g1,r1 = cv2.split(img1)
             b2,g2,r2 = cv2.split(img2)
@@ -50,12 +50,6 @@ def HistSimilarity(origin='origin.png',query='query.png'):
             hist1 = cv2.calcHist([img1],[0],None,[256],[0.0,255.0])
             hist2 = cv2.calcHist([img2],[0],None,[256],[0.0,255.0])
             retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_CORREL)
-    '''
-	#retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_BHATTACHARYYA)#Bhattacharyya distance
-	#retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_CORREL)#Correlation
-	#retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_CHISQR)#Chi-Square
-	#retal = cv2.compareHist(hist1,hist2,cv2.cv.CV_COMP_INTERSECT)#Intersection
-    '''
         return retal
     except:
         return None
@@ -79,21 +73,21 @@ def FeatureSimilarity(origin='origin.png',query='query.png'):
     kpnum1 = len(kp1)
     kpnum2 = len(kp2)
     print kpnum1,kpnum2
-	if kpnum1 <= kpnum2:
+    if kpnum1 <= kpnum2:
         kpnum = kpnum1
     else:
         kpnum = kpnum2
     print kpnum
     if kpnum <= 0:
-		retal = 0.0
-		return retal
+        retal = 0.0
+        return retal
     ''' search the match keypoints '''
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
     search_params = dict(checks = 50)
     flann = cv2.FlannBasedMatcher(index_params, search_params)
     matches = flann.knnMatch(des1,des2,k=2)
-	
+    
     good = []
     for m,n in matches:
         ''' threshold = 0.7 '''
@@ -237,9 +231,9 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
             dist.append(dis)
         for i in range(count):
             if count <= 2:
-				rcenter[0] += rlist_x[i]
-				rcenter[1] += rlist_y[i]
-				rcount += 1
+                rcenter[0] += rlist_x[i]
+                rcenter[1] += rlist_y[i]
+                rcount += 1
             else:
                 if dist[i] < max:
                    rcenter[0] += rlist_x[i]
