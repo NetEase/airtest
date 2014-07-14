@@ -62,7 +62,4 @@ echo "-------Step 6: installing airtest"
 which pip || easy_install pip
 set -eu
 pip install virtualenv
-pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
-
-echo "WHEN everything is done"
-echo "RUN: source venv/bin/activate"
+pip install --upgrade -i http://mt.nie.netease.com:3141/simple/ airtest
