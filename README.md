@@ -19,9 +19,12 @@ pip install -U git+http://git.mt.nie.netease.com/hzsunshx/airtest.git
 
 Other python lib required which may need installing by yourself.
 
+### For windows: 
+some resources can be found here:
+Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
+
 ### For android test (on any platform)
 1. adb: <http://developer.android.com/tools/help/adb.html>
-1. AndroidViewClient: `easy_install --upgrade androidviewclient`
 1. numpy
 1. opencv
 1. pillow
@@ -30,15 +33,10 @@ Other python lib required which may need installing by yourself.
 
 ### For ios test (only on Mac OS)
 1. brew: <http://brew.sh/>
-1. appium: `brew install node; npm install -g appium`
-1. Appium-Python-Client: `pip install Appium-Python-Client`
-1. opencv: `brew tap homebrew/science; brew install opencv` 
-1. pillow: `brew tap Homebrew/python; brew install pillow`
+1. appium: `brew install node && npm install -g appium`
+1. opencv: `brew tap homebrew/science && brew install opencv` 
+1. pillow: `brew tap Homebrew/python && brew install pillow`
 1. add python environment: `echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/site-packages' >> ~/.bash_profile`
-
-### For windows: 
-some resources can be found here:
-Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
 
 **and python should be 32bit**
 
