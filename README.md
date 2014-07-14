@@ -7,7 +7,12 @@ AirTest PoPo Discuss Group: **1275211**
 成功也好，失败也好，或者只想吐槽，欢迎直接反馈到群里。
 
 ## install
-install using pip.
+install using pip(stable).
+```
+pip install -i http://mt.nie.netease.com:3141/simple/ airtest
+```
+
+install (dev - not stable)
 ```
 pip install -U git+http://git.mt.nie.netease.com/hzsunshx/airtest.git
 ```
