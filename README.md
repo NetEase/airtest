@@ -9,7 +9,7 @@ AirTest PoPo Discuss Group: **1275211**
 ## install
 install using pip(stable).
 ```
-pip install -i http://mt.nie.netease.com:3141/simple/ airtest
+pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
 ```
 
 install (dev - not stable)
