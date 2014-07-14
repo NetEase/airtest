@@ -28,7 +28,7 @@ setup(
           'requests >= 2.3.0', 
           'docopt >= 0.6.2',
           'pystache >= 0.5.4',
-          'Appium-Python-Client >= 0.8'
+          'Appium-Python-Client == 0.9'
           ],
       entry_points='''
       [console_scripts]

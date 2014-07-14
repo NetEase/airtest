@@ -27,16 +27,18 @@ Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
     * Linux: A little complicated. It's better to install from source.
 
 ### For ios test (only on Mac OS)
+Auto install airtest by run: 
+```
+bash -c "$(curl -s http://git.mt.nie.netease.com/hzsunshx/airtest/raw/master/scripts/mac\_install.sh)"
+```
+
+Or manual
+
 1. brew: <http://brew.sh/>
 1. python: `brew install python`
 1. appium: `brew install node && npm install -g appium`
 1. opencv: `brew tap homebrew/science && brew install opencv` 
 1. pillow: `brew tap Homebrew/python && brew install pillow`
-1. add python environment: `echo 'export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/site-packages' >> ~/.bash_profile`
-
-**and python should be 32bit**
-
-**or** if you are leazy, just simply run `sh script/setup_ios_env.sh` to do all the things above.
 
 ## Check if install OK
 for android
