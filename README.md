@@ -36,7 +36,7 @@ Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
 
 **and python should be 32bit**
 
-or if you are leazy, just simply run `sh script/setup_ios_env.sh`, and all the above things done.
+**or** if you are leazy, just simply run `sh script/setup_ios_env.sh` to do all the things above.
 
 ## Check if install OK
 for android
