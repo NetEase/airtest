@@ -12,7 +12,7 @@ except:
 
 setup(
       name='airtest',
-      version='0.1.0714.01',
+      version='0.1.0714.02',
       description='mobile test(black air) python lib',
       long_description=long_description,
 

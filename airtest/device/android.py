@@ -130,17 +130,23 @@ class Device(object):
     def getsysinfo(self):
         # cpu
         output = self.adb.shell('cat /proc/cpuinfo')
-        matches = re.compile('^processor').findall(output)
+        matches = re.compile('processor').findall(output)
         cpu_count = len(matches)
         # mem
         output = self.adb.shell('cat /proc/meminfo')
-        match = re.compile('MemTotal:\*(\d+)').match(output)
+        match = re.compile('MemTotal:\s*(\d+)\s*kB\s*MemFree:\s*(\d+)', re.IGNORECASE).match(output)
         if match:
-            mem_total = match.group(1)
+            mem_total = int(match.group(1), 10)>>10 # MB
+            mem_free = int(match.group(2), 10)>>10
         else:
-            mem_total = 0
+            mem_total = -1
+            mem_free = -1
 
+        # brand = self.adb.getProperty('ro.product.brand')
         return {
             'cpu_count': cpu_count,
             'mem_total': mem_total,
+            'mem_free': mem_free,
+            'product_brand': self.adb.getProperty('ro.product.brand'),
+            'product_model': self.adb.getProperty('ro.product.model')
             }

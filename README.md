@@ -29,7 +29,7 @@ Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
 ### For ios test (only on Mac OS)
 Auto install airtest by run: 
 ```
-bash -c "$(curl -s http://git.mt.nie.netease.com/hzsunshx/airtest/raw/master/scripts/mac\_install.sh)"
+bash -c "$(curl -s http://git.mt.nie.netease.com/hzsunshx/airtest/raw/master/scripts/mac_install.sh)"
 ```
 
 Or manual
