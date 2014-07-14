@@ -12,11 +12,6 @@ install using pip(stable).
 pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
 ```
 
-install (dev - not stable)
-```
-pip install -U git+http://git.mt.nie.netease.com/hzsunshx/airtest.git
-```
-
 Other python lib required which may need installing by yourself.
 
 ### For windows: 
@@ -33,6 +28,7 @@ Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
 
 ### For ios test (only on Mac OS)
 1. brew: <http://brew.sh/>
+1. python: `brew install python`
 1. appium: `brew install node && npm install -g appium`
 1. opencv: `brew tap homebrew/science && brew install opencv` 
 1. pillow: `brew tap Homebrew/python && brew install pillow`
@@ -98,11 +94,12 @@ import airtest
 step1 connect device
 ```
 # get serialno by call: adb devices
-serialno = 'xxxxx888882111'
 deviceType = 'android' # can be windows or ios
+phoneno = 'xxxxx888882111' # phone number
+appname = 'com.netease.rz' # the application name
 
 # connect to your android devices
-app = airtest.connect(serialno, device=deviceType)
+app = airtest.connect(phoneno, appname=appname, device=deviceType)
 ```
 
 click(...) # click by image file
@@ -199,6 +196,12 @@ used by call, eg
 ```
 app.keyevent("HOME")
 ```
+
+airtest develop version(not stable)
+```
+pip install -U git+http://git.mt.nie.netease.com/hzsunshx/airtest.git
+```
+
 
 ## License
 This project is under the MIT License. See the [LICENSE](LICENSE) file for the full license text.

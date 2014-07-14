@@ -6,6 +6,7 @@ basic operation for a game(like a user does)
 '''
 
 import os
+import re
 
 from airtest import base
 from com.dtmilano.android.viewclient import ViewClient 
@@ -126,3 +127,20 @@ class Device(object):
     def stop(self, dictSet):
         self.adb.shell('am force-stop '+dictSet.get('package'))
 
+    def getsysinfo(self):
+        # cpu
+        output = self.adb.shell('cat /proc/cpuinfo')
+        matches = re.compile('^processor').findall(output)
+        cpu_count = len(matches)
+        # mem
+        output = self.adb.shell('cat /proc/meminfo')
+        match = re.compile('MemTotal:\*(\d+)').match(output)
+        if match:
+            mem_total = match.group(1)
+        else:
+            mem_total = 0
+
+        return {
+            'cpu_count': cpu_count,
+            'mem_total': mem_total,
+            }
