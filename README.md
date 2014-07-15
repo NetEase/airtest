@@ -9,7 +9,7 @@ AirTest PoPo Discuss Group: **1275211**
 ## install
 install using pip(stable).
 ```
-pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
+pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest androidviewclient
 ```
 
 Other python lib required which may need installing by yourself.
