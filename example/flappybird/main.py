@@ -11,7 +11,8 @@ import os
 import airtest
 
 def main():
-    serialno, appname = os.getenv('SERIALNO'), os.getenv('APPNAME')
+    serialno = os.getenv('AIRTEST_PHONENO') or 'yykksj1231'
+    appname = os.getenv('APPNAME') or 'com.dotgears.flappybird'
     print 'SERIALNO:', serialno
     print 'APPNAME:', appname
 
@@ -23,7 +24,7 @@ def main():
     app.sleep(2)
 
     app.globalSet({'threshold': 0.1})
-    app.clickOnAppear('start.png')
+    app.click('start.png')
     w, h = app.shape()
     middle_point = (w*0.5, h*0.5)
     for i in range(5):
