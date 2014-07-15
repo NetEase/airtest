@@ -290,7 +290,7 @@ class DeviceSuit(object):
         '''
         Release resouces
         '''
-        self._log.close()
+        pass
 
     def start(self):
         '''

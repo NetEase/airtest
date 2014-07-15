@@ -34,22 +34,14 @@ class JSONLog(object):
         @param args(array): only when d is string, support writeline('hello %s', 'world')
         '''
         with Lock(self._lock) as _:
-            if not self._fd:
-                self._fd = open(self._filename, 'a')
-            if isinstance(d, dict):
-                d.update({'timestamp': int(time.time())})
-                outline = json.dumps(d)
-            else:
-                outline = str(d) % args
-            self._fd.write(outline.rstrip() + '\n')
-            self._fd.flush()
+            with open(self._filename, 'a') as file:
+                if isinstance(d, dict):
+                    d.update({'timestamp': int(time.time())})
+                    outline = json.dumps(d)
+                else:
+                    outline = str(d) % args
+                file.write(outline.rstrip() + '\n')
 
-    def close(self):
-        '''
-        close log
-        '''
-        if self._fd:
-            self._fd.close()
 
 if __name__ == '__main__':
     log = JSONLog('test.log')
