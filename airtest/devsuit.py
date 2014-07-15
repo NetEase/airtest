@@ -286,6 +286,12 @@ class DeviceSuit(object):
             return self.dev.keyevent(event)
         raise RuntimeError('keyevent not support')
 
+    def close(self):
+        '''
+        Release resouces
+        '''
+        self._log.close()
+
     def start(self):
         '''
         Start a app

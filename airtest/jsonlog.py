@@ -44,6 +44,13 @@ class JSONLog(object):
             self._fd.write(outline.rstrip() + '\n')
             self._fd.flush()
 
+    def close(self):
+        '''
+        close log
+        '''
+        if self._fd:
+            self._fd.close()
+
 if __name__ == '__main__':
     log = JSONLog('test.log')
     log.writeline('hello')
