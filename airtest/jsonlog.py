@@ -20,14 +20,12 @@ class Lock(object):
     def __exit__(self, *args):
         self.lock.release()
 
-_LOGS={}
-
 class JSONLog(object):
     def __init__(self, filename):
         base.makedirs(base.dirname(filename))
 
         self._filename = filename
-        self._fd = _LOGS.get(filename) or open(filename, 'a')
+        self._fd = None
         self._lock = threading.Lock()
 
     def writeline(self, d, *args):
@@ -36,6 +34,8 @@ class JSONLog(object):
         @param args(array): only when d is string, support writeline('hello %s', 'world')
         '''
         with Lock(self._lock) as _:
+            if not self._fd:
+                self._fd = open(self._filename, 'a')
             if isinstance(d, dict):
                 d.update({'timestamp': int(time.time())})
                 outline = json.dumps(d)
