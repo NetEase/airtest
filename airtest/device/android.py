@@ -59,6 +59,7 @@ class Device(object):
 
         self.vc = ViewClient(self.adb, serialno)
         ViewClient.connectToDeviceOrExit()
+        self._devinfo = self.getdevinfo()
 
     def snapshot(self, filename):
         ''' save screen snapshot '''
@@ -113,7 +114,7 @@ class Device(object):
         return getMem(self._serialno, appname)
 
     def getCpu(self, appname):
-        return getCpu(self._serialno, appname)
+        return getCpu(self._serialno, appname)/self._devinfo['cpu_count']
 
     def start(self, dictSet):
         '''
@@ -127,7 +128,7 @@ class Device(object):
     def stop(self, dictSet):
         self.adb.shell('am force-stop '+dictSet.get('package'))
 
-    def getsysinfo(self):
+    def getdevinfo(self):
         # cpu
         output = self.adb.shell('cat /proc/cpuinfo')
         matches = re.compile('processor').findall(output)
