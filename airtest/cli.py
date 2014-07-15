@@ -36,7 +36,7 @@ from com.dtmilano.android.viewclient import ViewClient
 
 import airtest
 from airtest.base import exec_cmd
-from airtest import log2html
+from airtest import log2html, jsonlog
 
 def urlretrieve(url, filename=None):
     print 'DOWNLOAD:', url, '->', filename
@@ -148,9 +148,8 @@ def main():
             try:
                 fn()
             except Exception as e:
-                with open(logfile, 'a') as file:
-                    file.write(json.dumps({'type':'cli', 'step':step, 'result':'failed', 'detail': str(e)}))
-                    exitcode=1
+                jsonlog.JSONLog(logfile).writeline({'type':'cli', 'step':step, 'result':'failed', 'detail': str(e)})
+                exitcode=1
 
         sys.exit(exitcode)
         return

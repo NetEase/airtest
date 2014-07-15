@@ -55,7 +55,7 @@ class Device(object):
     def __init__(self, serialno=None):
         print 'S:', serialno
         self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
-        self.adb.reconnect = True # this way is more stable
+        #self.adb.reconnect = True # this way is more stable
 
         self.vc = ViewClient(self.adb, serialno)
         ViewClient.connectToDeviceOrExit()

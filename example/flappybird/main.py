@@ -23,7 +23,7 @@ def main():
 
     app.sleep(2)
 
-    app.globalSet({'threshold': 0.1})
+    #app.globalSet({'threshold': 0.1})
     app.click('start.png')
     w, h = app.shape()
     middle_point = (w*0.5, h*0.5)

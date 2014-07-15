@@ -69,6 +69,8 @@ def render(logfile, htmldir):
     data['cpu_data'] = json.dumps(cpus)
     data['mem_data'] = json.dumps(mems)
     def average(ss):
+        if not ss or len(ss):
+            return 0.0
         return reduce(lambda x,y: x+y, [value for _,value in ss])/float(len(ss))
 
     data['cpu_average'] = round(average(cpus), 2)
