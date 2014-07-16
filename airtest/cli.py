@@ -57,9 +57,13 @@ def run_snapshot():
     global serialno
     if not serialno:
         ds = airtest.getDevices()
+        print ds
         if len(ds) == 1:
             serialno=ds[0][0]
+        else:
+            sys.exit("too many devices, don't know which you want")
 
+    print 'snapshot', serialno
     if platform == 'android':
         c, _ = ViewClient.connectToDeviceOrExit(serialno=serialno)
         c.takeSnapshot().save('screen.png')
@@ -87,7 +91,8 @@ def run_runtest():
             'SERIALNO': serialno, 
             'AIRTEST_PHONENO': serialno,
             'AIRTEST_APPNAME': xpath(platform, 'package')}
-    exec_cmd(xpath('cmd'), timeout=30*60, shell=True, env=env)
+    exit_code = exec_cmd(xpath('cmd'), timeout=30*60, shell=True, env=env)
+    assert exit_code == 0
 
 def run_log2html():
     if F.get('logfile') and F.get('htmldir'):
@@ -105,6 +110,17 @@ def main():
     global F, platform, serialno
     arguments = docopt(__doc__, version='0.1')
 
+    # set action
+    action=''
+    for act in ['all', 'install', 'log2html', 'runtest', 'snapshot', 'uninstall', 'update']:
+        if arguments.get(act):
+            action = act
+            break
+    if not action:
+        sys.exit('No action specified, see --help')
+    print 'RUN action:', action
+
+    # load conf
     cnf = 'air.json'
     if os.path.exists(cnf):
         F = json.load(open(cnf))
@@ -117,10 +133,8 @@ def main():
     F['port'] = arguments.get('--port')
     F['listen'] = arguments.get('--listen')
 
-    for action in ['log2html', 'snapshot', 'update']:
-        if arguments[action]:
-            print 'RUN:', action
-            return globals().get('run_'+action)()
+    if action in ['log2html', 'update']:
+        return globals().get('run_'+action)()
 
     # check phoneno and platform
     if not arguments.get('SERIALNO'):
@@ -131,6 +145,9 @@ def main():
     serialno = arguments['SERIALNO']
     platform = arguments.get('-p', 'android')
 
+    if action in ['snapshot']:
+        return globals().get('run_'+action)()
+
     print 'PREPARE platform: %s' %(platform)
     print 'PREPARE serialno: %s' %(serialno)
     exec_cmd('adb', 'start-server', timeout=10)
@@ -138,7 +155,7 @@ def main():
     #print arguments
     if not os.path.exists(cnf):
         sys.exit('config file require: %s' %(cnf))
-    if arguments['all']:
+    if action == 'all':
         exitcode = 0
         for step in arguments['--steps'].split(','):
             fn = globals().get('run_'+step)
@@ -153,10 +170,9 @@ def main():
 
         sys.exit(exitcode)
         return
-    for action in ['install', 'uninstall', 'log2html', 'runtest']:
-        if arguments[action]:
-            print 'RUN:', action
-            return globals().get('run_'+action)()
+    if action in ['install', 'uninstall', 'log2html', 'runtest']:
+        print 'RUN:', action
+        return globals().get('run_'+action)()
     return
 
 if __name__ == '__main__':

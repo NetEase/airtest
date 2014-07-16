@@ -8,7 +8,7 @@ import json
 from airtest import image
 from airtest import base
 from airtest import jsonlog
-from airtest import device
+# from airtest import device
 from airtest import patch
 
 log = base.getLogger('devsuit')
@@ -109,7 +109,7 @@ class DeviceSuit(object):
         @return (x, y) or None if not found
         '''
         if isinstance(PS, basestring):
-            log.debug('locate postion to touch')
+            log.debug('locate %s', PS)
             PS = self.find(PS)
             if not PS:
                 return None
@@ -173,6 +173,7 @@ class DeviceSuit(object):
         Wait until some picture exists
         @return position when imgfile shows
         '''
+        log.info('WAIT: %s', imgfile)
         interval = 1
         max_retry = int(seconds/interval)
         pt = base.wait_until(self.find, args=(imgfile,), interval=interval, max_retry=max_retry)
@@ -199,7 +200,7 @@ class DeviceSuit(object):
                 break
             if time.time() - start > seconds:
                 raise RuntimeError('func click: timeout(%.2fs), target(%s) not found' %(seconds, SF))
-            log.debug('image file(%s) not found, retry' %(SF))
+            log.warn('image file(%s) not found, retry' %(SF))
         log.info('click %s point: (%d, %d)', SF, x, y)
         self.dev.touch(x, y)
 
