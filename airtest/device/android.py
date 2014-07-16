@@ -55,11 +55,17 @@ class Device(object):
     def __init__(self, serialno=None):
         print 'S:', serialno
         self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
-        #self.adb.reconnect = True # this way is more stable
+        self.adb.reconnect = True # this way is more stable
 
         self.vc = ViewClient(self.adb, serialno)
         ViewClient.connectToDeviceOrExit()
         self._devinfo = self.getdevinfo()
+
+        try:
+            if self.adb.isLocked():
+                self.adb.unlock()
+        except:
+            pass
 
     def snapshot(self, filename):
         ''' save screen snapshot '''
@@ -123,10 +129,12 @@ class Device(object):
         @param dictSet: dict (defined in air.json)
         '''
         #exec_cmd('adb', '-s', serialno, 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
-        self.adb.shell('am start -n '+dictSet.get('package')+'/'+dictSet.get('activity'))
+        # -S: force stop the target app before starting the activity
+        self.adb.shell('am start -S -n '+dictSet.get('package')+'/'+dictSet.get('activity'))
 
     def stop(self, dictSet):
-        self.adb.shell('am force-stop '+dictSet.get('package'))
+        #self.adb.shell('am force-stop '+dictSet.get('package'))
+        self.adb.shell('pm clear '+dictSet.get('package'))
 
     def getdevinfo(self):
         # cpu

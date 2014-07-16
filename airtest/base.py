@@ -63,7 +63,8 @@ def exec_cmd(*cmds, **kwargs):
         if shell:
             cmds = ' '.join(cmds)
         r = subprocess.Popen(cmds, env=env, stdout=sys.stdout, stderr=sys.stderr, shell=shell)
-        print r.wait()
+        return r.wait()
+    return 0
 
 def check_output(cmd):
     #log.debug('CHECK_OUTPUT, cmd: %s' %(cmd))
