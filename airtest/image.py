@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+'''
+2014/07/16 jiaqianghuai: 融合了特征匹配和模板匹配算法
+'''
 
+__author__ = 'hzjiaqianghuai,hzsunshx'
 import numpy as np
 import cv2
 import sys
@@ -97,6 +101,96 @@ def FeatureSimilarity(origin='origin.png',query='query.png'):
     print "Good Num: ", kpnum_good
     retal = kpnum_good/kpnum
     return retal
+def imgprocess(img,ratio):
+    h = img.shape[0]
+    w = img.shape[1]
+    h_t = int(h*ratio)
+    w_t = int(w*ratio)
+    print "h_t: %d, w_t: %d" % (h_t,w_t)
+    h_b = h-h_t
+    w_b = w-w_t
+    for i in range(h):
+        for j in range(w):
+            if (img.ndim ==2) & ((i < h_t) | (j < w_t) | (h_b < i) | (w_b < j)):
+                if 200 < img[i,j]:
+                    img[i,j] = 0
+            elif (img.ndim ==3) & ((i < h_t) | (j < w_t) | (h_b < i) | (w_b < j)):
+                graylevel = int((img[i,j,0]+img[i,j,1]+img[i,j,2])/3)
+                if 200 < graylevel:
+                    img[i,j,0] = 0
+                    img[i,j,1] = 0
+                    img[i,j,2] = 0
+    return img
+def copyimg(center,w,h,target_img):
+    center_x = center[0]
+    center_y = center[1]
+    topleft_x = int(center_x-w)
+    topleft_y = int(center_y-h)
+    print "tx, ty: ", topleft_x, topleft_y
+    if topleft_x < 0:
+        topleft_x = 0
+    if topleft_y < 0:
+        topleft_y = 0
+    print "ndim: ",target_img.ndim
+    rect_img = np.zeros((h*2,w*2),target_img.dtype)
+    if target_img.ndim == 2:
+        for i in range(h*2):
+            ty = topleft_y+i
+            if target_img.shape[0] <= ty:
+                ty = target_img.shape[0]-1
+            for j in range(w*2):
+                tx = topleft_x+j
+                if target_img.shape[1] <= tx:
+                    tx = target_img.shape[1]-1
+                rect_img[i][j] = target_img[ty][tx]
+    elif target_img.ndim == 3:
+        for i in range(h*2):
+            ty = topleft_y+i
+            for j in range(w*2):
+                tx = topleft_x+j
+                if target_img.shape[0] <= ty:
+                    ty = target_img.shape[0]-1
+                if target_img.shape[1] <= tx:
+                    tx = target_img.shape[1]-1
+                rect_img[i][j][0] = target_img[ty][tx][0]
+                rect_img[i][j][1] = target_img[ty][tx][1]
+                rect_img[i][j][2] = target_img[ty][tx][2]
+    return rect_img
+# template match function
+def templatematch(target_img,query_img,value,situ,center):
+    h_query = query_img.shape[0]
+    w_query = query_img.shape[1]
+    print "w_query:%d, h_query:%d" % (w_query,h_query)
+    w_temp = int(w_query/1)
+    h_temp = int(h_query/1)
+    print "w2:%d, h2:%d" % (w_temp,h_temp)
+    size = (w_temp,h_temp)
+    temp = cv2.resize(query_img,size,cv2.cv.CV_INTER_LINEAR)
+    h_target = target_img.shape[0]
+    w_target = target_img.shape[1]
+    print "w_target:%d, h_target:%d" % (w_target,h_target)
+    width=w_target-w_temp+1
+    height=h_target-h_temp+1
+    if width < 0 | height < 0:
+		return None
+    t_ret, t_thresh = cv2.threshold(target_img,200,255,cv2.THRESH_TOZERO)
+    q_ret, q_thresh = cv2.threshold(query_img,200,255,cv2.THRESH_TOZERO)
+    #result=np.zeros((width,height),np.uint8)
+    #cv.MatchTemplate(image,template, result,cv.CV_TM_SQDIFF_NORMED)
+    #result = cv2.matchTemplate(target_img,temp,cv2.cv.CV_TM_SQDIFF_NORMED)
+    result = cv2.matchTemplate(t_thresh,q_thresh,cv2.cv.CV_TM_CCORR_NORMED)
+    (min_val,max_val,minloc,maxloc)=cv2.minMaxLoc(result)
+    #(x,y)=minloc
+    (x,y)=maxloc
+    if len(center):
+        re_x = int(x+center[0]-w_temp/2)
+        re_y = int(y+center[1]-h_temp/2)
+    else:
+        re_x = int(x+w_temp/2)
+        re_y = int(y+h_temp/2)
+    maxloc = [re_x,re_y]
+    value.append(max_val)
+    situ.append(maxloc)
 def locate_image(orig,quer,outfile='debug.png',threshold=0.3):
     pt = locate_one_image(orig, quer, outfile, threshold)
     if pt:
@@ -125,6 +219,8 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
         kp2, des2 = sift.detectAndCompute(img2,None)
     except:
         return None
+    num1 = len(kp1)
+    num2 = len(kp2)
     #search and match the 
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
@@ -143,7 +239,9 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
     print "h, w: ", h, w
     #store all the good matches as per Lowe's ratio test.
     good = []
+    kp2_xy = []
     for m,n in matches:
+        kp2_xy.append(kp2[m.trainIdx].pt)
         if m.distance < threshold*n.distance: # threshold = 0.7
             good.append(m)
     if len(good)>MIN_MATCH_COUNT:
@@ -167,15 +265,19 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
             print "NO MATCH POINT"
             cv2.imwrite(outfile,target_img)
             return None
-        center = dst[row-1][col-1]
-        for i in range(row-1):
-            center += dst[i][col-1] 
-        if row < 1:
+        center = [0,0]
+        count = 0
+        for i in range(row):
+            if (dst[i][col-1][0] < target_img.shape[1]) & (0 <= dst[i][col-1][0]) & (dst[i][col-1][1] < target_img.shape[0]) & (0 <=dst[i][col-1][1]):
+                center += dst[i][col-1]
+                count += 1
+                cv2.circle(target_img, (dst[i][col-1][0], dst[i][col-1][1]), 2, (255, 0, 255), -1)
+        if count < 1:
             print "NO Match"
             return None
         else:
-            center_x = int(center[0]/row)
-            center_y = int(center[1]/row)
+            center_x = int(center[0]/count)
+            center_y = int(center[1]/count)
             if outfile:
                 cv2.rectangle(target_img,(int(center_x-w/2),int(center_y-h/2)),(int(center_x+w/2),int(center_y+h/2)),(0,0,255),1,0)
                 cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
@@ -189,10 +291,58 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
         row,col,dim = dst_pts.shape
         print row,col,dim
         if (row < 1) | (row < ratio_num):
-            print "NO MATCH POINT"
+            print "ReMatch"
+            re_dst_pts = np.float32([ kp2_xy[m] for m in range(len(kp2_xy)) ]).reshape(-1,1,2)
+            re_r,re_c,re_d = re_dst_pts.shape
+            temp = imgprocess(img1,0.1)
+            if re_r:
+                value = []
+                situ = []
+                for i in range(re_r):
+                    center = re_dst_pts[i][re_c-1]
+                    print "point: ", center
+                    rect_img = copyimg(center,w,h,img2)
+                    templatematch(rect_img,temp,value,situ,center)
+                    print "i is: ", i
+                max = value[re_r-1]
+                k = re_r-1
+                for i in range(re_r-1):
+                    print "value: ", value[i]
+                    if max < value[i]:
+                        max = value[i]
+                        k = i
+                print k, max
+                print "Re_center: ", situ[k]
+                if (max < 0.6) & (10 < num1):
+                    center = []
+                    value = []
+                    situ = []
+                    templatematch(img2,temp,value,situ,center)
+                    print "value", value
+                    if value[0] < 0.7: #template similarity
+                        return None
+                    else:
+                        center_x = situ[0][0]
+                        center_y = situ[0][1]
+                else:
+                    center_x = situ[k][0]
+                    center_y = situ[k][1]
+            else:
+                center = []
+                value = []
+                situ = []
+                templatematch(img2,temp,value,situ,center)
+                print "value", value
+                if value[0] < 0.7: #template similarity
+                    return None
+                else:
+                    center_x = situ[0][0]
+                    center_y = situ[0][1]
             if outfile:
+                cv2.rectangle(target_img,(int(center_x-w/2),int(center_y-h/2)),(int(center_x+w/2),int(center_y+h/2)),(0,0,255),1,0)
+                cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
                 cv2.imwrite(outfile,target_img)
-            return None
+            return [center_x,center_y]
         list_x = []
         list_y = []
         for i in range(row):
