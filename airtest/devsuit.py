@@ -66,9 +66,10 @@ class DeviceSuit(object):
         self._log(dict(type='start', timestamp=time.time()))
         self._device = deviceType
         self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
+        self._monitor_interval = 5
 
         @patch.go
-        def _monitor(interval=5):
+        def _monitor():
             log.debug('MONITOR started')
             if not self.appname:
                 log.debug('MONITOR finished, no package provided')
@@ -80,8 +81,8 @@ class DeviceSuit(object):
                 cpu = self.dev.getCpu(self.appname)
                 self._log({'type':'record', 'cpu':cpu})
                 dur = time.time()-start
-                if interval > dur:
-                    time.sleep(interval-dur)
+                if self._monitor_interval > dur:
+                    time.sleep(self._monitor_interval-dur)
         _monitor()
 
     def _fixPoint(self, (x, y)):

@@ -27,7 +27,7 @@ def fuckit(fn):
         try:
             return fn(*args, **kwargs)
         except Exception as e:
-            args.extend([k+'='+v for k, v in kwargs.items()])
+            args = list(args).extend([k+'='+v for k, v in kwargs.items()])
             print 'function(%s(%s)) panic(%s). fuckit' %(fn.__name__, ' ,'.join(args), e)
             return None
     return decorator
@@ -77,6 +77,7 @@ if __name__ == '__main__':
     def say_hello(sleep=0.3, message='hello world'):
         time.sleep(sleep)
         print message
+        return None
     t1 = say_hello(0.1)
     t2 = say_hello(0.5, 'this message should not showed')
     t1.join()
