@@ -6,13 +6,6 @@ AirTest PoPo Discuss Group: **1275211**
 
 成功也好，失败也好，或者只想吐槽，欢迎直接反馈到群里。
 
-## install
-install using pip(stable).
-```
-pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest androidviewclient
-```
-
-**Other python lib required** which may need installing by yourself.
 
 ### For windows: 
 Windows need python2.7 32bit.
@@ -43,6 +36,13 @@ Or manual
 1. appium: `brew install node && npm install -g appium`
 1. opencv: `brew tap homebrew/science && brew install opencv` 
 1. pillow: `brew tap Homebrew/python && brew install pillow`
+1. appclient: `pip install Appium-Python-Client`
+
+## Last but import: install airtest
+install using pip(stable).
+```
+pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest androidviewclient
+```
 
 ## Check if install OK
 for android

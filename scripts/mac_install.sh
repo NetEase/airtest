@@ -62,4 +62,5 @@ echo "-------Step 6: installing airtest"
 which pip || easy_install pip
 set -eu
 pip install virtualenv
+pip install Appium-Python-Client
 pip install --upgrade -i http://mt.nie.netease.com:3141/simple/ airtest

@@ -12,7 +12,7 @@ except:
 
 setup(
       name='airtest',
-      version='0.1.0714.02',
+      version='0.2.0717.01',
       description='mobile test(black air) python lib',
       long_description=long_description,
 
@@ -28,7 +28,7 @@ setup(
           'requests >= 2.3.0', 
           'docopt >= 0.6.2',
           'pystache >= 0.5.4',
-          'Appium-Python-Client == 0.9'
+          #'Appium-Python-Client == 0.9'
           ],
       entry_points='''
       [console_scripts]
