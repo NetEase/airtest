@@ -147,7 +147,7 @@ class IDevice():
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
         
  
-    def drag(self, (x1, y1), (x2, y2)):
+    def drag(self, (x1, y1), (x2, y2), duration=0.5):
         ''' Simulate drag '''
         win32api.SetCursorPos((x1, y1))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
@@ -214,13 +214,12 @@ class IDevice():
         HWND=win32gui.FindWindow(None,self.WinName)
         ctypes.windll.user32.GetWindowRect(HWND,ctypes.byref(rect))
         return rect.left,rect.top,rect.right,rect.bottom
-    
-    
-
         
-    #def getCpu(appname):
+    def getCpu(self, appname):
         ''' Return cpu: float (Cpu usage for app) '''
+        return 0
         
  
-    #def getMem(appname):
+    def getMem(self, appname):
         ''' Return mem: float (unit MB, memory usage for app) '''
+        return 0

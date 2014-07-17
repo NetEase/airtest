@@ -12,11 +12,15 @@ install using pip(stable).
 pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest androidviewclient
 ```
 
-Other python lib required which may need installing by yourself.
+**Other python lib required** which may need installing by yourself.
 
 ### For windows: 
-some resources can be found here:
-Link: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`
+Windows need python2.7 32bit.
+
+Download Resouce from here: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`.
+Install according to the number one by one.
+
+Last step: Copy `cv2.pyd` to `python/lib/site-packages`
 
 ### For android test (on any platform)
 1. adb: <http://developer.android.com/tools/help/adb.html>
@@ -88,6 +92,8 @@ cut the image part from it.
 4. generate log, and show html in Chrome. `air.test log2html --listen --port=8888 report`
 5. uninstall app. `air.test uninstall`
 
+open browser, input `127.0.0.1:8888`. You should see html report now.
+
 ## API Reference
 after installed successfully. you can import like
 ```
@@ -98,9 +104,9 @@ import airtest
 step1 connect device
 ```
 # get serialno by call: adb devices
+phoneno = os.getenv('AIRTEST_PHONENO') or 'xxxxx888882111' # phone number
+appname = os.getenv('AIRTEST_APPNAME') or 'com.netease.rz' # the application name
 deviceType = 'android' # can be windows or ios
-phoneno = 'xxxxx888882111' # phone number
-appname = 'com.netease.rz' # the application name
 
 # connect to your android devices
 app = airtest.connect(phoneno, appname=appname, device=deviceType)
@@ -112,6 +118,7 @@ app.click(P)
 # P can be
 # - filename: 'start.png'
 # - position: (100, 200)
+# - percent: (0.1, 0.02)    # equal to (width*0.1, height*0.02)
 ```
 
 find(...) # find a image position located in screen
