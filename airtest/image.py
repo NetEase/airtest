@@ -96,6 +96,36 @@ def feature_similarity(img1,img2):
     #print "Good Num: ", kpnum_good
     retal = kpnum_good/kpnum
     return retal
+def re_feature_similarity(kp1,des1,kp2,des2):
+    #img1 = cv2.imread(query,0) # queryImage,gray
+    #img2 = cv2.imread(origin,0) # originImage,gray
+    kpnum1 = len(kp1)
+    kpnum2 = len(kp2)
+    #print kpnum1,kpnum2
+    if kpnum1 <= kpnum2:
+        kpnum = kpnum1
+    else:
+        kpnum = kpnum2
+    #print kpnum
+    if kpnum <= 0:
+        retal = 0.0
+        return retal
+    ''' search the match keypoints '''
+    FLANN_INDEX_KDTREE = 0
+    index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
+    search_params = dict(checks = 50)
+    flann = cv2.FlannBasedMatcher(index_params, search_params)
+    matches = flann.knnMatch(des1,des2,k=2)
+    
+    good = []
+    for m,n in matches:
+        ''' threshold = 0.7 '''
+        if m.distance < 0.7*n.distance: 
+            good.append(m)
+    kpnum_good = float(len(good))
+    print "Good Num: ", kpnum_good
+    retal = kpnum_good/kpnum
+    return retal
 def imgprocess(img,ratio):
     h = img.shape[0]
     w = img.shape[1]
@@ -230,6 +260,13 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
     query_img = cv2.imread(query,1) # queryImage
     target_img = cv2.imread(origin,1) # originImage
 
+    v1 = []
+    s1 = []
+    temp = imgprocess(img1,0.1)
+    templatematch(img2,temp,v1,s1,[])
+    c1 = s1[0]
+
+   
     try:
         # find the keypoints and descriptors with SIFT
         kp1, des1 = siftextract(img1)
@@ -238,21 +275,21 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
         print "h, w: ", h, w
     except:
         return None
+    
+    rect1 = copyimg((c1[0],c1[1]),w,h,target_img,1)   
+    rect = copyimg((c1[0],c1[1]),w,h,img2,2)  
+    kp3, des3 = siftextract(rect)
     num1 = len(kp1)
     num2 = len(kp2)
+    num3 = len(kp3)
+    print "num1: ", num1
     
-    v1 = []
-    s1 = []
-    temp = imgprocess(img1,0.1)
-    templatematch(img2,temp,v1,s1,[])
-    c1 = s1[0]
-    rect2 = copyimg((c1[0],c1[0]),w,h,img2,2)
-    val2 = feature_similarity(rect2,img1)
-    print "center: ", c1
-    print "value 2: ", val2
-    if (val2 <= 0.05) & (5 < num1):
-        return None 
-  
+    if DEBUG: print "num3: ", num3
+    #val1 = hist_similarity(rect1,query_img)
+    #val2 = feature_similarity(rect2,img1)
+    val2 = re_feature_similarity(kp1,des1,kp3,des3)
+    if (num3 < int(num1*0.5)) | ((num1 <= num3) & (val2 <= 0.05)):
+        return None
     #search and match the 
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
