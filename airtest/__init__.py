@@ -15,7 +15,7 @@ ANDROID = 'android'
 IOS = 'ios'
 SEPRATOR = '::'
 
-def connect(serialno, appname=None, device='android'):
+def connect(phoneno, appname=None, device='android'):
     '''
     Connect device
     '''
@@ -28,7 +28,7 @@ def connect(serialno, appname=None, device='android'):
     else:
         raise RuntimeError('device type not recognize')
 
-    return devsuit.DeviceSuit(devClass, device, serialno, appname=appname)
+    return devsuit.DeviceSuit(devClass, device, phoneno, appname=appname)
 
 def getDevices(device='android'):
     ''' 
@@ -40,6 +40,6 @@ def getDevices(device='android'):
     for line in output.splitlines()[1:]:
         ss = line.strip().split()
         if len(ss) == 2:
-            (serialno, state) = ss
-            result.append((serialno, state))
+            (phoneno, state) = ss
+            result.append((phoneno, state))
     return result

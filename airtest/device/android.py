@@ -82,6 +82,12 @@ class Device(object):
         log.debug('touch position %s', (x, y))
         self.adb.touch(x, y, eventType)
 
+    def drag(self, (x0, y0), (x1, y1), duration=0.5):
+        '''
+        Drap screen
+        '''
+        self.adb.drag((x0, y0), (x1, y1), duration)
+
     def shape(self):
         ''' 
         Get screen width and height 
