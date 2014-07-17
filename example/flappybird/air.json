@@ -4,5 +4,8 @@
     "apk_url": "ftp://10.246.13.180/publish/com.dotgears.flappybird-bf978c69c8e594e6fe301b677e69acbc.apk",
     "package": "com.dotgears.flappybird",
     "activity": "com.dotgears.flappy.SplashScreen"
+  },
+  "windows": {
+	"path": "C:\\demo.exe"
   }
 }
