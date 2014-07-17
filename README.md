@@ -15,6 +15,11 @@ Install according to the number one by one.
 
 Last step: Copy `cv2.pyd` to `python/lib/site-packages`
 
+install pythonlib: **androidviewclient**
+```
+pip install -U -i http://mt.nie.netease.com:3141/simple/ androidviewclient
+```
+
 ### For android test (on any platform)
 1. adb: <http://developer.android.com/tools/help/adb.html>
 1. numpy
@@ -41,7 +46,7 @@ Or manual
 ## Last but import: install airtest
 install using pip(stable).
 ```
-pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest androidviewclient
+pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
 ```
 
 ## Check if install OK
