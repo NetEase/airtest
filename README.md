@@ -191,6 +191,9 @@ change image recognize sensitivity
 app.globalSet({'threshold': 0.3}) 
 ```
 
+## 更新日志
+[CHANGELOG](CHANGELOG.md)
+
 ## Team
 
 	孙圣翔 hzsunshx@corp.netease.com
