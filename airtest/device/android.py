@@ -128,19 +128,27 @@ class Device(object):
     def getCpu(self, appname):
         return getCpu(self._serialno, appname)/self._devinfo['cpu_count']
 
-    def start(self, dictSet):
+    def start(self, appname, extra={}):
         '''
         Start a program
 
-        @param dictSet: dict (defined in air.json)
+        @param extra: dict (defined in air.json)
         '''
         #exec_cmd('adb', '-s', serialno, 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
         # -S: force stop the target app before starting the activity
-        self.adb.shell('am start -S -n '+dictSet.get('package')+'/'+dictSet.get('activity'))
+        self.adb.shell('am start -S -n '+appname+'/'+extra.get('activity'))
 
-    def stop(self, dictSet):
-        #self.adb.shell('am force-stop '+dictSet.get('package'))
-        self.adb.shell('pm clear '+dictSet.get('package'))
+    def stop(self, appname, extra={}):
+        '''
+        Stop app
+        '''
+        self.adb.shell('am force-stop '+appname)
+
+    def clear(self, appname, extra={}):
+        '''
+        Stop app and clear data
+        '''
+        self.adb.shell('pm clear '+appname)
 
     def getdevinfo(self):
         # cpu

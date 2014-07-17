@@ -299,15 +299,21 @@ class DeviceSuit(object):
         Start a app
         '''
         s = json.load(open(self._configfile))
-        return self.dev.start(s.get(self._device))
+        return self.dev.start(self.appname, s.get(self._device))
     
     def stop(self):
         '''
         Stop a app
         '''
         s = json.load(open(self._configfile))
-        return self.dev.stop(s.get(self._device))
+        return self.dev.stop(self.appname, s.get(self._device))
 
+    def clear(self):
+        '''
+        Stop app and clear data
+        '''
+        s = json.load(open(self._configfile))
+        return self.dev.clear(self.appname, s.get(self._device))
 
 #if __name__ == '__main__':
 #    serialno = '10.242.62.143:5555'
