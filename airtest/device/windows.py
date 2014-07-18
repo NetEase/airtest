@@ -8,7 +8,7 @@ import win32api,win32con,win32gui
 import autopy
 import ctypes
 import pygame
-
+import os
  
 #def getNetFlow(appname=None)
 #    Get current network flow 
@@ -214,6 +214,15 @@ class IDevice():
         HWND=win32gui.FindWindow(None,self.WinName)
         ctypes.windll.user32.GetWindowRect(HWND,ctypes.byref(rect))
         return rect.left,rect.top,rect.right,rect.bottom
+    
+    def start(self, appname, extra={}):
+        '''Start an app'''
+        Path = extra.get('path')
+        os.system('cd '+Path+' && '+'start '+appname)
+        
+    def stop(self, appname, extra={}):
+        HWND=win32gui.FindWindow(None,self.WinName)
+        win32gui.SendMessage(HWND,win32con.WM_CLOSE,0,0)
         
     def getCpu(self, appname):
         ''' Return cpu: float (Cpu usage for app) '''
