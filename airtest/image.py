@@ -283,12 +283,11 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
     num2 = len(kp2)
     num3 = len(kp3)
     print "num1: ", num1
-    
-    if DEBUG: print "num3: ", num3
+    print "num3: ", num3
     #val1 = hist_similarity(rect1,query_img)
     #val2 = feature_similarity(rect2,img1)
     val2 = re_feature_similarity(kp1,des1,kp3,des3)
-    if (num3 < int(num1*0.5)) | ((num1 <= num3) & (val2 <= 0.05)):
+    if (((num3 < int(num1*0.5)) ) | ((int (num1*1.5) <= num3) & (val2 == 0))) & (MIN_MATCH_COUNT < num1):
         return None
     #search and match the 
     FLANN_INDEX_KDTREE = 0
@@ -454,6 +453,8 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
             if outfile:
                 cv2.imwrite(outfile,target_img)
             return None
+        print "lenx: ", len(rlist_x)
+        print "leny: ", len(rlist_y)
         for i in range(len(rlist_x)):
             center_sum_x += rlist_x[i]
             center_sum_y += rlist_y[i]
