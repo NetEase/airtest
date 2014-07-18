@@ -17,12 +17,17 @@ def test_image_locate_file_not_exists():
         image.locate_one_image('testdata/yy.png', 'zz.png')
 
 def test_locate_one_image():
-    dirs = [p for p in os.listdir('testdata') if p.startswith('img1-')]
+    dirs = [p for p in os.listdir('testdata') if p.startswith('oneimg-')]
     for d in dirs:
         folder = os.path.join('testdata', d)
 
         EXPECT_FILE = os.path.join(folder, 'expect.txt')
         TRAIN_FILE = os.path.join(folder, 'train.png')
+        if not os.path.exists(TRAIN_FILE):
+            TRAIN_FILE = os.path.join(folder, 'train.jpg')
+
+        assert os.path.exists(EXPECT_FILE)
+        assert os.path.exists(TRAIN_FILE)
 
         #
         # format: <filename> <left-up> <right-bottom>
@@ -30,6 +35,8 @@ def test_locate_one_image():
         #
         for line in open(EXPECT_FILE):
             line = line.strip()
+            if not line or line.startswith('#'):
+                continue
             name, extra = string.split(line, maxsplit=1)
             query_file = os.path.join(folder, name)
             print 'TEST:', query_file, extra
