@@ -1,5 +1,4 @@
 #decoding:utf-8
-
 import windows
 import wx
 
