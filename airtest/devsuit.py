@@ -4,6 +4,7 @@
 import os
 import time
 import json
+import PIL
 
 from airtest import image
 from airtest import base
@@ -85,24 +86,34 @@ class DeviceSuit(object):
                     time.sleep(self._monitor_interval-dur)
         _monitor()
 
+    def _getRotation(self):
+        '''
+        @return UP|RIGHT|DOWN|LEFT
+        '''
+        rotation = self._rotation
+        if not rotation:
+            (w, h) = self.dev.shape() # when rotate w > h
+            if w != self.width:
+                rotation = 'RIGHT'
+            else:
+                rotation = 'UP'
+        return rotation
+
     def _fixPoint(self, (x, y)):
         width, height = self.width, self.height
+        rotation = self._getRotation()
+        if rotation in ('RIGHT', 'LEFT'):
+            width, height = max(height,width), min(height,width) # adjust width > height
         if isinstance(x, float) and x <= 1.0:
             x = int(width*x)
         if isinstance(y, float) and y <= 1.0:
             y = int(height*y)
-        rotation = self._rotation
-        if not rotation:
-            (w, h) = self.dev.shape() # when rotate w > h
-            if w != width:
-                rotation = 'RIGHT'
-            else:
-                rotation = 'UP'
-        nx, ny = rotate_point((x, y), (width, height), rotation)
-        if rotation != 'UP':
-            log.debug('screen rotate direction(%s), width(%d), height(%d)', rotation, w, h)
-            log.debug('(%d, %d) -> (%d, %d)', x, y, nx, ny)
-        return (nx, ny)
+        if self._device == 'ios' and rotation == 'RIGHT':
+            rotation = dict(RIGHT='LEFT',UP='UP',LEFT='RIGHT',DOWN='UP').get(rotation)
+            nx, ny = rotate_point((x, y), (width, height), rotation)
+            log.debug('rotation back(left-up): (%d, %d) -> (%d, %d)', x, y, nx, ny)
+            return (nx, ny)
+        return (x, y)
 
     def _PS2Point(self, PS):
         '''
@@ -123,6 +134,11 @@ class DeviceSuit(object):
 
         filename = os.path.join(self._tmpdir, base.random_name(filename))
         self.dev.snapshot(filename)
+        rotation = self._getRotation()
+        # the origin screenshot is UP, so need to rotate it here for human
+        if rotation != 'UP':
+            angle = dict(RIGHT=PIL.Image.ROTATE_90, LEFT=PIL.Image.ROTATE_270).get(rotation)
+            PIL.Image.open(filename).transpose(angle).save(filename)
         self._log(dict(type='snapshot', filename=filename))
         return filename
 

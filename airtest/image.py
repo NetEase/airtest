@@ -254,6 +254,12 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
     @param threshold: float (range [0, 1), the lower the more ease to match)
     @return None if not found, (x,y) point if found
     '''
+    import os
+    if not os.path.exists(origin):
+        raise IOError('origin_file not exists')
+    if not os.path.exists(query):
+        raise IOError('query_file not exists')
+
     threshold = 1- threshold
     img1 = cv2.imread(query,0) # queryImage,gray
     img2 = cv2.imread(origin,0) # originImage,gray
