@@ -127,13 +127,15 @@ class Device():
     ''' Interface documentation '''
     def __init__(self,WinName=None):
         self.WinName = WinName
+        self.HWND=win32gui.FindWindow(None,self.WinName)
+        if self.HWND==0:
+            raise Exception(u'目标窗口不存在')
         
     def snapshot(self, filename=None ):
         ''' Capture device screen '''
         '''WinName is the window name of the target program'''
         rect = RECT()
-        HWND=win32gui.FindWindow(None,self.WinName)
-        ctypes.windll.user32.GetWindowRect(HWND,ctypes.byref(rect))
+        ctypes.windll.user32.GetWindowRect(self.HWND,ctypes.byref(rect))
         rangle = (rect.left+2,rect.top+2,rect.right-2,rect.bottom-2)
         pic = ImageGrab.grab(rangle)
         if filename !=None:
@@ -211,8 +213,7 @@ class Device():
     def windowposition(self):
         '''Get the position of target window while given its name'''
         rect = RECT()
-        HWND=win32gui.FindWindow(None,self.WinName)
-        ctypes.windll.user32.GetWindowRect(HWND,ctypes.byref(rect))
+        ctypes.windll.user32.GetWindowRect(self.HWND,ctypes.byref(rect))
         return rect.left,rect.top,rect.right,rect.bottom
     
     def start(self, appname, extra={}):
@@ -221,8 +222,7 @@ class Device():
         os.system('cd '+Path+' && '+'start '+appname)
         
     def stop(self, appname, extra={}):
-        HWND=win32gui.FindWindow(None,self.WinName)
-        win32gui.SendMessage(HWND,win32con.WM_CLOSE,0,0)
+        win32gui.SendMessage(self.HWND,win32con.WM_CLOSE,0,0)
         
     def getCpu(self, appname):
         ''' Return cpu: float (Cpu usage for app) '''
