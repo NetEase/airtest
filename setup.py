@@ -12,7 +12,7 @@ except:
 
 setup(
       name='airtest',
-      version='0.2.0717.04',
+      version='0.2.0718.02',
       description='mobile test(black air) python lib',
       long_description=long_description,
 
@@ -20,6 +20,7 @@ setup(
       author_email='codeskyblue@gmail.com',
 
       packages = find_packages(),
+      include_package_data=True,
       package_data={
           'airtest': ['htmltemplate/*.html', 'htmltemplate/*.js', 'htmltemplate/*.json'],
         },
