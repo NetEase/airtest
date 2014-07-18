@@ -90,7 +90,7 @@ class DeviceSuit(object):
         if isinstance(x, float) and x <= 1.0:
             x = int(width*x)
         if isinstance(y, float) and y <= 1.0:
-            y = int(width*y)
+            y = int(height*y)
         rotation = self._rotation
         if not rotation:
             (w, h) = self.dev.shape() # when rotate w > h
@@ -294,30 +294,30 @@ class DeviceSuit(object):
         '''
         pass
 
+    def _safe_load_config(self):
+        import os
+        if os.path.exists(self._configfile):
+            return json.load(open(self._configfile))
+        return {}
+            
     def start(self):
         '''
         Start a app
         '''
-        s = json.load(open(self._configfile))
+        s = self._safe_load_config()
         return self.dev.start(self.appname, s.get(self._device))
     
     def stop(self):
         '''
         Stop a app
         '''
-        s = json.load(open(self._configfile))
+        s = self._safe_load_config()
         return self.dev.stop(self.appname, s.get(self._device))
 
     def clear(self):
         '''
         Stop app and clear data
         '''
-        s = json.load(open(self._configfile))
+        s = self._safe_load_config()
         return self.dev.clear(self.appname, s.get(self._device))
 
-#if __name__ == '__main__':
-#    serialno = '10.242.62.143:5555'
-#    deviceType = 'android'
-#
-#    dev = connect(serialno, device=deviceType)
-#    dev.click('hello.png')
