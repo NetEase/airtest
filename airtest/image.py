@@ -309,10 +309,10 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
 
     thresh_num = len(kp1)
     #print "thresh: ", thresh_num
-    t = thresh_num*0.1
+    #t = thresh_num*0.1
     ratio_num = int(thresh_num*0.1)
-    if t > float(ratio_num+0.5):
-        ratio_num += 1
+    #if t > float(ratio_num+0.5):
+        #ratio_num += 1
     #print ratio_num
     #store all the good matches as per Lowe's ratio test.
     good = []
