@@ -290,15 +290,15 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
     kp3, des3 = siftextract(rect)
 
     num3 = len(kp3)
-    print "num1: ", num1
-    print "num2: ", num2
-    print "num3: ", num3
+    #print "num1: ", num1
+    #print "num2: ", num2
+    #print "num3: ", num3
     #val1 = hist_similarity(rect1,query_img)
     #val2 = feature_similarity(rect2,img1)
     if num1 <= num3:
         val2 = re_feature_similarity(kp1,des1,kp3,des3)
         #print "val: ", val2
-        if (((int (num1*1.5) <= num3) & (val2 == 0))) & (MIN_MATCH_COUNT < num1):
+        if (((int (num1*5) <= num3) & (val2 == 0))) & (MIN_MATCH_COUNT < num1):
             return None
     #search and match the 
     FLANN_INDEX_KDTREE = 0
@@ -538,8 +538,8 @@ if __name__ == '__main__':
     starttime = time.clock()
     pts = locate_image('testdata/target.png','testdata/query.png','testdata/debug.png',0.3)
     endtime = time.clock()
-    print "time: ", endtime-starttime
-    print "center point: ", pts
+    #print "time: ", endtime-starttime
+    #print "center point: ", pts
     if pts:
         center_x = pts[0][0]
         center_y = pts[0][1]
@@ -548,7 +548,7 @@ if __name__ == '__main__':
         with open('testdata/data.txt','r') as f:
             for line in f:
                 point.append(map(float,line.split(',')))
-            print point
+            #print point
         pt = point[0]
         #object top_left coordinate
         topleft_x = int(pt[0])
