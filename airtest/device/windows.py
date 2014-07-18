@@ -122,8 +122,8 @@ ShiftCodes = {
            "\"":0xDE}
 
 
-#class IDevice(Interface):
-class IDevice():
+#class Device(Interface):
+class Device():
     ''' Interface documentation '''
     def __init__(self,WinName=None):
         self.WinName = WinName
