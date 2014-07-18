@@ -1,3 +1,3 @@
 cd $(dirname $0)
-export PYTHONPATH=$(cd ../; pwd)
+export PYTHONPATH=$PYTHONPATH:$(cd ../; pwd)
 py.test -v -l
