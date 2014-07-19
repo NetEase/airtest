@@ -290,14 +290,14 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
     kp3, des3 = siftextract(rect)
 
     num3 = len(kp3)
-    print "num1: ", num1
-    print "num2: ", num2
-    print "num3: ", num3
+    #print "num1: ", num1
+    #print "num2: ", num2
+    #print "num3: ", num3
     #val1 = hist_similarity(rect1,query_img)
     #val2 = feature_similarity(rect2,img1)
     if num1 <= num3:
         val2 = re_feature_similarity(kp1,des1,kp3,des3)
-        print "val: ", val2
+        #print "val: ", val2
         if (((int (num1*5) <= num3) & (val2 == 0))) & (MIN_MATCH_COUNT < num1):
             return None
     #search and match the 
@@ -313,7 +313,7 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
     ratio_num = int(thresh_num*0.1)
     #if t > float(ratio_num+0.5):
         #ratio_num += 1
-    print ratio_num
+    #print ratio_num
     #store all the good matches as per Lowe's ratio test.
     good = []
     kp2_xy = []
@@ -366,7 +366,7 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
         dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
         #print dst_pts
         row,col,dim = dst_pts.shape
-        print row,col,dim
+        #print row,col,dim
         if (row < 1) | (row < ratio_num):
             #print "ReMatch"
             re_dst_pts = np.float32([ kp2_xy[m] for m in range(len(kp2_xy)) ]).reshape(-1,1,2)
@@ -548,7 +548,7 @@ if __name__ == '__main__':
         with open('testdata/data.txt','r') as f:
             for line in f:
                 point.append(map(float,line.split(',')))
-            print point
+            #print point
         pt = point[0]
         #object top_left coordinate
         topleft_x = int(pt[0])
