@@ -12,6 +12,7 @@ import time
 import math
 
 MIN_MATCH_COUNT = 5
+MIN_MATCH = 15
 # Euclidean distance calculation
 def distance(p1, p2):
     l2 = (p1[0]-p2[0])*(p1[0]-p2[0]) + (p1[1]-p2[1])*(p1[1]-p2[1])
@@ -267,8 +268,8 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
 
     v1 = []
     s1 = []
-    temp = imgprocess(img1,0.1)
-    templatematch(img2,temp,v1,s1,[])
+    #temp = imgprocess(img1,0.1)
+    templatematch(img2,img1,v1,s1,[])
     c1 = s1[0]
 
    
@@ -298,7 +299,7 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
     if num1 <= num3:
         val2 = re_feature_similarity(kp1,des1,kp3,des3)
         #print "val: ", val2
-        if (((int (num1*5) <= num3) & (val2 == 0))) & (MIN_MATCH_COUNT < num1):
+        if (((int (num1*5) <= num3) & (val2 == 0))) & (MIN_MATCH < num1):
             return None
     #search and match the 
     FLANN_INDEX_KDTREE = 0
@@ -427,10 +428,14 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
                             #templatematch(rect_img,query_img,value,situ,center)
                             #print "final value 2: ", val
                             #print "final value2 2: ", val2
-                            if (value < 0.03) | (val2 < 0.5): #
+                            if (value < 0.03) | (val2 < 0.15): #
                                 return None
                 else:
-                    return None
+                    if ((0.9 < max) & (0.09 < num[k])):
+                        center_x = situ[k][0]
+                        center_y = situ[k][1]
+                    else:
+                        return None
             else:
                 center = []
                 value = []
