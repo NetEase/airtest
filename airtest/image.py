@@ -305,7 +305,7 @@ def _re_detectAndmatch(kp_num,kp2_xy,img1,img2,query_img,target_img,outfile):
                 max = value[i]
                 k = i
         print k, max, num[k]
-        if (0.2 < num[k]):
+        if (0.18 < num[k]):
             if (max <= 0.6) & (5 < kp_num):
                 center,value,situ = [],[],[]
                 templatematch(img2,temp,value,situ,center)
