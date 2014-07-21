@@ -428,7 +428,6 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
         # find the keypoints and descriptors with SIFT
         kp1, des1 = siftextract(img1)
         kp2, des2 = siftextract(img2)
-        h,w = img1.shape
         #print "h, w: ", h, w
         num1 = len(kp1)
         num2 = len(kp2)
@@ -436,6 +435,8 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
             return None
     except:
         return None
+    
+    h,w = img1.shape
     '''提前过滤，排除那些肯定不存在查询图片的测试图片'''
     v1 = []
     s1 = []
