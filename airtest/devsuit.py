@@ -53,6 +53,7 @@ def get_jsonlog(filename='log/airtest.log'):
 
 class DeviceSuit(object):
     def __init__(self, device, deviceType, serialno, appname=None):
+        print 'DEVSUIT_SERIALNO:', serialno
         self.dev = device(serialno)
         self.appname = appname
 
