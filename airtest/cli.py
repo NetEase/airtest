@@ -10,7 +10,7 @@ phone(android|iphone) autotest framework
 Usage:
     air.test (runtest|install|uninstall) [-p PLATFORM] [SERIALNO]
     air.test log2html [--listen] [--port=PORT] <HTMLDIR>
-    air.test snapshot [-p PLATFORM] [SERIALNO]
+    air.test snapshot [-p PLATFORM] [-r ROTATION] [SERIALNO]
     air.test all [--steps STEPS] [-H HTMLDIR] [-p PLATFORM] [SERIALNO]
     air.test update
 
@@ -21,6 +21,7 @@ Options:
     --steps STEPS   the steps one by one [default: install,runtest,log2html,uninstall]
     -H HTMLDIR      Save html report
     --port PORT     for log2html open a webserver to view report [default: 8888]
+    -r ROTATION     rotation of device, one of UP,DOWN,LEFT,RIGHT
 '''
 
 __version__ = '0.1.0702'
@@ -46,6 +47,7 @@ F = {} #json.load(open(jsonfile, 'r'))
 SUBPROCESS = []
 platform = 'android'
 serialno = None
+rotation = 'UP'
 
 def xpath(*paths):
     v=F
@@ -55,21 +57,28 @@ def xpath(*paths):
 
 def run_snapshot():
     global serialno
-    if not serialno:
+    if not serialno and platform=='android':
+        print F
         ds = airtest.getDevices()
         print ds
         if len(ds) == 1:
             serialno=ds[0][0]
         else:
             sys.exit("too many devices, don't know which you want")
-
+    assert serialno != None
     print 'snapshot', serialno
-    if platform == 'android':
-        c, _ = ViewClient.connectToDeviceOrExit(serialno=serialno)
-        c.takeSnapshot().save('screen.png')
-        print 'screenshot save to "screen.png"'
-    else:
-        print 'not supported:', platform
+    app = airtest.connect(serialno, device=platform)
+    app.globalSet(dict(tmpdir='.'))
+    print 'ROTATION:', rotation
+    app.globalSet(dict(rotation=rotation))
+    app.takeSnapshot('screen.png')
+    print 'screenshot save to "screen.png"'
+    #if platform == 'android':
+    #    c, _ = ViewClient.connectToDeviceOrExit(serialno=serialno)
+    #    c.takeSnapshot().save('screen.png')
+    #    print 'screenshot save to "screen.png"'
+    #else:
+    #    print 'not supported:', platform
 
 def run_install():
     if platform == 'android':
@@ -107,7 +116,7 @@ def run_update():
     exec_cmd('pip', 'install', '--upgrade', 'git+http://git.mt.nie.netease.com/hzsunshx/airtest.git')
 
 def main():
-    global F, platform, serialno
+    global F, platform, serialno, rotation
     arguments = docopt(__doc__, version='0.1')
 
     # set action
@@ -139,6 +148,7 @@ def main():
     # check phoneno and platform
     serialno = arguments['SERIALNO']
     platform = arguments.get('-p', 'android')
+    rotation = arguments.get('-r', 'UP')
     if platform == 'android' and not arguments.get('SERIALNO'):
         devices = [dev for dev in airtest.getDevices() if dev[1] != 'unknown']
         if len(devices) != 1:
@@ -150,7 +160,7 @@ def main():
 
     print 'PREPARE platform: %s' %(platform)
     print 'PREPARE serialno: %s' %(serialno)
-    exec_cmd('adb', 'start-server', timeout=10)
+    #exec_cmd('adb', 'start-server', timeout=10)
 
     #print arguments
     if not os.path.exists(cnf):

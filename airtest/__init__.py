@@ -15,6 +15,7 @@ from airtest import devsuit
 
 ANDROID = 'android'
 IOS = 'ios'
+WINDOWS='windows'
 SEPRATOR = '::'
 
 def connect(phoneno, appname=None, device='android'):
@@ -27,6 +28,9 @@ def connect(phoneno, appname=None, device='android'):
     elif device == IOS:
         from airtest.device import ios
         devClass = ios.Device
+    elif device == WINDOWS:
+        from airtest.device import windows
+        devClass = windows.Device
     else:
         raise RuntimeError('device type not recognize')
 
