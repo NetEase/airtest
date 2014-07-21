@@ -10,11 +10,12 @@ import math
 
 import numpy as np
 import cv2
+import os
 
 
 MIN_MATCH_COUNT = 5
 MIN_MATCH = 15
-Debug = True
+Debug = os.getenv('DEBUG') == 'true'
 
 # Euclidean distance calculation
 def distance(p1, p2):
