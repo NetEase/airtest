@@ -58,8 +58,12 @@ class DeviceSuit(object):
         self.appname = appname
 
         w, h = self.dev.shape()
-        self.width = min(w, h)
-        self.height = max(w, h)
+        if device != 'windows':
+            self.width = min(w, h)
+            self.height = max(w, h)
+        else:
+            self.width = w
+            self.width = h
 
         self._threshold = 0.3 # for findImage
         self._rotation = None # UP,DOWN,LEFT,RIGHT
@@ -91,6 +95,8 @@ class DeviceSuit(object):
         '''
         @return UP|RIGHT|DOWN|LEFT
         '''
+        if self._device == 'windows':
+            return 'UP'
         rotation = self._rotation
         if not rotation:
             (w, h) = self.dev.shape() # when rotate w > h
@@ -135,6 +141,8 @@ class DeviceSuit(object):
 
         filename = os.path.join(self._tmpdir, base.random_name(filename))
         self.dev.snapshot(filename)
+        if self._device == 'windows':
+            return filename
         rotation = self._getRotation()
         # the origin screenshot is UP, so need to rotate it here for human
         if rotation != 'UP':
