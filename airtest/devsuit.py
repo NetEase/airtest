@@ -108,11 +108,11 @@ class DeviceSuit(object):
             x = int(width*x)
         if isinstance(y, float) and y <= 1.0:
             y = int(height*y)
-        if self._device == 'ios' and rotation == 'RIGHT':
-            rotation = dict(RIGHT='LEFT',UP='UP',LEFT='RIGHT',DOWN='UP').get(rotation)
-            nx, ny = rotate_point((x, y), (width, height), rotation)
-            log.debug('rotation back(left-up): (%d, %d) -> (%d, %d)', x, y, nx, ny)
-            return (nx, ny)
+        #if self._device == 'ios' and rotation == 'RIGHT':
+        #    rotation = dict(RIGHT='LEFT',UP='UP',LEFT='RIGHT',DOWN='UP').get(rotation)
+        #    nx, ny = rotate_point((x, y), (width, height), rotation)
+        #    log.debug('rotation back(left-up): (%d, %d) -> (%d, %d)', x, y, nx, ny)
+        #    return (nx, ny)
         return (x, y)
 
     def _PS2Point(self, PS):
