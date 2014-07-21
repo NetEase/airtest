@@ -355,6 +355,7 @@ def _re_detectAndmatch(kp_num, kp2_xy, img1, img2, query_img, target_img, outfil
                     rect_img2 = copyimg((center_x, center_y), w, h, img2, 2)
                     val = hist_similarity(rect_img, query_img)
                     val2 = feature_similarity(rect_img2, img1)
+                    print val, val2
                     if (val < 0.03) | (val2 < 0.15):  #
                         return None
         else:
@@ -374,13 +375,14 @@ def _re_detectAndmatch(kp_num, kp2_xy, img1, img2, query_img, target_img, outfil
             center_y = situ[0][1]
     top_x = int(center_x - w / 2)
     top_y = int(center_y - h / 2)
+    print top_x, top_y
     if (top_x < 0) | (top_y < 0):
         return None
     if outfile:
-        cv2.rectangle(target_img, (int(center_x - w / 2), int(center_y - h / 2)),
-                      (int(center_x + w / 2), int(center_y + h / 2)), (0, 0, 255), 1, 0)
+        cv2.rectangle(target_img, (int(center_x - w / 2), int(center_y - h / 2)),(int(center_x + w / 2), int(center_y + h / 2)), (0, 0, 255), 1, 0)
         cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
         cv2.imwrite(outfile, target_img)
+    print [center_x, center_y]
     return [center_x, center_y]
 
 
@@ -483,8 +485,9 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
     if num1 <= num3:
         val2 = re_feature_similarity(kp1, des1, kp3, des3)
         #print "val: ", val2
-        if ((int(num1 * 5) <= num3) & (float(val2) == 0.0) & (MIN_MATCH < num1):
-            return None
+        if (int(num1*5) <= num3) and (MIN_MATCH < num1):
+            if (val2 == 0.0): 
+                return None
     ratio_num = int(num1 * 0.1)
     '''store all the good matches as per Lowe's ratio test.'''
     matches = _search(des1, des2)
@@ -502,6 +505,7 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
         row, col, dim = dst_pts.shape
         if (row < 1) | (row < ratio_num) | ((row == 1) & (ratio_num == 1)):
             center = _re_detectAndmatch(num1, kp2_xy, img1, img2, query_img, target_img, outfile)
+            print center
             return center
         list_x, list_y = [], []
         for i in range(row):
