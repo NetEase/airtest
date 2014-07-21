@@ -37,3 +37,4 @@ nosetests.xml
 tmp/
 log/
 *.log
+test/match.png

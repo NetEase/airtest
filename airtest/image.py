@@ -483,7 +483,7 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
     if num1 <= num3:
         val2 = re_feature_similarity(kp1, des1, kp3, des3)
         #print "val: ", val2
-        if (int(num1 * 5) <= num3 & val2 == 0) & (MIN_MATCH < num1):
+        if (int(num1 * 5) <= num3 and int(val2) == 0) and (MIN_MATCH < num1):
             return None
     ratio_num = int(num1 * 0.1)
     '''store all the good matches as per Lowe's ratio test.'''
