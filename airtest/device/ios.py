@@ -48,15 +48,15 @@ class Device(object):
         )
         self.start()
 
-    def start():
+    def start(self):
         self.driver.launch_app()
         self._getShapeReal()
         self._getShapeInput()
 
-    def stop():
+    def stop(self):
         self.driver.close_app()
 
-    def clear():
+    def clear(self):
         self.stop()
 
     def snapshot(self, filename):
