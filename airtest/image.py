@@ -14,7 +14,7 @@ import cv2
 
 MIN_MATCH_COUNT = 5
 MIN_MATCH = 15
-
+Debug = True
 
 # Euclidean distance calculation
 def distance(p1, p2):
@@ -333,7 +333,8 @@ def _re_detectAndmatch(kp_num, kp2_xy, img1, img2, query_img, target_img, outfil
             if max < value[i]:
                 max = value[i]
                 k = i
-        print k, max, num[k]
+        if Debug:
+            print k, max, num[k]
         if (0.18 < num[k]):
             if (max <= 0.6) & (5 < kp_num):
                 center, value, situ = [], [], []
@@ -382,7 +383,6 @@ def _re_detectAndmatch(kp_num, kp2_xy, img1, img2, query_img, target_img, outfil
         cv2.rectangle(target_img, (int(center_x - w / 2), int(center_y - h / 2)),(int(center_x + w / 2), int(center_y + h / 2)), (0, 0, 255), 1, 0)
         cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
         cv2.imwrite(outfile, target_img)
-    print [center_x, center_y]
     return [center_x, center_y]
 
 
@@ -465,7 +465,6 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
         # find the keypoints and descriptors with SIFT
         kp1, des1 = siftextract(img1)
         kp2, des2 = siftextract(img2)
-        #print "h, w: ", h, w
         num1 = len(kp1)
         num2 = len(kp2)
         if num2 < num1:
@@ -484,52 +483,58 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
     num3 = len(kp3)
     if num1 <= num3:
         val2 = re_feature_similarity(kp1, des1, kp3, des3)
-        #print "val: ", val2
+        if Debug:
+            print "val: ", val2
         if (int(num1*5) <= num3) and (MIN_MATCH < num1):
             if (val2 == 0.0): 
                 return None
     ratio_num = int(num1 * 0.1)
     '''store all the good matches as per Lowe's ratio test.'''
     matches = _search(des1, des2)
-    good = []
-    kp2_xy = []
+    good,kp2_xy = [],[]
     for m, n in matches:
         kp2_xy.append(kp2[m.trainIdx].pt)
         if m.distance < threshold * n.distance:  # threshold = 0.7
             good.append(m)
     if len(good) > MIN_MATCH_COUNT:  #good matches的数量超过给定阈值，则进行Homography
         center = _homography_match(h, w, kp1, kp2, good, target_img, outfile)
+        if Debug:
+            print "center: ",center
         return center
     else:
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
         row, col, dim = dst_pts.shape
         if (row < 1) | (row < ratio_num) | ((row == 1) & (ratio_num == 1)):
             center = _re_detectAndmatch(num1, kp2_xy, img1, img2, query_img, target_img, outfile)
-            print center
+            if Debug:
+                print "center: ",center
             return center
-        list_x, list_y = [], []
-        for i in range(row):
-            x = dst_pts[i][col - 1][dim - 2]
-            y = dst_pts[i][col - 1][dim - 1]
-            list_x.append(int(x))
-            list_y.append(int(y))
-            cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
-        rcenter_x, rcenter_y, rcount = _refine_center(list_x, list_y)
-        if rcount < 1:
-            return None
         else:
-            center_x = int(rcenter_x / rcount)
-            center_y = int(rcenter_y / rcount)
-            top_x = int(center_x - w / 2)
-            top_y = int(center_y - h / 2)
-            if (top_x < 0) & (top_y < 0):
+            list_x, list_y = [], []
+            for i in range(row):
+                x = dst_pts[i][col - 1][dim - 2]
+                y = dst_pts[i][col - 1][dim - 1]
+                list_x.append(int(x))
+                list_y.append(int(y))
+                cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
+            rcenter_x, rcenter_y, rcount = _refine_center(list_x, list_y)
+            if rcount < 1:
                 return None
-            if outfile:
-                cv2.rectangle(target_img, (int(center_x - w / 2), int(center_y - h / 2)),
+            else:
+                center_x = int(rcenter_x / rcount)
+                center_y = int(rcenter_y / rcount)
+                top_x = int(center_x - w / 2)
+                top_y = int(center_y - h / 2)
+                if (top_x < 0) & (top_y < 0):
+                    return None
+                if outfile:
+                    cv2.rectangle(target_img, (int(center_x - w / 2), int(center_y - h / 2)),
                               (int(center_x + w / 2), int(center_y + h / 2)), (0, 0, 255), 1, 0)
-                cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
-                cv2.imwrite(outfile, target_img)
-            return [center_x, center_y]
+                    cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
+                    cv2.imwrite(outfile, target_img)
+                if Debug:
+                    print "center: ",[center_x, center_y]
+                return [center_x, center_y]
 
 
 if __name__ == '__main__':
