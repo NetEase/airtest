@@ -137,13 +137,13 @@ def main():
         return globals().get('run_'+action)()
 
     # check phoneno and platform
-    if not arguments.get('SERIALNO'):
+    serialno = arguments['SERIALNO']
+    platform = arguments.get('-p', 'android')
+    if platform == 'android' and not arguments.get('SERIALNO'):
         devices = [dev for dev in airtest.getDevices() if dev[1] != 'unknown']
         if len(devices) != 1:
             sys.exit("can't determine which devices to use, please run: 'adb devices'")
         arguments['SERIALNO'] = devices[0][0]
-    serialno = arguments['SERIALNO']
-    platform = arguments.get('-p', 'android')
 
     if action in ['snapshot']:
         return globals().get('run_'+action)()
