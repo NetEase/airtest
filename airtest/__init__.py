@@ -5,6 +5,8 @@
 #
 #__all__=['devsuit', 'android', 'image', 'base', 'patch', 'ios', 'device']
 
+__version__ = '0.2.0721'
+
 import subprocess
 
 from airtest import device
