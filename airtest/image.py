@@ -250,7 +250,7 @@ def _search(des1,des2):
     matches = flann.knnMatch(des1,des2,k=2)
     return matches
 # SIFT + Homography
-def _homography_match(kp1,kp2,good,target_img,outfile):
+def _homography_match(h,w,kp1,kp2,good,target_img,outfile):
     src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
     dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
     #origin_img match keypoints
@@ -261,7 +261,7 @@ def _homography_match(kp1,kp2,good,target_img,outfile):
         x = dst_pts[i][c-1][d-2]
         y = dst_pts[i][c-1][d-1]
         cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
-    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)#最少需要4个match点
     pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
     dst = cv2.perspectiveTransform(pts,M) #找到一个变换矩阵，从查询图片映射到检测图片
     row,col,dim = dst.shape
@@ -428,7 +428,6 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
         # find the keypoints and descriptors with SIFT
         kp1, des1 = siftextract(img1)
         kp2, des2 = siftextract(img2)
-        h,w = img1.shape
         #print "h, w: ", h, w
         num1 = len(kp1)
         num2 = len(kp2)
@@ -436,6 +435,8 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
             return None
     except:
         return None
+    
+    h,w = img1.shape
     '''提前过滤，排除那些肯定不存在查询图片的测试图片'''
     v1 = []
     s1 = []
@@ -459,7 +460,8 @@ def locate_one_image(origin='origin.png',query='query.png',outfile='match.png',t
         if m.distance < threshold*n.distance: # threshold = 0.7
             good.append(m)
     if (len(good) > MIN_MATCH_COUNT): #good matches的数量超过给定阈值，则进行Homography
-        _homography_match(kp1,kp2,good,target_img,outfile)
+        center = _homography_match(h,w,kp1,kp2,good,target_img,outfile)
+        return center
     else:
         dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
         row,col,dim = dst_pts.shape

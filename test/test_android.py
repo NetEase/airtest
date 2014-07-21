@@ -14,4 +14,4 @@ def test_android_getsysinfo():
         phoneNo, phoneType = devs[0]
     print phoneNo
     app = airtest.connect(phoneNo, device='android')
-    print app.dev.getsysinfo()
+    print app.dev.getdevinfo()
