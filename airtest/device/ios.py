@@ -46,7 +46,7 @@ class Device(object):
                 'autoLaunch': False
             }
         )
-       self.start()
+        self.start()
 
     def start():
         self.driver.launch_app()
