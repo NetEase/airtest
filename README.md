@@ -6,6 +6,7 @@ AirTest PoPo Discuss Group: **1275211**
 
 成功也好，失败也好，或者只想吐槽，欢迎直接反馈到群里。
 
+[![Build Status](http://jenkins.mt.nie.netease.com/job/airtest_selftest/badge/icon)](http://jenkins.mt.nie.netease.com/job/airtest_selftest/)
 
 ### For windows: 
 Windows need python2.7 32bit.
