@@ -40,11 +40,23 @@ class Device(object):
         self.driver = webdriver.Remote(
             command_executor=self.url,
             desired_capabilities={
-                'platformName': 'iOS'
+                'platformName': 'iOS',
+                # after appium 1.2.0, deviceName is required
+                'deviceName': 'ios device',
+                'autoLaunch': False
             }
         )
+
+    def start():
+        self.driver.launch_app()
         self._getShapeReal()
         self._getShapeInput()
+
+    def stop():
+        self.driver.close_app()
+
+    def clear():
+        self.stop()
 
     def snapshot(self, filename):
         ''' save screen snapshot '''
