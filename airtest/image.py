@@ -18,7 +18,7 @@ MIN_MATCH = 15
 <<<<<<< HEAD
 DEBUG = True
 =======
-DeBUG = os.getenv('DEBUG') == 'true'
+DEBUG = os.getenv('DEBUG') == 'true'
 >>>>>>> 2add9f871df9b6aff46356b6f2a2c0c6c58bc6a6
 
 # Euclidean distance calculation
