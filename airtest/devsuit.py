@@ -53,12 +53,17 @@ def get_jsonlog(filename='log/airtest.log'):
 
 class DeviceSuit(object):
     def __init__(self, device, deviceType, serialno, appname=None):
+        print 'DEVSUIT_SERIALNO:', serialno
         self.dev = device(serialno)
         self.appname = appname
 
         w, h = self.dev.shape()
-        self.width = min(w, h)
-        self.height = max(w, h)
+        if device != 'windows':
+            self.width = min(w, h)
+            self.height = max(w, h)
+        else:
+            self.width = w
+            self.width = h
 
         self._threshold = 0.3 # for findImage
         self._rotation = None # UP,DOWN,LEFT,RIGHT
@@ -90,6 +95,8 @@ class DeviceSuit(object):
         '''
         @return UP|RIGHT|DOWN|LEFT
         '''
+        if self._device == 'windows':
+            return 'UP'
         rotation = self._rotation
         if not rotation:
             (w, h) = self.dev.shape() # when rotate w > h
@@ -108,11 +115,11 @@ class DeviceSuit(object):
             x = int(width*x)
         if isinstance(y, float) and y <= 1.0:
             y = int(height*y)
-        if self._device == 'ios' and rotation == 'RIGHT':
-            rotation = dict(RIGHT='LEFT',UP='UP',LEFT='RIGHT',DOWN='UP').get(rotation)
-            nx, ny = rotate_point((x, y), (width, height), rotation)
-            log.debug('rotation back(left-up): (%d, %d) -> (%d, %d)', x, y, nx, ny)
-            return (nx, ny)
+        #if self._device == 'ios' and rotation == 'RIGHT':
+        #    rotation = dict(RIGHT='LEFT',UP='UP',LEFT='RIGHT',DOWN='UP').get(rotation)
+        #    nx, ny = rotate_point((x, y), (width, height), rotation)
+        #    log.debug('rotation back(left-up): (%d, %d) -> (%d, %d)', x, y, nx, ny)
+        #    return (nx, ny)
         return (x, y)
 
     def _PS2Point(self, PS):
@@ -134,6 +141,8 @@ class DeviceSuit(object):
 
         filename = os.path.join(self._tmpdir, base.random_name(filename))
         self.dev.snapshot(filename)
+        if self._device == 'windows':
+            return filename
         rotation = self._getRotation()
         # the origin screenshot is UP, so need to rotate it here for human
         if rotation != 'UP':

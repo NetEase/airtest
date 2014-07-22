@@ -46,16 +46,25 @@ class Device(object):
                 'autoLaunch': False
             }
         )
+        self._scale = None
+        self.start()
+        self._init()
 
-    def start():
+    def _init(self):
+        rw, rh = self._getShapeReal()
+        w, h = self._getShapeInput()
+        w, h = min(w, h), max(w, h)
+        print (rw, rh), (w, h)
+        self._scale = float(w)/rw
+        print 'SCALE:', self._scale
+
+    def start(self):
         self.driver.launch_app()
-        self._getShapeReal()
-        self._getShapeInput()
 
-    def stop():
+    def stop(self):
         self.driver.close_app()
 
-    def clear():
+    def clear(self):
         self.stop()
 
     def snapshot(self, filename):
@@ -67,8 +76,8 @@ class Device(object):
 
     def _cvtXY(self, x, y):
         """convert x,y from device real resolution to action input resolution"""
-        x_input = x * self.width / self.width_real
-        y_input = y * self.height / self.height_real
+        x_input = x * self._scale #self.width / self.width_real
+        y_input = y * self._scale #self.height / self.height_real
         log.debug("cvt %s,%s to %s,%s" % (x, y, x_input, y_input))
         return (int(x_input), int(y_input))
 
@@ -116,7 +125,8 @@ class Device(object):
         ''' 
         Get screen width and height 
         '''
-        return (self.width_real, self.height_real)
+        return map(int, [p/self._scale for p in self._getShapeInput()])
+        #return (self.width_real, self.height_real)
 
     def type(self, text):
         '''

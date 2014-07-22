@@ -32,33 +32,6 @@ def fuckit(fn):
             return None
     return decorator
 
-def record(jlog=None):
-    ''' decorator for class '''
-    if not jlog:
-        print 'WARN: no log specfied'
-
-    #jlog = jsonlog.JSONLog(logfile)
-    #logfd = open(logfile, 'w')
-    def wrapper(cls):
-        class NewClass(cls):
-            def __getattribute__(self, name):
-                obj = super(NewClass, self).__getattribute__(name)
-                if callable(obj):
-                    if obj.__name__.startswith('_'):
-                        return obj
-                    print 'record:', name
-                    def func_wrapper(*args, **kwargs):
-                        jlog.writeline({'type':'func', 'function': name, 'args': args, 'kwargs': kwargs})
-                        return obj(*args, **kwargs)
-
-                        #print >>logfd, json.dumps({'timestamp': int(time.time()), {'function': name, 'args': args, 'kwargs': kwargs})
-                        #logfd.flush()
-                    func_wrapper.__doc__ = obj.__doc__ # keep the doc
-                    return func_wrapper
-                return obj
-        return NewClass
-    return wrapper
-
 def go(fn):
     '''
     Decorator
