@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-2014/07/20 jiaqianghuai: 代码注释
+2014/07/22 jiaqianghuai: 修改代码，提高识别速度
 '''
 
 __author__ = 'hzjiaqianghuai,hzsunshx'
@@ -14,7 +14,7 @@ import cv2
 
 MIN_MATCH_COUNT = 5
 MIN_MATCH = 15
-Debug = True
+DEBUG = True
 
 # Euclidean distance calculation
 def distance(p1, p2):
@@ -86,7 +86,8 @@ def feature_similarity(img1, img2):
         kpnum = kpnum1
     else:
         kpnum = kpnum2
-    #print kpnum
+    #if DEBUG:
+        #print "match num: ", kpnum
     if kpnum <= 0:
         retal = 0.0
         return retal
@@ -103,9 +104,10 @@ def feature_similarity(img1, img2):
         if m.distance < 0.7 * n.distance:
             good.append(m)
     kpnum_good = float(len(good))
-    #print "Good Num: ", kpnum_good
+    #if DEBUG:
+        #print "Good Num: ", kpnum_good
     retal = kpnum_good / kpnum
-    return retal
+    return retal,kpnum_good
 
 
 def re_feature_similarity(kp1, des1, kp2, des2):
@@ -273,9 +275,8 @@ def _search(des1, des2):
     matches = flann.knnMatch(des1, des2, k=2)
     return matches
 
-
 # SIFT + Homography
-def _homography_match(h, w, kp1, kp2, good, target_img, outfile):
+def _homography_match(h, w, kp1, kp2, good,img1,img2,target_img, outfile):
     src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
     dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
     #origin_img match keypoints
@@ -295,35 +296,47 @@ def _homography_match(h, w, kp1, kp2, good, target_img, outfile):
     center = [0, 0]
     count = 0
     for i in range(row):
-        if (int(dst[i][col - 1][0]) <= target_img.shape[1]) & (0 <= dst[i][col - 1][0]) & (
-                    int(dst[i][col - 1][1]) <= target_img.shape[0]) & (0 <= dst[i][col - 1][1]):
+        if (int(dst[i][col - 1][0]) <= target_img.shape[1]) & (0 <= int(dst[i][col - 1][0])) & (
+                    int(dst[i][col - 1][1]) <= target_img.shape[0]) & (0 <= int(dst[i][col - 1][1])): #表达式需要修改
             center += dst[i][col - 1]
             count += 1
             cv2.circle(target_img, (dst[i][col - 1][0], dst[i][col - 1][1]), 2, (255, 0, 255), -1)
-    if ((count < 1) | (count <= int(row * 0.5))):  #仿射变换得到的四个坐标，如果至少有两个坐标不在检测图片区域，说明匹配不成功
+    if ((count < 1) | (count < int(row * 0.5))):  #仿射变换得到的四个坐标，如果至少有两个坐标不在检测图片区域，说明匹配不成功
         return None
     else:
         center_x = int(center[0] / count)
         center_y = int(center[1] / count)
-        if outfile:
-            cv2.rectangle(target_img, (int(center_x - w / 2), int(center_y - h / 2)),
-                          (int(center_x + w / 2), int(center_y + h / 2)), (0, 0, 255), 1, 0)
-            cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
-            cv2.imwrite(outfile, target_img)
-        return [center_x, center_y]
+        rect_img = copyimg((center_x,center_y),w,h,img2,2) ######
+        value,kp_num = feature_similarity(rect_img,img1) #######
+        if DEBUG:
+            print "feature_match value: ", value
+            print "kp_num: ", kp_num
+        if (value > 0.34) | ((kp_num <= 11) & (len(kp1) <= (20*kp_num))) | (20 < kp_num):
+            if outfile:
+                cv2.rectangle(target_img,(int(center_x-w/2),int(center_y-h/2)),(int(center_x+w/2),int(center_y+h/2)),(0,0,255),1,0)
+                cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
+                cv2.imwrite(outfile,target_img)
+            #print "center point: ", center_x, center_y
+            return [center_x, center_y]
+        else:
+            return None
 
 
-def _re_detectAndmatch(kp_num, kp2_xy, img1, img2, query_img, target_img, outfile):
+def _re_detectAndmatch(kp1,des1,kp2,des2,val1,val2,disp,kp2_xy, img1, img2, query_img, target_img, outfile):
     h, w = img1.shape
     re_dst_pts = np.float32([kp2_xy[m] for m in range(len(kp2_xy))]).reshape(-1, 1, 2)
     re_r, re_c, re_d = re_dst_pts.shape
+    if DEBUG:
+        print "re_r: ", re_r
+    num1 = len(kp1)
+    num2 = len(kp2)
     temp = imgprocess(img1, 0.1)
-    if re_r:
+    if (re_r < 35):
         value, situ, num = [], [], []
         for i in range(re_r):
             center = re_dst_pts[i][re_c - 1]
             rect_img = copyimg(center, w, h, img2, 2)
-            tp = feature_similarity(rect_img, img1)
+            tp,default = feature_similarity(rect_img, img1)
             num.append(tp)
             templatematch(rect_img, temp, value, situ, center)
         max = value[re_r - 1]
@@ -333,10 +346,10 @@ def _re_detectAndmatch(kp_num, kp2_xy, img1, img2, query_img, target_img, outfil
             if max < value[i]:
                 max = value[i]
                 k = i
-        if Debug:
+        if DEBUG:
             print k, max, num[k]
         if (0.18 < num[k]):
-            if (max <= 0.6) & (5 < kp_num):
+            if (max <= 0.6) & (5 < num1):
                 center, value, situ = [], [], []
                 templatematch(img2, temp, value, situ, center)
                 if value[0] < 0.7:  #template similarity
@@ -355,8 +368,8 @@ def _re_detectAndmatch(kp_num, kp2_xy, img1, img2, query_img, target_img, outfil
                     rect_img = copyimg((center_x, center_y), w, h, target_img, 1)
                     rect_img2 = copyimg((center_x, center_y), w, h, img2, 2)
                     val = hist_similarity(rect_img, query_img)
-                    val2 = feature_similarity(rect_img2, img1)
-                    print val, val2
+                    val2,default = feature_similarity(rect_img2, img1)
+                    #print val, val2
                     if (val < 0.03) | (val2 < 0.15):  #
                         return None
         else:
@@ -366,17 +379,30 @@ def _re_detectAndmatch(kp_num, kp2_xy, img1, img2, query_img, target_img, outfil
             else:
                 return None
     else:
-        center, value, situ = [], [], []
-        templatematch(img2, temp, value, situ, center)
-        #print "value", value
-        if value[0] < 0.7:  #template similarity
+        #center, value, situ = [], [], []
+        #templatematch(img2, temp, value, situ, center)
+
+        #print "value 1", val1
+        #print "value 2", val2
+        if (num1 <= num2):
+            if(val2 <= 0.15):
+                return None
+        else:
+            if (num2 < 2):
+                return None
+            else: 
+                val = re_feature_similarity(kp1,des1,kp2,des2)
+                #print "val: ", val
+                if (val <= 0.4):  ####0.15
+                    return None
+        if (val1[0] < 0.7) | ((num2*10) < num1):  #template similarity
             return None
         else:
-            center_x = situ[0][0]
-            center_y = situ[0][1]
+            center_x = disp[0]
+            center_y = disp[1]
     top_x = int(center_x - w / 2)
     top_y = int(center_y - h / 2)
-    print top_x, top_y
+    #print top_x, top_y
     if (top_x < 0) | (top_y < 0):
         return None
     if outfile:
@@ -386,7 +412,7 @@ def _re_detectAndmatch(kp_num, kp2_xy, img1, img2, query_img, target_img, outfil
     return [center_x, center_y]
 
 
-def _refine_center(list_x, list_y):
+def _refine_center(list_x, list_y,w,h):
     center_sum_x, center_sum_y, count = 0, 0, 0
     #duplicate removal
     rlist_x = reremove(list_x)
@@ -413,7 +439,8 @@ def _refine_center(list_x, list_y):
     center_y = int(center_sum_y / count)
     temp = [center_x, center_y]
     dist = []
-    max, rcount = 0, 0
+    index = []
+    max, rcount,rcount1 = 0, 0, 0
     rcenter = [0, 0]
     for i in range(count):
         #dis = abs(center_x-rlist_x[i])+abs(center_y-rlist_y[i])
@@ -426,15 +453,32 @@ def _refine_center(list_x, list_y):
             rcenter[0] += x_list[i]
             rcenter[1] += y_list[i]
             rcount += 1
+            index.append(i)
         else:
             if dist[i] < max:
                 rcenter[0] += x_list[i]
                 rcenter[1] += y_list[i]
                 rcount += 1
-    return rcenter[0], rcenter[1], rcount
+                index.append(i)
+    if rcount < 1:
+        return None
+    else:
+        x = int(rcenter[0]/rcount)
+        y = int(rcenter[1]/rcount)
+    length = len(index)
+    #print "w,h: ",w, h
+    for i in range(length):
+        #print abs(x-x_list[index[i]])
+        #print abs(y-y_list[index[i]])
+        if (int(1.5*w) < (abs(x-x_list[index[i]]))) | (int(1.5*h) < (abs(y-y_list[index[i]]))):
+            rcount1 = rcount1+1
+    if rcount1 == rcount:
+        return None
+    else:
+        return [x,y]
 
 
-def locate_image(orig, quer, outfile='debug.png', threshold=0.3):
+def locate_image(orig, quer, outfile='DEBUG.png', threshold=0.3):
     pt = locate_one_image(orig, quer, outfile, threshold)
     if pt:
         return [pt]
@@ -464,11 +508,7 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
     try:
         # find the keypoints and descriptors with SIFT
         kp1, des1 = siftextract(img1)
-        kp2, des2 = siftextract(img2)
         num1 = len(kp1)
-        num2 = len(kp2)
-        if num2 < num1:
-            return None
     except:
         return None
 
@@ -481,13 +521,24 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
     rect = copyimg((c1[0], c1[1]), w, h, img2, 2)  #复制潜在匹配区域
     kp3, des3 = siftextract(rect)
     num3 = len(kp3)
+    val2 = 1.0
     if num1 <= num3:
         val2 = re_feature_similarity(kp1, des1, kp3, des3)
-        if Debug:
+        if DEBUG:
             print "val: ", val2
-        if (int(num1*5) <= num3) and (MIN_MATCH < num1):
+        if (int(num1*10) <= num3) and (MIN_MATCH < num1):
             if (val2 == 0.0): 
                 return None
+    if num3 == 0:
+        return None
+    try:
+        # find the keypoints and descriptors with SIFT
+        kp2, des2 = siftextract(img2)
+        num2 = len(kp2)
+        if num2 < num1:
+            return None
+    except:
+        return None
     ratio_num = int(num1 * 0.1)
     '''store all the good matches as per Lowe's ratio test.'''
     matches = _search(des1, des2)
@@ -497,16 +548,18 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
         if m.distance < threshold * n.distance:  # threshold = 0.7
             good.append(m)
     if len(good) > MIN_MATCH_COUNT:  #good matches的数量超过给定阈值，则进行Homography
-        center = _homography_match(h, w, kp1, kp2, good, target_img, outfile)
-        if Debug:
+        #print "Good"
+        center = _homography_match(h, w, kp1, kp2, good, img1,img2,target_img, outfile)
+        if DEBUG:
             print "center: ",center
         return center
     else:
+        #print "bad"
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
         row, col, dim = dst_pts.shape
         if (row < 1) | (row < ratio_num) | ((row == 1) & (ratio_num == 1)):
-            center = _re_detectAndmatch(num1, kp2_xy, img1, img2, query_img, target_img, outfile)
-            if Debug:
+            center = _re_detectAndmatch(kp1,des1,kp3,des3,v1,val2,c1,kp2_xy, img1, img2, query_img, target_img, outfile)
+            if DEBUG:
                 print "center: ",center
             return center
         else:
@@ -517,12 +570,10 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
                 list_x.append(int(x))
                 list_y.append(int(y))
                 cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
-            rcenter_x, rcenter_y, rcount = _refine_center(list_x, list_y)
-            if rcount < 1:
-                return None
-            else:
-                center_x = int(rcenter_x / rcount)
-                center_y = int(rcenter_y / rcount)
+            newcenter = _refine_center(list_x, list_y,w,h)
+            if newcenter:
+                center_x = newcenter[0]
+                center_y = newcenter[1]
                 top_x = int(center_x - w / 2)
                 top_y = int(center_y - h / 2)
                 if (top_x < 0) & (top_y < 0):
@@ -532,14 +583,14 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
                               (int(center_x + w / 2), int(center_y + h / 2)), (0, 0, 255), 1, 0)
                     cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
                     cv2.imwrite(outfile, target_img)
-                if Debug:
+                if DEBUG:
                     print "center: ",[center_x, center_y]
                 return [center_x, center_y]
 
 
 if __name__ == '__main__':
     starttime = time.clock()
-    pts = locate_image('testdata/target.png', 'testdata/query.png', 'testdata/debug.png', 0.3)
+    pts = locate_image('testdata/target.png', 'testdata/query.png', 'testdata/DEBUG.png', 0.3)
     endtime = time.clock()
     print "time: ", endtime - starttime
     print "center point: ", pts
