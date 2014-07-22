@@ -131,26 +131,38 @@ class Device():
         if self.HWND==0:
             raise Exception(u'目标窗口不存在')
         
+    def _range(self):
+        ''' Get Windows rectangle position '''
+        rect = RECT()
+        ctypes.windll.user32.GetWindowRect(self.HWND,ctypes.byref(rect))
+        range_ = (rect.left+2,rect.top+2,rect.right-2,rect.bottom-2)
+        return range_
+
+    def _resetpt(self, x, y):
+        left, top, _, _ = self._range()
+        x, y = left+x, top+y
+        return x, y
+
     def snapshot(self, filename=None ):
         ''' Capture device screen '''
         '''WinName is the window name of the target program'''
-        rect = RECT()
-        ctypes.windll.user32.GetWindowRect(self.HWND,ctypes.byref(rect))
-        rangle = (rect.left+2,rect.top+2,rect.right-2,rect.bottom-2)
-        pic = ImageGrab.grab(rangle)
+        range_ = self._range()
+        pic = ImageGrab.grab(range_)
         if filename !=None:
             pic.save(filename)
         return pic
         
     def touch(self, x, y):
         ''' Simulate touch '''
+        x, y = self._resetpt(x, y)
         win32api.SetCursorPos((x,y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
         
- 
     def drag(self, (x1, y1), (x2, y2), duration=0.5):
         ''' Simulate drag '''
+        x1, y1 = self._resetpt(x1, y1)
+        x2, y2 = self._resetpt(x2, y2)
         win32api.SetCursorPos((x1, y1))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
         autopy.mouse.smooth_move(x2, y2)
@@ -217,7 +229,7 @@ class Device():
         return rect.left,rect.top,rect.right,rect.bottom
     
     def start(self, appname, extra={}):
-        '''Start an app'''
+        '''Start an app, TODO(not good now)'''
         Path = extra.get('path')
         os.system('cd '+Path+' && '+'start '+appname)
         
@@ -228,7 +240,6 @@ class Device():
         ''' Return cpu: float (Cpu usage for app) '''
         return 0
         
- 
     def getMem(self, appname):
         ''' Return mem: float (unit MB, memory usage for app) '''
         return 0
