@@ -12,7 +12,6 @@ import numpy as np
 import cv2
 import os
 
-
 MIN_MATCH_COUNT = 5
 MIN_MATCH = 15
 DEBUG = os.getenv('DEBUG') == 'true'
@@ -312,7 +311,7 @@ def _homography_match(h, w, kp1, kp2, good,img1,img2,target_img, outfile):
         if DEBUG:
             print "feature_match value: ", value
             print "kp_num: ", kp_num
-        if (value >= 0.4) | ((kp_num <= 14) & (0.34 < value)) | (35 < kp_num):
+        if (value >= 0.4) | ((kp_num <= 14) & (0.34 < value)) | (35 < kp_num) | ((kp_num <= 5) & (len(kp1) <= (20*kp_num))):
             if outfile:
                 cv2.rectangle(target_img,(int(center_x-w/2),int(center_y-h/2)),(int(center_x+w/2),int(center_y+h/2)),(0,0,255),1,0)
                 cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
