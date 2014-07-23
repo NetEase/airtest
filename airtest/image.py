@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-2014/07/22 jiaqianghuai: 修改代码，提高识别速度
+2014/07/23 jiaqianghuai: fix the code
 '''
 
 __author__ = 'hzjiaqianghuai,hzsunshx'
@@ -10,16 +10,11 @@ import math
 
 import numpy as np
 import cv2
-import os
 
 
 MIN_MATCH_COUNT = 5
 MIN_MATCH = 15
-<<<<<<< HEAD
-DEBUG = True
-=======
 DEBUG = os.getenv('DEBUG') == 'true'
->>>>>>> 2add9f871df9b6aff46356b6f2a2c0c6c58bc6a6
 
 # Euclidean distance calculation
 def distance(p1, p2):
@@ -91,8 +86,8 @@ def feature_similarity(img1, img2):
         kpnum = kpnum1
     else:
         kpnum = kpnum2
-    #if DEBUG:
-        #print "match num: ", kpnum
+    if DEBUG:
+        print "match num: ", kpnum
     if kpnum <= 0:
         retal = 0.0
         return retal
@@ -109,8 +104,8 @@ def feature_similarity(img1, img2):
         if m.distance < 0.7 * n.distance:
             good.append(m)
     kpnum_good = float(len(good))
-    #if DEBUG:
-        #print "Good Num: ", kpnum_good
+    if DEBUG:
+        print "Good Num: ", kpnum_good
     retal = kpnum_good / kpnum
     return retal,kpnum_good
 
@@ -316,7 +311,7 @@ def _homography_match(h, w, kp1, kp2, good,img1,img2,target_img, outfile):
         if DEBUG:
             print "feature_match value: ", value
             print "kp_num: ", kp_num
-        if (value > 0.34) | ((kp_num <= 11) & (len(kp1) <= (20*kp_num))) | (20 < kp_num):
+        if (value >= 0.4) | ((kp_num <= 14) & (0.34 < value)) | (35 < kp_num):
             if outfile:
                 cv2.rectangle(target_img,(int(center_x-w/2),int(center_y-h/2)),(int(center_x+w/2),int(center_y+h/2)),(0,0,255),1,0)
                 cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
@@ -324,7 +319,20 @@ def _homography_match(h, w, kp1, kp2, good,img1,img2,target_img, outfile):
             #print "center point: ", center_x, center_y
             return [center_x, center_y]
         else:
-            return None
+            rect_img2 = copyimg((center_x,center_y),h,w,img2,2) ######
+            value2,kp_num2 = feature_similarity(rect_img2,img1) #######
+            if DEBUG:
+                print "feature_match value 2: ", value2
+                print "kp_num 2: ", kp_num2
+            if ((0.32 < value2) | (35 < kp_num)) & (value < value2) & (kp_num < kp_num2):
+                if outfile:
+                    cv2.rectangle(target_img,(int(center_x-h/2),int(center_y-w/2)),(int(center_x+h/2),int(center_y+w/2)),(0,0,255),1,0)
+                    cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
+                    cv2.imwrite(outfile,target_img)
+                #print "center point: ", center_x, center_y
+                return [center_x, center_y]
+            else:
+                return None
 
 
 def _re_detectAndmatch(kp1,des1,kp2,des2,val1,val2,disp,kp2_xy, img1, img2, query_img, target_img, outfile):
@@ -510,12 +518,6 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
     img2 = cv2.imread(origin, 0)  # originImage,gray
     query_img = cv2.imread(query, 1)  # queryImage
     target_img = cv2.imread(origin, 1)  # originImage
-    try:
-        # find the keypoints and descriptors with SIFT
-        kp1, des1 = siftextract(img1)
-        num1 = len(kp1)
-    except:
-        return None
 
     h, w = img1.shape
     '''提前过滤，排除那些肯定不存在查询图片的测试图片'''
@@ -524,8 +526,14 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
     templatematch(img2, img1, v1, s1, [])  #全局模板匹配
     c1 = s1[0]
     rect = copyimg((c1[0], c1[1]), w, h, img2, 2)  #复制潜在匹配区域
-    kp3, des3 = siftextract(rect)
-    num3 = len(kp3)
+    try:
+        # find the keypoints and descriptors with SIFT
+        kp1, des1 = siftextract(img1)
+        kp3, des3 = siftextract(rect)
+        num1 = len(kp1)
+        num3 = len(kp3)
+    except:
+        return None
     val2 = 1.0
     if num1 <= num3:
         val2 = re_feature_similarity(kp1, des1, kp3, des3)
@@ -544,6 +552,9 @@ def locate_one_image(origin='origin.png', query='query.png', outfile='match.png'
             return None
     except:
         return None
+    #print "Num1: ", num1
+    #print "Num2: ", num2
+    #print "Num3: ", num3
     ratio_num = int(num1 * 0.1)
     '''store all the good matches as per Lowe's ratio test.'''
     matches = _search(des1, des2)
