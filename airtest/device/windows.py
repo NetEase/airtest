@@ -4,11 +4,11 @@
  
 #from zope.interface import Interface
 from PIL import ImageGrab
-import win32api,win32con,win32gui
+import win32api,win32con,win32gui,win32process
 import autopy
-import ctypes
+import ctypes,ctypes.wintypes
 import pygame
-import os
+import os,sys
  
 #def getNetFlow(appname=None)
 #    Get current network flow 
@@ -127,7 +127,7 @@ class Device():
     ''' Interface documentation '''
     def __init__(self,filename=None):
         self.filename = filename
-        HWND=_getHandleThroughFilename()
+        HWND=self._getHandleThroughFilename()
         self.HWND = HWND[0]
         if self.HWND==0:
             raise Exception(u'Target application is not started')
@@ -292,7 +292,7 @@ class Device():
         '''appname is not used in windows interferences'''
         Path = extra.get('path')
         os.system('cd '+Path+' && '+'start '+self.filename)
-        HWND=_getHandleThroughFilename()
+        HWND=self._getHandleThroughFilename()
         self.HWND = HWND[0]
         
     def stop(self, appname, extra={}):
