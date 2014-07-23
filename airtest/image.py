@@ -15,11 +15,7 @@ import os
 
 MIN_MATCH_COUNT = 5
 MIN_MATCH = 15
-<<<<<<< HEAD
-DEBUG = True
-=======
 DEBUG = os.getenv('DEBUG') == 'true'
->>>>>>> 2add9f871df9b6aff46356b6f2a2c0c6c58bc6a6
 
 # Euclidean distance calculation
 def distance(p1, p2):
