@@ -175,6 +175,7 @@ class DeviceSuit(object):
         '''
         savefile = self._saveScreen(filename)
         self._log(dict(type='snapshot', filename=savefile))
+        return savefile
 
     def globalSet(self, m={}):
         '''
