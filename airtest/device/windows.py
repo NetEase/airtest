@@ -142,11 +142,13 @@ class Device():
         left, top, _, _ = self._range()
         x, y = left+x, top+y
         return x, y
-
+    
     def snapshot(self, filename=None ):
         ''' Capture device screen '''
         '''WinName is the window name of the target program'''
         range_ = self._range()
+        HWND=win32gui.FindWindow(None,self.WinName)
+        win32gui.SetForegroundWindow(HWND)
         pic = ImageGrab.grab(range_)
         if filename !=None:
             pic.save(filename)
