@@ -65,6 +65,13 @@ class DeviceSuit(object):
             self.width = w
             self.width = h
 
+        # default image search extentension and 
+        self._image_exts = ['.jpg', '.png']
+        self._image_dirs = ['.']
+        self._image_dirs.insert(0, 'image-'+deviceType)
+        if deviceType in ('android', 'ios'):
+            self._image_dirs.insert(0, 'image-%d_%d'%(self.width, self.height))
+
         self._threshold = 0.3 # for findImage
         self._rotation = None # UP,DOWN,LEFT,RIGHT
         self._log = get_jsonlog().writeline # should implementes writeline(dict)
@@ -122,14 +129,28 @@ class DeviceSuit(object):
         #    return (nx, ny)
         return (x, y)
 
+    def _search_image(self, filename):
+        ''' Search image in default path '''
+        if isinstance(filename, unicode) and platform.system() == 'Windows':
+            filename = filename.encode('gbk')
+        basename, ext = os.path.splitext(filename)
+        exts = [ext] if ext else self._image_exts
+        for folder in self._image_dirs:
+            for ext in exts:
+                fullpath = os.path.join(folder, basename+ext)
+                if os.path.exists(fullpath):
+                    return fullpath
+        raise RuntimeError('Image file(%s) not found in %s' %(filename, self._image_dirs))
+
     def _PS2Point(self, PS):
         '''
         Convert PS to point
         @return (x, y) or None if not found
         '''
         if isinstance(PS, basestring):
-            log.debug('locate %s', PS)
-            PS = self.find(PS)
+            filepath = self._search_image(PS)
+            log.debug('Locate image(%s) realpath(%s)', PS, filepath)
+            PS = self.find(filepath)
             if not PS:
                 return None
         (x, y) = self._fixPoint(PS)#(PS[0], PS[1]))#(1L, 2L))

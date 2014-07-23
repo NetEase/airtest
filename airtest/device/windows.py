@@ -129,7 +129,7 @@ class Device():
         self.WinName = WinName
         self.HWND=win32gui.FindWindow(None,self.WinName)
         if self.HWND==0:
-            raise Exception(u'目标窗口不存在')
+            raise Exception(u'Target windows not found')
         
     def _range(self):
         ''' Get Windows rectangle position '''
@@ -233,7 +233,7 @@ class Device():
     def start(self, appname, extra={}):
         '''Start an app, TODO(not good now)'''
         Path = extra.get('path')
-        os.system('cd '+Path+' && '+'start '+appname)
+        os.system('start %s' %(Path))
         
     def stop(self, appname, extra={}):
         win32gui.SendMessage(self.HWND,win32con.WM_CLOSE,0,0)
