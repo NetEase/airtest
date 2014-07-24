@@ -9,6 +9,7 @@ import autopy
 import ctypes,ctypes.wintypes
 import pygame
 import os,sys
+import time
  
 #def getNetFlow(appname=None)
 #    Get current network flow 
@@ -128,7 +129,7 @@ class Device():
     def __init__(self,filename=None):
         self.filename = filename
         HWND=self._getHandleThroughFilename()
-        self.HWND = HWND[0]
+        self.HWND = self._chosegamehandle(HWND)
         if self.HWND==0:
             raise Exception(u'Target application is not started')
         
@@ -189,6 +190,15 @@ class Device():
             return hwnds
         return get_hwnds_for_pid(ProcessId)
     
+    def _chosegamehandle(self,HWND):
+            if not HWND : return HWND
+            else:
+                for handle in HWND:
+                    windowtext = win32gui.GetWindowText(handle)
+                    if ":" not in windowtext: 
+                        return handle
+                        
+    
         
     def _range(self):
         ''' Get Windows rectangle position '''
@@ -206,6 +216,7 @@ class Device():
         ''' Capture device screen '''
         range_ = self._range()
         win32gui.SetForegroundWindow(self.HWND)
+        time.sleep(0.1)
         pic = ImageGrab.grab(range_)
         if filename !=None:
             pic.save(filename)
