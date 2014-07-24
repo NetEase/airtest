@@ -304,7 +304,9 @@ class Device():
         Path = extra.get('path')
         os.system('cd '+Path+' && '+'start '+self.filename)
         HWND=self._getHandleThroughFilename()
-        self.HWND = HWND[0]
+        self.HWND = self._chosegamehandle(HWND)
+        if self.HWND==0:
+            raise Exception(u'Target application is not successfully started')
         
     def stop(self, appname, extra={}):
         '''appname is not used in windows interferences'''
