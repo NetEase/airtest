@@ -4,11 +4,12 @@
  
 #from zope.interface import Interface
 from PIL import ImageGrab
-import win32api,win32con,win32gui
+import win32api,win32con,win32gui,win32process
 import autopy
-import ctypes
+import ctypes,ctypes.wintypes
 import pygame
-import os
+import os,sys
+import time
  
 #def getNetFlow(appname=None)
 #    Get current network flow 
@@ -125,11 +126,79 @@ ShiftCodes = {
 #class Device(Interface):
 class Device():
     ''' Interface documentation '''
-    def __init__(self,WinName=None):
-        self.WinName = WinName
-        self.HWND=win32gui.FindWindow(None,self.WinName)
+    def __init__(self,filename=None):
+        self.filename = filename
+        HWND=self._getHandleThroughFilename()
+        self.HWND = self._chosegamehandle(HWND)
         if self.HWND==0:
-            raise Exception(u'目标窗口不存在')
+            raise Exception(u'Target application is not started')
+        
+    def _getHandleThroughFilename(self):
+        
+        Psapi = ctypes.WinDLL('Psapi.dll')
+        EnumProcesses = Psapi.EnumProcesses
+        EnumProcesses.restype = ctypes.wintypes.BOOL
+        GetProcessImageFileName = Psapi.GetProcessImageFileNameA
+        GetProcessImageFileName.restype = ctypes.wintypes.DWORD
+
+        Kernel32 = ctypes.WinDLL('kernel32.dll')
+        OpenProcess = Kernel32.OpenProcess
+        OpenProcess.restype = ctypes.wintypes.HANDLE
+        TerminateProcess = Kernel32.TerminateProcess
+        TerminateProcess.restype = ctypes.wintypes.BOOL
+        CloseHandle = Kernel32.CloseHandle
+        
+
+        MAX_PATH = 260
+        PROCESS_TERMINATE = 0x0001
+        PROCESS_QUERY_INFORMATION = 0x0400
+
+        count = 32
+        while True:
+            ProcessIds = (ctypes.wintypes.DWORD*count)()
+            cb = ctypes.sizeof(ProcessIds)
+            BytesReturned = ctypes.wintypes.DWORD()
+            if EnumProcesses(ctypes.byref(ProcessIds), cb, ctypes.byref(BytesReturned)):
+                if BytesReturned.value<cb:
+                    break
+                else:
+                    count *= 2
+            else:
+                sys.exit("Call to EnumProcesses failed")
+
+        for index in range(BytesReturned.value / ctypes.sizeof(ctypes.wintypes.DWORD)):
+            ProcessId = ProcessIds[index]
+            hProcess = OpenProcess(PROCESS_TERMINATE | PROCESS_QUERY_INFORMATION, False, ProcessId)
+            if hProcess:
+                ImageFileName = (ctypes.c_char*MAX_PATH)()
+                if GetProcessImageFileName(hProcess, ImageFileName, MAX_PATH)>0:
+                    filename = os.path.basename(ImageFileName.value)
+                    if filename == self.filename:
+                        break
+                #TerminateProcess(hProcess, 1)
+                CloseHandle(hProcess)
+                
+        def get_hwnds_for_pid(pid):
+            def callback (hwnd, hwnds):
+                if win32gui.IsWindowVisible (hwnd) and win32gui.IsWindowEnabled (hwnd):
+                    _, found_pid = win32process.GetWindowThreadProcessId (hwnd)
+                    if found_pid == pid:
+                        hwnds.append (hwnd)
+                    return True
+            hwnds = []
+            win32gui.EnumWindows(callback, hwnds)
+            return hwnds
+        return get_hwnds_for_pid(ProcessId)
+    
+    def _chosegamehandle(self,HWND):
+            if not HWND : return HWND
+            else:
+                for handle in HWND:
+                    windowtext = win32gui.GetWindowText(handle)
+                    if ":" not in windowtext: 
+                        return handle
+                        
+    
         
     def _range(self):
         ''' Get Windows rectangle position '''
@@ -145,10 +214,9 @@ class Device():
     
     def snapshot(self, filename=None ):
         ''' Capture device screen '''
-        '''WinName is the window name of the target program'''
         range_ = self._range()
-        HWND=win32gui.FindWindow(None,self.WinName)
-        win32gui.SetForegroundWindow(HWND)
+        win32gui.SetForegroundWindow(self.HWND)
+        time.sleep(0.1)
         pic = ImageGrab.grab(range_)
         if filename !=None:
             pic.save(filename)
@@ -232,10 +300,16 @@ class Device():
     
     def start(self, appname, extra={}):
         '''Start an app, TODO(not good now)'''
+        '''appname is not used in windows interferences'''
         Path = extra.get('path')
-        os.system('cd '+Path+' && '+'start '+appname)
+        os.system('cd '+Path+' && '+'start '+self.filename)
+        HWND=self._getHandleThroughFilename()
+        self.HWND = self._chosegamehandle(HWND)
+        if self.HWND==0:
+            raise Exception(u'Target application is not successfully started')
         
     def stop(self, appname, extra={}):
+        '''appname is not used in windows interferences'''
         win32gui.SendMessage(self.HWND,win32con.WM_CLOSE,0,0)
         
     def getCpu(self, appname):

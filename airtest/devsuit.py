@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import platform
 import time
 import json
 import PIL
@@ -65,6 +66,13 @@ class DeviceSuit(object):
             self.width = w
             self.width = h
 
+        # default image search extentension and 
+        self._image_exts = ['.jpg', '.png']
+        self._image_dirs = ['.', 'image']
+        self._image_dirs.insert(0, 'image-'+deviceType)
+        if deviceType in ('android', 'ios'):
+            self._image_dirs.insert(0, 'image-%d_%d'%(self.width, self.height))
+
         self._threshold = 0.3 # for findImage
         self._rotation = None # UP,DOWN,LEFT,RIGHT
         self._log = get_jsonlog().writeline # should implementes writeline(dict)
@@ -115,12 +123,20 @@ class DeviceSuit(object):
             x = int(width*x)
         if isinstance(y, float) and y <= 1.0:
             y = int(height*y)
-        #if self._device == 'ios' and rotation == 'RIGHT':
-        #    rotation = dict(RIGHT='LEFT',UP='UP',LEFT='RIGHT',DOWN='UP').get(rotation)
-        #    nx, ny = rotate_point((x, y), (width, height), rotation)
-        #    log.debug('rotation back(left-up): (%d, %d) -> (%d, %d)', x, y, nx, ny)
-        #    return (nx, ny)
         return (x, y)
+
+    def _search_image(self, filename):
+        ''' Search image in default path '''
+        if isinstance(filename, unicode) and platform.system() == 'Windows':
+            filename = filename.encode('gbk')
+        basename, ext = os.path.splitext(filename)
+        exts = [ext] if ext else self._image_exts
+        for folder in self._image_dirs:
+            for ext in exts:
+                fullpath = os.path.join(folder, basename+ext)
+                if os.path.exists(fullpath):
+                    return fullpath
+        raise RuntimeError('Image file(%s) not found in %s' %(filename, self._image_dirs))
 
     def _PS2Point(self, PS):
         '''
@@ -128,7 +144,6 @@ class DeviceSuit(object):
         @return (x, y) or None if not found
         '''
         if isinstance(PS, basestring):
-            log.debug('locate %s', PS)
             PS = self.find(PS)
             if not PS:
                 return None
@@ -160,6 +175,7 @@ class DeviceSuit(object):
         '''
         savefile = self._saveScreen(filename)
         self._log(dict(type='snapshot', filename=savefile))
+        return savefile
 
     def globalSet(self, m={}):
         '''
@@ -178,10 +194,10 @@ class DeviceSuit(object):
 
         @return (point founded or None if not found)
         '''
-        if not os.path.exists(imgfile):
-            raise RuntimeError('image file(%s) not exists' %(imgfile))
+        filepath = self._search_image(imgfile)
+        log.debug('Locate image path: %s', filepath)
         screen = self._saveScreen('screen-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
-        pt = find_one_image(screen, imgfile, self._threshold)
+        pt = find_one_image(screen, filepath, self._threshold)
         return pt
 
     def findAll(self, imgfile):
@@ -200,13 +216,15 @@ class DeviceSuit(object):
         @return position when imgfile shows
         '''
         log.info('WAIT: %s', imgfile)
-        interval = 1
-        max_retry = int(seconds/interval)
-        pt = base.wait_until(self.find, args=(imgfile,), interval=interval, max_retry=max_retry)
-        if not pt:
-            raise RuntimeError('wait fails')
-        self._last_point = pt
-        return pt
+        start = time.time()
+        while True:
+            pt = self.find(imgfile)
+            if pt:
+                return pt
+            if time.time()-start > seconds:
+                break
+            time.sleep(1)
+        raise RuntimeError('Wait timeout(%.2f)', float(seconds))
 
     def exists(self, imgfile):
         return True if self.find(imgfile) else False
@@ -216,18 +234,23 @@ class DeviceSuit(object):
         Click function
         @param seconds: float (if time not exceed, it will retry and retry)
         '''
-        print SF
         log.info('CLICK %s', SF)
-        start = time.time()
-        while True:
-            point = self._PS2Point(SF)
-            if point:
-                (x, y) = point
-                break
-            if time.time() - start > seconds:
-                raise RuntimeError('func click: timeout(%.2fs), target(%s) not found' %(seconds, SF))
-            log.warn('image file(%s) not found, retry' %(SF))
-        log.info('click %s point: (%d, %d)', SF, x, y)
+        point = self._PS2Point(SF)
+        if point:
+            (x, y) = point
+            self.dev.touch(x, y)
+            return
+        (x, y) = self.wait(SF, seconds=seconds)
+        # while True:
+        #     point = self._PS2Point(SF)
+        #     if point:
+        #         (x, y) = point
+        #         break
+        #     if time.time() - start > seconds:
+        #         raise RuntimeError('func click: timeout(%.2fs), target(%s) not found' %(seconds, SF))
+            # log.warn('image file(%s) not found retry' %(SF))
+            # time.sleep(1)
+        log.info('Click %s point: (%d, %d)', SF, x, y)
         self.dev.touch(x, y)
 
     def center(self):
