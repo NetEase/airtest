@@ -302,7 +302,7 @@ class Device():
         '''Start an app, TODO(not good now)'''
         '''appname is not used in windows interferences'''
         Path = extra.get('path')
-        os.system('cd '+Path+' && '+'start '+self.filename)
+        os.system('cd /d '+Path+' && '+'start '+self.filename)
         HWND=self._getHandleThroughFilename()
         self.HWND = self._chosegamehandle(HWND)
         if self.HWND==0:
