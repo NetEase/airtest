@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-2014/07/24 jiaqianghuai: fix the code
+2014/07/26 jiaqianghuai: fix the code
 '''
 
 __author__ = 'hzjiaqianghuai,hzsunshx'
