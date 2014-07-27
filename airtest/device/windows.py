@@ -127,11 +127,14 @@ ShiftCodes = {
 class Device():
     ''' Interface documentation '''
     def __init__(self,filename=None):
-        self.filename = filename
+        if '.exe' != filename[-4:len(filename)]:#check the name has postfix ".exe" or not; if not, add ".exe" to the end
+            self.filename = filename+".exe"
+        else:
+            self.filename = filename
         HWND=self._getHandleThroughFilename()
         self.HWND = self._chosegamehandle(HWND)
         if self.HWND==0:
-            raise Exception(u'Target application is not started')
+            raise Exception('Can not find target application process')
         
     def _getHandleThroughFilename(self):
         
@@ -164,7 +167,7 @@ class Device():
                 else:
                     count *= 2
             else:
-                sys.exit("Call to EnumProcesses failed")
+                raise Exception('Call to EnumProcesses failed')
 
         for index in range(BytesReturned.value / ctypes.sizeof(ctypes.wintypes.DWORD)):
             ProcessId = ProcessIds[index]
