@@ -10,7 +10,6 @@ import PIL
 from airtest import image
 from airtest import base
 from airtest import jsonlog
-# from airtest import device
 from airtest import patch
 
 log = base.getLogger('devsuit')
@@ -32,7 +31,11 @@ def rotate_point((x, y), (w, h), d):
         return h-y, x
 
 def find_multi_image(orig, query, threshold):
-    return [find_one_image(orig, query, threshold)]
+    points = image.locate_more_image_template(orig, query)
+    if not points:
+        return []
+    return points
+    #return [find_one_image(orig, query, threshold)]
     
 def find_one_image(orig, query, threshold):
     pts = image.locate_image(orig, query, threshold=threshold)
@@ -150,11 +153,16 @@ class DeviceSuit(object):
         (x, y) = self._fixPoint(PS)#(PS[0], PS[1]))#(1L, 2L))
         return (x, y)
 
-    def _saveScreen(self, filename):
-        if not os.path.exists(self._tmpdir):
-            base.makedirs(self._tmpdir)
+    def _saveScreen(self, filename, random_name=True, tempdir=True):
+        if random_name:
+            filename = base.random_name(filename)
+        if tempdir:
+            filename = os.path.join(self._tmpdir, filename)
 
-        filename = os.path.join(self._tmpdir, base.random_name(filename))
+        parent_dir = os.path.dirname(filename) or '.'
+        if not os.path.exists(parent_dir):
+            base.makedirs(parent_dir)
+
         self.dev.snapshot(filename)
         if self._device == 'windows':
             return filename
@@ -173,7 +181,7 @@ class DeviceSuit(object):
         @param filename: string (base filename want to save as basename)
         @return string: (filename that really save to)
         '''
-        savefile = self._saveScreen(filename)
+        savefile = self._saveScreen(filename, random_name=False, tempdir=False)
         self._log(dict(type='snapshot', filename=savefile))
         return savefile
 

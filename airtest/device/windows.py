@@ -134,7 +134,6 @@ class Device():
             raise Exception(u'Target application is not started')
         
     def _getHandleThroughFilename(self):
-        
         Psapi = ctypes.WinDLL('Psapi.dll')
         EnumProcesses = Psapi.EnumProcesses
         EnumProcesses.restype = ctypes.wintypes.BOOL
