@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-2014/07/26 jiaqianghuai: fix the code
+2014/07/28 jiaqianghuai: 添加注释
 '''
 
 __author__ = 'hzjiaqianghuai,hzsunshx'
@@ -17,23 +17,24 @@ MIN_MATCH = 15
 DEBUG = os.getenv('DEBUG') == 'true'
 
 #path check
-def path_check(img_path):
+def _path_check(img_path):
     if not os.path.exists(img_path):
         raise IOError(img_path + 'not exists')
 
 #Euclidean distance calculation
-def distance(p1, p2):
+def _distance(p1, p2):
     l2 = (p1[0] - p2[0]) * (p1[0] - p2[0]) + (p1[1] - p2[1]) * (p1[1] - p2[1])
     return math.sqrt(l2)
 
-#remove the duplicate element of the list
-def reremove(list):
+#remove the duplicate element in the list
+def _reremove(list):
     checked = []
     for e in list:
         if e not in checked:
             checked.append(e)
     return checked
 
+#sort the two_dimensional point list via the ascending order of the second dimension 
 def _sort_point_list(list):
     new_list = []
     num = len(list)
@@ -50,7 +51,7 @@ def _sort_point_list(list):
     return new_list
 
 #write keypoints and descriptors into an array
-def pickle_keypoints(keypoints,descriptors):
+def _pickle_keypoints(keypoints,descriptors):
     i = 0
     temp_array = []
     for point in keypoints:
@@ -60,7 +61,7 @@ def pickle_keypoints(keypoints,descriptors):
     return temp_array
 
 #filter the keypoints and descriptors of the detected object
-def unpickle_keypoints(array,center,w,h,shape):
+def _unpickle_keypoints(array,center,w,h,shape):
     keypoints,descriptors = [],[]
     center_x = center[0]
     center_y = center[1]
@@ -79,8 +80,9 @@ def unpickle_keypoints(array,center,w,h,shape):
     for point in array:
         x = int(point[0][0])
         y = int(point[0][1])
-        if (x < topleft_x) | (y < topleft_y) | (bottomright_x < x) | (bottomright_y < y):
-            temp_feature = cv2.KeyPoint(x=point[0][0],y=point[0][1],_size=point[1],_angle=point[2],_response=point[3],_octave=point[4],_class_id=point[5])
+        if (x < topleft_x) or (y < topleft_y) or (bottomright_x < x) or (bottomright_y < y): #判断是否在指定区域外
+            temp_feature = cv2.KeyPoint(x=point[0][0],y=point[0][1],_size=point[1],
+                _angle=point[2],_response=point[3],_octave=point[4],_class_id=point[5])
             temp_descriptor = point[6]
             keypoints.append(temp_feature)
             descriptors.append(temp_descriptor)
@@ -89,11 +91,11 @@ def unpickle_keypoints(array,center,w,h,shape):
 # color hist based similarity calculation
 def hist_similarity(img1,img2):
     try:
-        if img1.ndim == 2 & img2.ndim == 2:
+        if img1.ndim == 2 and img2.ndim == 2:
             hist1 = cv2.calcHist([img1], [0], None, [256], [0.0, 255.0])
             hist2 = cv2.calcHist([img2], [0], None, [256], [0.0, 255.0])
             retal = cv2.compareHist(hist1, hist2, cv2.cv.CV_COMP_CORREL)
-        elif img1.ndim == 3 & img2.ndim == 3:
+        elif img1.ndim == 3 and img2.ndim == 3:
             ''' R,G,B split '''
             b1, g1, r1 = cv2.split(img1)
             b2, g2, r2 = cv2.split(img2)
@@ -130,11 +132,7 @@ def re_feature_similarity(kp1, des1, kp2, des2):
         retal = 0.0
         return retal
     matches = _search(des1, des2)
-    good = []
-    for m, n in matches:
-        ''' threshold = 0.7 '''
-        if m.distance < 0.7 * n.distance:
-            good.append(m)
+    good = _match_good(matches,0.7) 
     kpnum_good = float(len(good))
     retal = kpnum_good / kpnum
     return retal,kpnum_good
@@ -149,15 +147,16 @@ def _img_process(img, ratio):
     w_b = w - w_t
     for i in range(h):
         for j in range(w):
-            if (img.ndim == 2) & ((i < h_t) | (j < w_t) | (h_b < i) | (w_b < j)):
+            if (img.ndim == 2) and ((i < h_t) or (j < w_t) or (h_b < i) or (w_b < j)): #判断是否在边界
                 if 200 < img[i, j]:
                     img[i, j] = 0
-            elif (img.ndim == 3) & ((i < h_t) | (j < w_t) | (h_b < i) | (w_b < j)):
+            elif (img.ndim == 3) and ((i < h_t) or (j < w_t) or (h_b < i) or (w_b < j)):
                 graylevel = int((img[i, j, 0] + img[i, j, 1] + img[i, j, 2]) / 3)
                 if 200 < graylevel:
                     img[i, j, 0],img[i, j, 1],img[i, j, 2] = 0,0,0
     return img
 
+#将图像img中指定区域的像素值置零
 def _img_zero(w,h,center,img):
     top_left_x = int(center[0]-w)
     top_left_y = int(center[1]-h)
@@ -169,9 +168,9 @@ def _img_zero(w,h,center,img):
             x = top_left_x + j
             if img.shape[1] <= x:
                 x = img.shape[1]-1
-            if img.ndim == 2:
+            if img.ndim == 2: #灰度图像
                 img[y,x] = 0
-            elif img.ndim == 3:
+            elif img.ndim == 3:#彩色图像
                 img[y,x,0],img[y,x,1],img[y,x,2] = 0,0,0
     return img
 
@@ -187,7 +186,8 @@ def _img_read(origin,query):
 def _img_multi__rectangle(w,h,center_xy,target_img):
     for i in range(len(center_xy)):
         center_i = center_xy[i]
-        if (0 < center_i[0] < target_img.shape[1]) & (0 < center_i[1] < target_img.shape[0]):
+        '''判断中心点是否在图像中'''
+        if (0 < center_i[0] < target_img.shape[1]) and (0 < center_i[1] < target_img.shape[0]):
             topleft_x = int(center_i[0]-w*0.5)
             topleft_y = int(center_i[1]-h*0.5)
             bottomright_x = int(center_i[0]+w*0.5)
@@ -203,6 +203,7 @@ def _img_multi__rectangle(w,h,center_xy,target_img):
             cv2.rectangle(target_img,(topleft_x,topleft_y),(bottomright_x,bottomright_y),(0,0,255),1,0)
             cv2.circle(target_img, (int(center_i[0]), int(center_i[1])), 2, (0, 255, 0), -1)   
 
+#单映射
 def _homography(h, w, kp1,kp2,good,target_img):
     src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
     dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
@@ -213,14 +214,15 @@ def _homography(h, w, kp1,kp2,good,target_img):
     for i in range(r):
         x = dst_pts[i][c - 1][d - 2]
         y = dst_pts[i][c - 1][d - 1]
-        cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
+        if DEBUG:
+            cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
     M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)  #最少需要4个match点
     pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
     dst = cv2.perspectiveTransform(pts, M)  #找到一个变换矩阵，从查询图片映射到检测图片
     return dst
 
 #复制图像
-def copyimg(center, w, h, target_img, num):
+def _copyimg(center, w, h, target_img, num):
     center_x = center[0]
     center_y = center[1]
     topleft_x = int(center_x - w)
@@ -229,7 +231,7 @@ def copyimg(center, w, h, target_img, num):
         topleft_x = 0
     if topleft_y < 0:
         topleft_y = 0
-    if target_img.ndim == 2:
+    if target_img.ndim == 2: #灰度图
         rect_img = np.zeros((h * num, w * num), target_img.dtype)
         for i in range(h * num):
             ty = topleft_y + i
@@ -240,7 +242,7 @@ def copyimg(center, w, h, target_img, num):
                 if target_img.shape[1] <= tx:
                     tx = target_img.shape[1] - 1
                 rect_img[i][j] = target_img[ty][tx]
-    elif target_img.ndim == 3:
+    elif target_img.ndim == 3: #彩色图
         rect_img = np.zeros((h, w, 3), target_img.dtype)
         for i in range(h):
             ty = topleft_y + i
@@ -255,7 +257,7 @@ def copyimg(center, w, h, target_img, num):
                 rect_img[i][j][2] = target_img[ty][tx][2]
     return rect_img
 
-# template match function，这里加了图像灰度阈值处理
+#template match function，这里加了图像灰度阈值处理
 def templatematch(target_img, query_img, value, situ, center):
     h_query = query_img.shape[0]
     w_query = query_img.shape[1]
@@ -267,12 +269,13 @@ def templatematch(target_img, query_img, value, situ, center):
     w_target = target_img.shape[1]
     width = w_target - w_temp + 1
     height = h_target - h_temp + 1
-    if width < 0 | height < 0:
+    if width < 0 or height < 0:
         return None
-    t_ret, t_thresh = cv2.threshold(target_img, 200, 255, cv2.THRESH_TOZERO)
-    q_ret, q_thresh = cv2.threshold(query_img, 200, 255, cv2.THRESH_TOZERO)
+    t_ret, t_thresh = cv2.threshold(target_img, 200, 255, cv2.THRESH_TOZERO)#图像阈值化
+    q_ret, q_thresh = cv2.threshold(query_img, 200, 255, cv2.THRESH_TOZERO)#图像阈值化
+    '''模板匹配'''
     result = cv2.matchTemplate(t_thresh, q_thresh, cv2.cv.CV_TM_CCORR_NORMED)#cv2.cv.CV_TM_SQDIFF_NORMED
-    (min_val, max_val, minloc, maxloc) = cv2.minMaxLoc(result)
+    (min_val, max_val, minloc, maxloc) = cv2.minMaxLoc(result)#寻找最佳与最差的匹配区域
     (x, y) = maxloc
     if len(center):
         re_x = int(x + center[0] - w_temp / 2)
@@ -284,6 +287,7 @@ def templatematch(target_img, query_img, value, situ, center):
     value.append(max_val)
     situ.append(maxloc)
 
+#输入图像未经处理的模板匹配算法
 def origin_templatematch(target_img, query_img):
     h_query = query_img.shape[0]
     w_query = query_img.shape[1]
@@ -291,18 +295,21 @@ def origin_templatematch(target_img, query_img):
     w_target = target_img.shape[1]
     width = w_target - w_query + 1
     height = h_target - h_query + 1
-    if width < 0 | height < 0:
+    if width < 0 or height < 0:
         return None
+    '''模板匹配'''
     result = cv2.matchTemplate(target_img, query_img, cv2.cv.CV_TM_SQDIFF_NORMED)
     (min_val, max_val, minloc, maxloc) = cv2.minMaxLoc(result)
     (x,y)=minloc
     return min_val,minloc
 
-def siftextract(target_img):
+#SIFT extraction
+def _siftextract(target_img):
     sift = cv2.SIFT()# Initiate SIFT detector
     kp, des = sift.detectAndCompute(target_img, None)# find the keypoints and descriptors with SIFT
     return kp, des
 
+#knn匹配，给定des1中的一个描述子（对应一个关键点），从des2寻找最近邻和次近邻的两个描述子
 def _search(des1, des2): 
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
@@ -311,157 +318,19 @@ def _search(des1, des2):
     matches = flann.knnMatch(des1, des2, k=2)
     return matches
 
-# SIFT + Homography
-def _homography_match(h, w, kp1,kp2,des1,des2,good,img1,img2,target_img, outfile):
-    dst = _homography(h, w, kp1,kp2,good,target_img)
-    row, col, dim = dst.shape
-    if row < 1:
-        return None
-    center = [0, 0]
-    count = 0
-    for i in range(row):
-        if (int(dst[i][col - 1][0]) <= target_img.shape[1]) & (0 <= int(dst[i][col - 1][0])) & (
-                    int(dst[i][col - 1][1]) <= target_img.shape[0]) & (0 <= int(dst[i][col - 1][1])): #表达式需要修改
-            center += dst[i][col - 1]
-            count += 1
-            cv2.circle(target_img, (dst[i][col - 1][0], dst[i][col - 1][1]), 2, (255, 0, 255), -1)
-    if ((count < 1) | (count < int(row * 0.5))):  #仿射变换得到的四个坐标，如果至少有两个坐标不在检测图片区域，说明匹配不成功
-        return None
-    else:
-        center_x = int(center[0] / count)
-        center_y = int(center[1] / count)
-        rect_img = copyimg((center_x,center_y),w,h,img2,2) ######
-        kp, des = siftextract(rect_img)
-        value,kp_num = re_feature_similarity(kp, des, kp1, des1) #######
-        if DEBUG:
-            print "feature_match value: ", value
-            print "kp_num: ", kp_num
-        if (value >= 0.4) | ((kp_num <= 14) & (0.34 < value)) | (35 < kp_num) |((kp_num <= 5) & (len(kp1) <= (20*kp_num))):
-            if outfile:
-                cv2.rectangle(target_img,(int(center_x-w/2),int(center_y-h/2)),
-                    (int(center_x+w/2),int(center_y+h/2)),(0,0,255),1,0)
-                cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
-                cv2.imwrite(outfile,target_img)
-            return [center_x, center_y]
-        else:
-            rect_img2 = copyimg((center_x,center_y),h,w,img2,2) ######
-            kp, des = siftextract(rect_img2)
-            value2,kp_num2 = re_feature_similarity(kp,des,kp1,des1) #######
-            if DEBUG:
-                print "feature_match value 2:  ", value2
-                print "kp_num 2: ", kp_num2
-            if ((0.32 < value2) | (35 < kp_num)) & (value < value2) & (kp_num < kp_num2):
-                if outfile:
-                    cv2.rectangle(target_img,(int(center_x-h/2),int(center_y-w/2)),
-                        (int(center_x+h/2),int(center_y+w/2)),(0,0,255),1,0)
-                    cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
-                    cv2.imwrite(outfile,target_img)
-                return [center_x, center_y]
-            else:
-                return None
+#设定最近邻与次近邻的一个比例阈值，选择真正匹配的关键点对
+def _match_good(matches,threshold):
+    good = []
+    for m,n in matches:
+        if m.distance < threshold*n.distance:
+            good.append(m)
+    return good
 
-def _re_homsift_match(h,w,kp1,kp2,good,target_img,point_match):
-    dst = _homography(h, w, kp1,kp2,good,target_img)
-    row,col,dim = dst.shapel
-    if row < 1:
-        return None
-    center = dst[row-1][col-1]
-    for i in range(row-1):
-        center += dst[i][col-1] 
-    if row < 1:
-        return None
-    else:
-        center_x = int(center[0]/row)
-        center_y = int(center[1]/row)
-        temp = (center_x, center_y)
-        return [center_x, center_y]
-
-def _re_detectAndmatch(kp1,des1,kp2,des2,val1,val2,disp,kp2_xy, img1, img2, query_img, target_img, outfile):
-    h, w = img1.shape
-    re_dst_pts = np.float32([kp2_xy[m] for m in range(len(kp2_xy))]).reshape(-1, 1, 2)
-    re_r, re_c, re_d = re_dst_pts.shape
-    if DEBUG:
-        print "re_r: ", re_r
-    num1 = len(kp1)
-    num2 = len(kp2)
-    temp = _img_process(img1, 0.1)
-    if (re_r < 35):
-        value, situ, num = [], [], []
-        for i in range(re_r):
-            center = re_dst_pts[i][re_c - 1]
-            rect_img = copyimg(center, w, h, img2, 2)
-            kp, des = siftextract(rect_img)
-            tp,default = re_feature_similarity(kp,des,kp1,des1)
-            num.append(tp)
-            templatematch(rect_img, temp, value, situ, center)
-        max = value[re_r - 1]
-        k = re_r - 1
-        for i in range(re_r - 1):
-            if max < value[i]:
-                max = value[i]
-                k = i
-        if DEBUG:
-            print k, max, num[k]
-        if (0.18 < num[k]):
-            if (max <= 0.6) & (5 < num1):
-                center, value, situ = [], [], []
-                templatematch(img2, temp, value, situ, center)
-                if value[0] < 0.7:  #template similarity
-                    return None
-                else:
-                    center_x = situ[0][0]
-                    center_y = situ[0][1]
-                    rect_img = copyimg((center_x, center_y), w, h, target_img, 1)
-                    value = hist_similarity(rect_img, query_img)
-                    if (value < 0.03):
-                        return None
-            else:
-                center_x = situ[k][0]
-                center_y = situ[k][1]
-                if (max < 0.9):
-                    rect_img = copyimg((center_x, center_y), w, h, target_img, 1)
-                    rect_img2 = copyimg((center_x, center_y), w, h, img2, 2)
-                    val = hist_similarity(rect_img, query_img)
-                    kp, des = siftextract(rect_img2)
-                    val2,default = re_feature_similarity(kp,des,kp1,des1)
-                    if (val < 0.03) | (val2 < 0.15):  #
-                        return None
-        else:
-            if ((0.9 < max) & (0.09 < num[k])):
-                center_x = situ[k][0]
-                center_y = situ[k][1]
-            else:
-                return None
-    else:
-        if (num1 <= num2):
-            if(val2 <= 0.15):
-                return None
-        else:
-            if (num2 < 2):
-                return None
-            else: 
-                val,default = re_feature_similarity(kp1,des1,kp2,des2)
-                if (val <= 0.4):  ####0.15
-                    return None
-        if (val1[0] < 0.7) | ((num2*10) < num1):  #template similarity
-            return None
-        else:
-            center_x = disp[0]
-            center_y = disp[1]
-    top_x = int(center_x - w / 2)
-    top_y = int(center_y - h / 2)
-    if (top_x < 0) | (top_y < 0):
-        return None
-    if outfile:
-        cv2.rectangle(target_img, (int(center_x - w / 2), int(center_y - h / 2)),(int(center_x + w / 2), int(center_y + h / 2)), (0, 0, 255), 1, 0)
-        cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
-        cv2.imwrite(outfile, target_img)
-    return [center_x, center_y]
-
+#利用欧式准则，优化中心点
 def _refine_center(list_x, list_y,w,h):
     center_sum_x, center_sum_y, count = 0, 0, 0
-    rlist_x = reremove(list_x)#duplicate removal
-    rlist_y = reremove(list_y)
+    rlist_x = _reremove(list_x)#duplicate removal
+    rlist_y = _reremove(list_y)
     if len(rlist_x) < 1:
         return None
     rx_len = len(rlist_x)
@@ -488,7 +357,7 @@ def _refine_center(list_x, list_y,w,h):
     max, rcount,rcount1 = 0, 0, 0
     rcenter = [0, 0]
     for i in range(count):
-        dis = distance(temp, [x_list[i], y_list[i]])#dis = abs(center_x-rlist_x[i])+abs(center_y-rlist_y[i])
+        dis = _distance(temp, [x_list[i], y_list[i]])
         if max < dis:
             max = dis
         dist.append(dis)
@@ -511,13 +380,15 @@ def _refine_center(list_x, list_y,w,h):
         y = int(rcenter[1]/rcount)
     length = len(index)
     for i in range(length):
-        if (int(1.5*w) < (abs(x-x_list[index[i]]))) | (int(1.5*h) < (abs(y-y_list[index[i]]))):
+        '''中心点的位置与它周围点的距离不能大于一定值'''
+        if (int(1.5*w) < (abs(x-x_list[index[i]]))) or (int(1.5*h) < (abs(y-y_list[index[i]]))):
             rcount1 = rcount1+1
     if rcount1 == rcount:
         return None
     else:
         return [x,y]
 
+#利用关键点，重新计算中心点坐标
 def _adjust_center(w,h,ratio_num,good_match_num,center_xy,point_match,target_img):
     re_center_xy = []
     re_center_xy.append(center_xy[0])
@@ -527,7 +398,7 @@ def _adjust_center(w,h,ratio_num,good_match_num,center_xy,point_match,target_img
     for i in range(length-1):
         count = 0
         for j in range(len(point_xy)):
-            if (point_match[i][0]!= point_xy[j][0]) | (point_match[i][1]!= point_xy[j][1]):
+            if (point_match[i][0]!= point_xy[j][0]) or (point_match[i][1]!= point_xy[j][1]):
                 count = count+1
         if (count == len(point_xy)):
             point_xy.append(point_match[i])
@@ -536,13 +407,14 @@ def _adjust_center(w,h,ratio_num,good_match_num,center_xy,point_match,target_img
         sum_y = 0
         k = 0
         for j in range(len(point_xy)):
-            if ((abs(center_xy[i+1][0]-point_xy[j][0]) < int(w/2)) & (abs(center_xy[i+1][1]-point_xy[j][1]) < int(h/2)) & (0 < (center_xy[i+1][0]-int(w/2))) & 
-                    (0 < (center_xy[i+1][1]-int(h/2))) & ((center_xy[i+1][0]+int(w/2)) < target_img.shape[1]) & ((center_xy[i+1][1]+int(h/2)) < target_img.shape[0])):
+            '''选择在中心点附近一定区域内的关键点'''
+            if ((abs(center_xy[i+1][0]-point_xy[j][0]) < int(w/2)) and (abs(center_xy[i+1][1]-point_xy[j][1]) < int(h/2)) and (0 < (center_xy[i+1][0]-int(w/2))) and 
+                    (0 < (center_xy[i+1][1]-int(h/2))) and ((center_xy[i+1][0]+int(w/2)) < target_img.shape[1]) and ((center_xy[i+1][1]+int(h/2)) < target_img.shape[0])):
                 sum_x += point_xy[j][0]
                 sum_y += point_xy[j][1]
                 k = k + 1
         print good_match_num
-        if (ratio_num <= k) & (k > 0):
+        if (ratio_num <= k) and (k > 0): #关键点数目不能少于一定阈值，否则滤除这个中心点
             x = int(sum_x/k)
             y = int(sum_y/k)
             re_center = [x, y]
@@ -552,10 +424,7 @@ def _adjust_center(w,h,ratio_num,good_match_num,center_xy,point_match,target_img
 
 # find the next object and its center
 def _nextobject(w,h,match,kp1,kp2,center_xy,point_match,target_img):
-    good = []
-    for m,n in match:
-        if m.distance < 0.9*n.distance: #0.95,0.9s
-            good.append(m)
+    good = _match_good(match,0.9) #0.95,0.9
     if len(good) > MIN_MATCH_COUNT:
         center = _re_homsift_match(h,w,kp1,kp2,good,target_img,point_match)
         if center:
@@ -571,7 +440,8 @@ def _nextobject(w,h,match,kp1,kp2,center_xy,point_match,target_img):
                 for i in range(row):
                     x = dst_pts[i][col-1][dim-2]
                     y = dst_pts[i][col-1][dim-1]
-                    cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
+                    if DEBUG:
+                        cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
                     tem = [x, y]
                     point_match.append(tem)
                 center = dst_pts[row-1][col-1]
@@ -591,6 +461,163 @@ def _nextobject(w,h,match,kp1,kp2,center_xy,point_match,target_img):
             if DEBUG:
                 print "Match Failure !!!"
 
+# SIFT + Homography
+def _homography_match(h, w, kp1,kp2,des1,des2,good,img1,img2,target_img, outfile):
+    dst = _homography(h, w, kp1,kp2,good,target_img)
+    row, col, dim = dst.shape
+    if row < 1:
+        return None
+    center = [0, 0]
+    count = 0
+    for i in range(row):
+        '''检查单映射后的四个坐标点是否在目标图像中'''
+        if (int(dst[i][col - 1][0]) <= target_img.shape[1]) and (0 <= int(dst[i][col - 1][0])) and (
+                    int(dst[i][col - 1][1]) <= target_img.shape[0]) and (0 <= int(dst[i][col - 1][1])): 
+            center += dst[i][col - 1]
+            count += 1
+            if DEBUG:
+                cv2.circle(target_img, (dst[i][col - 1][0], dst[i][col - 1][1]), 2, (255, 0, 255), -1)
+    if ((count < 1) or (count < int(row * 0.5))):  #仿射变换得到的四个坐标，如果至少有三个坐标不在检测图片区域，说明匹配不成功
+        return None
+    else:
+        center_x = int(center[0] / count)
+        center_y = int(center[1] / count)
+        rect_img = _copyimg((center_x,center_y),w,h,img2,2) #
+        kp, des = _siftextract(rect_img)
+        value,kp_num = re_feature_similarity(kp, des, kp1, des1) #
+        if DEBUG:
+            print "feature_match value: ", value
+            print "kp_num: ", kp_num
+        '''rule has been obtained from the experiments'''    
+        if (value >= 0.4) or ((kp_num <= 14) and (0.34 < value)) or (35 < kp_num) or ((kp_num <= 5) and (len(kp1) <= (20*kp_num))):
+            if outfile:
+                cv2.rectangle(target_img,(int(center_x-w/2),int(center_y-h/2)),
+                    (int(center_x+w/2),int(center_y+h/2)),(0,0,255),1,0)
+                if DEBUG:
+                    cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
+                cv2.imwrite(outfile,target_img)
+            return [center_x, center_y]
+        else:
+            rect_img2 = _copyimg((center_x,center_y),h,w,img2,2) ######
+            kp, des = _siftextract(rect_img2)
+            value2,kp_num2 = re_feature_similarity(kp,des,kp1,des1) #######
+            if DEBUG:
+                print "feature_match value 2:  ", value2
+                print "kp_num 2: ", kp_num2
+            if ((0.32 < value2) or (35 < kp_num)) and (value < value2) and (kp_num < kp_num2):
+                if outfile:
+                    cv2.rectangle(target_img,(int(center_x-h/2),int(center_y-w/2)),
+                        (int(center_x+h/2),int(center_y+w/2)),(0,0,255),1,0)
+                    if DEBUG:
+                        cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
+                    cv2.imwrite(outfile,target_img)
+                return [center_x, center_y]
+            else:
+                return None
+
+#简单版的_homography_match
+def _re_homsift_match(h,w,kp1,kp2,good,target_img,point_match):
+    dst = _homography(h, w, kp1,kp2,good,target_img)
+    row,col,dim = dst.shapel
+    if row < 1:
+        return None
+    center = dst[row-1][col-1]
+    for i in range(row-1):
+        center += dst[i][col-1] 
+    if row < 1:
+        return None
+    else:
+        center_x = int(center[0]/row)
+        center_y = int(center[1]/row)
+        temp = (center_x, center_y)
+        return [center_x, center_y]
+
+#匹配点很少的情况下，进行图像匹配
+def _re_detectAndmatch(kp1,des1,kp2,des2,val1,val2,disp,kp2_xy, img1, img2, query_img, target_img, outfile):
+    h, w = img1.shape
+    re_dst_pts = np.float32([kp2_xy[m] for m in range(len(kp2_xy))]).reshape(-1, 1, 2)
+    re_r, re_c, re_d = re_dst_pts.shape
+    if DEBUG:
+        print "re_r: ", re_r
+    num1 = len(kp1)
+    num2 = len(kp2)
+    temp = _img_process(img1, 0.1)
+    if (re_r < 35): #给匹配上的特征点数设置阈值，若在该范围内的，则在每个特征点所在区域进行特征和模板匹配
+        value, situ, num = [], [], []
+        for i in range(re_r):
+            center = re_dst_pts[i][re_c - 1]
+            rect_img = _copyimg(center, w, h, img2, 2)
+            kp, des = _siftextract(rect_img)
+            tp,default = re_feature_similarity(kp,des,kp1,des1)#特征匹配
+            num.append(tp)
+            templatematch(rect_img, temp, value, situ, center)#模板匹配
+        max = value[re_r - 1]
+        k = re_r - 1
+        for i in range(re_r - 1):
+            if max < value[i]:
+                max = value[i]
+                k = i
+        if DEBUG:
+            print k, max, num[k]
+        if (0.18 < num[k]): #基于SIFT特征匹配相似度的最小值
+            if (max <= 0.6) and (5 < num1):
+                center, value, situ = [], [], []
+                templatematch(img2, temp, value, situ, center)
+                if value[0] < 0.7:  #template similarity
+                    return None
+                else:
+                    center_x = situ[0][0]
+                    center_y = situ[0][1]
+                    rect_img = _copyimg((center_x, center_y), w, h, target_img, 1)
+                    value = hist_similarity(rect_img, query_img)#计算颜色直方图相似度 
+                    if (value < 0.03):
+                        return None
+            else:
+                center_x = situ[k][0]
+                center_y = situ[k][1]
+                if (max < 0.9):
+                    rect_img = _copyimg((center_x, center_y), w, h, target_img, 1)
+                    rect_img2 = _copyimg((center_x, center_y), w, h, img2, 2)
+                    val = hist_similarity(rect_img, query_img)#计算颜色直方图相似度
+                    kp, des = _siftextract(rect_img2)
+                    val2,default = re_feature_similarity(kp,des,kp1,des1)#计算基于SIFT特征匹配相似度
+                    if (val < 0.03) or (val2 < 0.15):  ###参数靠实验结果优化
+                        return None
+        else:
+            if ((0.9 < max) and (0.09 < num[k])):
+                center_x = situ[k][0]
+                center_y = situ[k][1]
+            else:
+                return None
+    else:
+        if (num1 <= num2):
+            if(val2 <= 0.15):
+                return None
+        else:
+            if (num2 < 2):
+                return None
+            else: 
+                val,default = re_feature_similarity(kp1,des1,kp2,des2)
+                if (val <= 0.4):  ####0.15
+                    return None
+        if (val1[0] < 0.7) or ((num2*10) < num1):  #template similarity
+            return None
+        else:
+            center_x = disp[0]
+            center_y = disp[1]
+    top_x = int(center_x - w / 2)
+    top_y = int(center_y - h / 2)
+    if (top_x < 0) or (top_y < 0):
+        return None
+    if outfile:
+        cv2.rectangle(target_img, (int(center_x - w / 2), int(center_y - h / 2)),
+            (int(center_x + w / 2), int(center_y + h / 2)), (0, 0, 255), 1, 0)
+        if DEBUG:
+            cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
+        cv2.imwrite(outfile, target_img)
+    return [center_x, center_y]
+
+
 def locate_image(orig, quer, outfile='DEBUG.png', threshold=0.3):
     pt = locate_one_image(orig, quer, outfile, threshold)
     if pt:
@@ -606,22 +633,21 @@ def locate_one_image(origin, query, outfile='match.png', threshold=0.3):
     @param threshold: float (range [0, 1), the lower the more ease to match)
     @return None if not found, (x,y) point if found
     '''
-    path_check(origin)
-    path_check(query)
+    _path_check(origin)
+    _path_check(query)
     img1,img2,query_img,target_img = _img_read(origin,query)
     threshold = 1 - threshold
     h, w = img1.shape
     '''提前过滤，排除那些肯定不存在查询图片的测试图片'''
-    v1 = []
-    s1 = []
+    v1,s1 = [],[]
     templatematch(img2, img1, v1, s1, [])  #全局模板匹配
     c1 = s1[0]
     print v1
-    rect = copyimg((c1[0], c1[1]), w, h, img2, 2)  #复制潜在匹配区域
+    rect = _copyimg((c1[0], c1[1]), w, h, img2, 2)  #复制潜在匹配区域
     try:
         # find the keypoints and descriptors with SIFT
-        kp1, des1 = siftextract(img1)
-        kp3, des3 = siftextract(rect)
+        kp1, des1 = _siftextract(img1)
+        kp3, des3 = _siftextract(rect)
         num1 = len(kp1)
         num3 = len(kp3)
     except:
@@ -637,7 +663,7 @@ def locate_one_image(origin, query, outfile='match.png', threshold=0.3):
     if num3 == 0:
         return None
     try:
-        kp2, des2 = siftextract(img2)
+        kp2, des2 = _siftextract(img2)
         num2 = len(kp2)
         if num2 < num1:
             return None
@@ -659,7 +685,8 @@ def locate_one_image(origin, query, outfile='match.png', threshold=0.3):
     else:
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
         row, col, dim = dst_pts.shape
-        if (row < 1) | (row < ratio_num) | ((row == 1) & (ratio_num == 1)):
+        '''几乎没有好的匹配点的情况'''
+        if (row < 1) or (row < ratio_num) or ((row == 1) and (ratio_num == 1)):
             center = _re_detectAndmatch(kp1,des1,kp3,des3,v1,val2,c1,kp2_xy, img1, img2, query_img, target_img, outfile)
             if DEBUG:
                 print "center: ",center
@@ -671,19 +698,21 @@ def locate_one_image(origin, query, outfile='match.png', threshold=0.3):
                 y = dst_pts[i][col - 1][dim - 1]
                 list_x.append(int(x))
                 list_y.append(int(y))
-                cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
+                if DEBUG:
+                    cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
             newcenter = _refine_center(list_x, list_y,w,h)
             if newcenter:
                 center_x = newcenter[0]
                 center_y = newcenter[1]
                 top_x = int(center_x - w / 2)
                 top_y = int(center_y - h / 2)
-                if (top_x < 0) & (top_y < 0):
+                if (top_x < 0) and (top_y < 0):
                     return None
                 if outfile:
                     cv2.rectangle(target_img, (int(center_x - w / 2), int(center_y - h / 2)),
                               (int(center_x + w / 2), int(center_y + h / 2)), (0, 0, 255), 1, 0)
-                    cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
+                    if DEBUG:
+                        cv2.circle(target_img, (center_x, center_y), 2, (0, 255, 0), -1)
                     cv2.imwrite(outfile, target_img)
                 if DEBUG:
                     print "center: ",[center_x, center_y]
@@ -699,20 +728,18 @@ def locate_more_image(origin,query,outfile='match.png',threshold=0.3,object_num=
     @param threshold: float (range [0, 1), the lower the more ease to match)
     @return None if not found, (x,y) point list if found
     '''
-    path_check(origin)
-    path_check(query)
+    _path_check(origin)
+    _path_check(query)
     img1,img2,query_img,target_img = _img_read(origin,query)
     threshold = 1-threshold
     # find the keypoints and descriptors with SIFT
-    kp1, des1 = siftextract(img1)
-    kp2, des2 = siftextract(img2)
+    kp1, des1 = _siftextract(img1)
+    kp2, des2 = _siftextract(img2)
     '''store all the good matches as per Lowe's ratio test.'''
     matches = _search(des1, des2)
-    # store all the good matches as per Lowe's ratio test.
-    good,center_xy, point_match= [],[],[]  
-    for m,n in matches:
-        if m.distance < threshold*n.distance:
-            good.append(m)
+    # store all the good matches as per Lowe's ratio test. 
+    good = _match_good(matches,threshold)
+    center_xy, point_match= [],[] 
     h,w = img1.shape
     ratio_num = int(len(kp1)*0.1)
     if len(good)>MIN_MATCH_COUNT:
@@ -725,12 +752,13 @@ def locate_more_image(origin,query,outfile='match.png',threshold=0.3,object_num=
             for i in range(row):
                 x = dst_pts[i][col-1][dim-2]
                 y = dst_pts[i][col-1][dim-1]
-                cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
+                if DEBUG:
+                    cv2.circle(target_img, (int(x), int(y)), 2, (255, 0, 0), -1)
                 point_match.append([x, y])
             center = dst_pts[row-1][col-1]
             for i in range(row-1):
                 center += dst_pts[i][col-1] 
-            if (row < 1) | (row < ratio_num):
+            if (row < 1) or (row < ratio_num):
                 if DEBUG:
                     print "NO Match"
             else:
@@ -745,8 +773,8 @@ def locate_more_image(origin,query,outfile='match.png',threshold=0.3,object_num=
     else:
         for i in range(1,object_num):
             center = center_xy[-1]
-            array = pickle_keypoints(kp2,des2)
-            kp2,des2 = unpickle_keypoints(array,center,w,h,target_img.shape)
+            array = _pickle_keypoints(kp2,des2)
+            kp2,des2 = _unpickle_keypoints(array,center,w,h,target_img.shape)
             matches = _search(des1, des2)
             _nextobject(w,h,matches,kp1,kp2,center_xy,point_match,target_img)
         re_center_xy = _adjust_center(w,h,ratio_num,good_match_num,center_xy,point_match,target_img)
@@ -755,9 +783,9 @@ def locate_more_image(origin,query,outfile='match.png',threshold=0.3,object_num=
             cv2.imwrite(outfile,target_img)
         return re_center_xy
 
-def locate_more_image_template(origin,query,outfile='match.png',object_num=5):
-    path_check(origin)
-    path_check(query)
+def locate_more_image_template(origin,query,outfile='match.png',object_num=0):
+    _path_check(origin)
+    _path_check(query)
     img1,img2,query_img,target_img = _img_read(origin,query)
     h = img1.shape[0]
     w = img1.shape[1]
@@ -804,7 +832,7 @@ if __name__ == '__main__':
         topleft_y = int(pt[1])
         bottomright_x = int(pt[2])
         bottomright_y = int(pt[3])
-        if (topleft_x <= center_x & center_x <= bottomright_x) & (topleft_y <= center_y & center_y <= bottomright_y):
+        if (topleft_x <= center_x and center_x <= bottomright_x) and (topleft_y <= center_y and center_y <= bottomright_y):
             print "Match Successfully !!!"
         else:
             print "Match Failure !!!"
