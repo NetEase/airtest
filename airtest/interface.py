@@ -26,8 +26,8 @@ class IDevice(Interface):
         ''' Return (width, height) '''
 
     def getCpu(appname):
-        ''' Return cpu: float (Cpu usage for app) '''
+        ''' Return cpu: float '''
 
     def getMem(appname):
-        ''' Return mem: float (unit MB, memory usage for app) '''
+        ''' Return dict: {'VSS': int, 'RSS': int, 'PSS': int} (unit KB) '''
 

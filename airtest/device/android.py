@@ -17,19 +17,34 @@ log = base.getLogger('android')
 
 def getMem(serialno, package):
     '''
+    @description details view: http://my.oschina.net/goskyblue/blog/296798
+
     @param package(string): android package name
-    @return float: the memory, unit MB
+    @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
     '''
-    command = 'adb -s %s shell dumpsys meminfo' % serialno
-    mem_info = base.check_output(command).splitlines()
+    command = 'adb -s %s shell ps %s' %(serialno, package)
+    output = base.check_output(command)
+    ret = {}
     try:
-        xym_mem = filter(lambda x: package in x, mem_info)[0].split()[0]
-        mem = float(xym_mem) / 1024
-        #log.info("mem: %.2f" % mem)
-        return mem
+        info = output.split('\n')[1] # ignore header
+        # USER PID PPID VSIZE RSS WCHAN PC NAME
+        values = info.split()
+        ret.update(dict(VSS=int(values[3]), RSS=int(values[4])))
     except IndexError:
-        log.error("mem error")
-        return 0
+        log.error("mem get error")
+        return {}
+    psscmd = 'adb -s %s shell dumpsys meminfo %s' %(serialno, package)
+    memout = base.check_output(psscmd)
+    pss = 0
+    result = re.search(r'\(Pss\):(\s+\d+)+', memout, re.M)
+    if result:
+        pss = result.group(1)
+    else:
+        result = re.search(r'TOTAL\s+(\d+)', memout, re.M)
+        if result:
+            pss = result.group(1)
+    ret.update(dict(PSS=int(pss)))
+    return ret
 
 def getCpu(serialno, package):
     '''

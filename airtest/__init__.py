@@ -5,13 +5,12 @@
 #
 #__all__=['devsuit', 'android', 'image', 'base', 'patch', 'ios', 'device']
 
-__version__ = '0.2.0721'
-
+import time
 import subprocess
 
-from airtest import device
 from airtest import devsuit
 
+__version__ = time.strftime('0.2.%m%d')
 
 ANDROID = 'android'
 IOS = 'ios'
@@ -24,6 +23,9 @@ def connect(phoneno, appname=None, device='android'):
     '''
     if  device == ANDROID:
         from airtest.device import android
+        subprocess.call(['adb', 'start-server'])
+        if not phoneno:
+            phoneno = [d for d, t in getDevices() if t == 'device'][0]
         devClass = android.Device
     elif device == IOS:
         from airtest.device import ios
@@ -31,6 +33,9 @@ def connect(phoneno, appname=None, device='android'):
     elif device == WINDOWS:
         from airtest.device import windows
         devClass = windows.Device
+    elif device == 'dummy': # this class is only for test
+        from airtest.device import dummy
+        devClass = dummy.Device 
     else:
         raise RuntimeError('device type not recognize')
 

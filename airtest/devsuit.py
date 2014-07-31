@@ -72,9 +72,8 @@ class DeviceSuit(object):
         # default image search extentension and 
         self._image_exts = ['.jpg', '.png']
         self._image_dirs = ['.', 'image']
-        self._image_dirs.insert(0, 'image-'+deviceType)
-        if deviceType in ('android', 'ios'):
-            self._image_dirs.insert(0, 'image-%d_%d'%(self.width, self.height))
+        self._image_pre_search_dirs = ['image-%d_%d'%(self.width, self.height), 
+                'image-'+deviceType]
 
         self._threshold = 0.3 # for findImage
         self._rotation = None # UP,DOWN,LEFT,RIGHT
@@ -94,7 +93,8 @@ class DeviceSuit(object):
             while True:
                 start = time.time()
                 mem = self.dev.getMem(self.appname)
-                self._log({'type':'record', 'mem':mem})
+                self._log({'type':'record', 'mem':mem.get('PSS')/1024})
+                self._log({'type':'record', 'mem_details':mem})
                 cpu = self.dev.getCpu(self.appname)
                 self._log({'type':'record', 'cpu':cpu})
                 dur = time.time()-start
@@ -134,7 +134,7 @@ class DeviceSuit(object):
             filename = filename.encode('gbk')
         basename, ext = os.path.splitext(filename)
         exts = [ext] if ext else self._image_exts
-        for folder in self._image_dirs:
+        for folder in self._image_pre_search_dirs + self._image_dirs:
             for ext in exts:
                 fullpath = os.path.join(folder, basename+ext)
                 if os.path.exists(fullpath):
@@ -195,6 +195,14 @@ class DeviceSuit(object):
                 setattr(self, '_'+k, v)
             else:
                 print 'not have such setting: %s' %(k)
+
+    def globalGet(self, key):
+        '''
+        get app setting
+        '''
+        if hasattr(self, '_'+key):
+            return getattr(self, '_'+key)
+        return None
 
     def find(self, imgfile):
         '''

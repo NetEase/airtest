@@ -6,10 +6,11 @@ This is only for test airtest itself
 '''
 
 import os
-import re
+# import re
+import shutil
 
 from airtest import base
-from com.dtmilano.android.viewclient import ViewClient 
+# from com.dtmilano.android.viewclient import ViewClient 
 from com.dtmilano.android.viewclient import adbclient
 
 DEBUG = os.getenv("DEBUG")=="true"
@@ -18,11 +19,13 @@ log = base.getLogger('dummy')
 
 class Device(object):
     def __init__(self, phoneno=None):
+        self._snapshot = './default.png'
         pass
 
     def snapshot(self, filename):
         ''' save screen snapshot '''
         log.debug('DUMMY start take snapshot')
+        shutil.copyfile(self._snapshot, filename)
 
     def touch(self, x, y, eventType=adbclient.DOWN_AND_UP):
         '''
