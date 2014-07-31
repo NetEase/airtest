@@ -257,15 +257,6 @@ class DeviceSuit(object):
             self.dev.touch(x, y)
             return
         (x, y) = self.wait(SF, seconds=seconds)
-        # while True:
-        #     point = self._PS2Point(SF)
-        #     if point:
-        #         (x, y) = point
-        #         break
-        #     if time.time() - start > seconds:
-        #         raise RuntimeError('func click: timeout(%.2fs), target(%s) not found' %(seconds, SF))
-            # log.warn('image file(%s) not found retry' %(SF))
-            # time.sleep(1)
         log.info('Click %s point: (%d, %d)', SF, x, y)
         self.dev.touch(x, y)
 
