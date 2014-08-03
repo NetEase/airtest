@@ -3,6 +3,8 @@
 
 from setuptools import setup, find_packages
 
+import airtest
+
 long_description = ''
 try:
     with open('README.md') as f:
@@ -12,7 +14,7 @@ except:
 
 setup(
       name='airtest',
-      version='0.2.0721.01',
+      version=airtest.__version__ + '.01',
       description='mobile test(black air) python lib',
       long_description=long_description,
 

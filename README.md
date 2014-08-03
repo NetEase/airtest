@@ -9,6 +9,10 @@ AirTest PoPo Discuss Group: **1275211**
 关于**屏幕旋转**一直也没有一个很好的解决方案，现在的方法需要手工去设置旋转方向。
 具体需要参考这篇文章 [airtest中的屏幕旋转如何设置](http://doc.mt.nie.netease.com/doku.php?id=airtest-screen-rotate)
 
+airtest目前的wiki在, 很多问题可以再上面找到答案： <http://doc.mt.nie.netease.com/doku.php?id=airtest>
+
+airtest具体的API依然维护这个README上面
+
 [![Build Status](http://jenkins.mt.nie.netease.com/job/airtest_selftest/badge/icon)](http://jenkins.mt.nie.netease.com/job/airtest_selftest/)
 
 ### For windows: 
@@ -181,19 +185,21 @@ app.keyevent('BACK')
 app.keyevent('MENU')
 ```
 
-### about airtest settting
-phone has 4 directions: `UP,DOWN,LEFT,RIGHT`
-
-change rotation through
+### airtest settting
+Mobile phone has 4 directions: `UP,DOWN,LEFT,RIGHT`.
+Change rotation through. more info view: <http://doc.mt.nie.netease.com/doku.php?id=airtest-screen-rotate>
 ```
 app.globalSet({'rotation': 'RIGHT'})
 ```
 
-change image recognize sensitivity
+Change image recognize sensitivity
 ```
-# threshold range [0, 1), if set to 1, then app can't recognize anything
+# threshold range [0, 1)
+# the bigger the accurate. If set to 1, then app can't recognize anything
 app.globalSet({'threshold': 0.3}) 
 ```
+
+关于更详细的配置，请参考: <http://doc.mt.nie.netease.com/doku.php?id=airtest#设置接口globalset和globalget>
 
 ## 更新日志
 [CHANGELOG](CHANGELOG.md)

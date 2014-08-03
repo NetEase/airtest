@@ -137,7 +137,6 @@ class Device():
             raise Exception('Can not find target application process')
         
     def _getHandleThroughFilename(self):
-        
         Psapi = ctypes.WinDLL('Psapi.dll')
         EnumProcesses = Psapi.EnumProcesses
         EnumProcesses.restype = ctypes.wintypes.BOOL
@@ -227,19 +226,24 @@ class Device():
         
     def touch(self, x, y):
         ''' Simulate touch '''
+        (ox, oy) = self.mouseposition() # remember mouse position
         x, y = self._resetpt(x, y)
         win32api.SetCursorPos((x,y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
+        win32api.SetCursorPos((ox,oy)) # move back mouse position
+
         
     def drag(self, (x1, y1), (x2, y2), duration=0.5):
         ''' Simulate drag '''
+        (ox, oy) = self.mouseposition() # remember mouse position
         x1, y1 = self._resetpt(x1, y1)
         x2, y2 = self._resetpt(x2, y2)
         win32api.SetCursorPos((x1, y1))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
         autopy.mouse.smooth_move(x2, y2)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
+        win32api.SetCursorPos((ox,oy)) # move back mouse position
         
     def type(self, text):
         ''' Type text into device '''
@@ -317,8 +321,8 @@ class Device():
         
     def getCpu(self, appname):
         ''' Return cpu: float (Cpu usage for app) '''
-        return 0
+        return 0.0
         
     def getMem(self, appname):
         ''' Return mem: float (unit MB, memory usage for app) '''
-        return 0
+        return {}

@@ -14,22 +14,6 @@ from PIL import Image
 DEBUG = os.getenv("DEBUG")=="true"
 log = base.getLogger('ios')
 
-def getMem(serialno, package):
-    '''
-    @param package(string): android package name
-    @return float: the memory, unit MB
-    '''
-    pass
-
-
-def getCpu(serialno, package):
-    '''
-    @param package(string): android package name
-    @return float: the cpu usage
-    '''
-    pass
-
-
 # from zope.interface.declarations import implementer
 # from airtest import interface
 
@@ -138,11 +122,11 @@ class Device(object):
 
     def getMem(self, appname):
         print "not provided yet on ios"
-        return getMem(self._serialno, appname)
+        return {}
 
     def getCpu(self, appname):
         print "not provided yet on ios"
-        return getCpu(self._serialno, appname)
+        return 0.0
 
 
 if __name__ == '__main__':
