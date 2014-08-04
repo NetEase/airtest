@@ -27,6 +27,10 @@ install pythonlib: **androidviewclient**
 ```
 pip install -U -i http://mt.nie.netease.com:3141/simple/ androidviewclient
 ```
+install pythonlib: **airtest**
+```
+pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
+```
 
 ### For android test (on any platform)
 1. adb: <http://developer.android.com/tools/help/adb.html>
@@ -51,16 +55,15 @@ Or manual
 1. pillow: `brew tap Homebrew/python && brew install pillow`
 1. appclient: `pip install Appium-Python-Client`
 
-## Last but import: install airtest
-install using pip(stable).
-```
-pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
-```
-
 ## Check if install OK
 for android
 
 Run [flappybird example program](example/flappybird)
+
+download test code through:
+```
+git clone http://git.mt.nie.netease.com/hzsunshx/flappybird
+```
 
 ## run test case
 ### step1: prepare air.json file.
