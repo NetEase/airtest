@@ -20,11 +20,13 @@ log = base.getLogger('dummy')
 class Device(object):
     def __init__(self, phoneno=None):
         self._snapshot = './default.png'
+        self._text = ''
+        self._click = None
         pass
 
     def snapshot(self, filename):
         ''' save screen snapshot '''
-        log.debug('DUMMY start take snapshot')
+        log.debug('DUMMY take snapshot %s' %(filename))
         shutil.copyfile(self._snapshot, filename)
 
     def touch(self, x, y, eventType=adbclient.DOWN_AND_UP):
@@ -32,6 +34,7 @@ class Device(object):
         same as adb -s ${SERIALNO} shell input tap x y
         '''
         log.debug('touch position %s', (x, y))
+        self._click = (x, y)
 
     def drag(self, (x0, y0), (x1, y1), duration=0.5):
         '''
@@ -52,6 +55,7 @@ class Device(object):
         @param text: string (text want to type)
         '''
         log.debug('type text: %s', repr(text))
+        self._text = text
 
     def keyevent(self, event):
         '''
@@ -62,7 +66,7 @@ class Device(object):
         log.debug('keyevent: %s', event)
 
     def getMem(self, appname):
-        return 0.0
+        return {}
 
     def getCpu(self, appname):
         return 0.0

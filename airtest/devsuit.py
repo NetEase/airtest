@@ -132,6 +132,7 @@ class DeviceSuit(object):
         ''' Search image in default path '''
         if isinstance(filename, unicode) and platform.system() == 'Windows':
             filename = filename.encode('gbk')
+            #filename = filename.encode('utf-8')
         basename, ext = os.path.splitext(filename)
         exts = [ext] if ext else self._image_exts
         for folder in self._image_pre_search_dirs + self._image_dirs:

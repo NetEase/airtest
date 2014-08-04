@@ -596,6 +596,7 @@ def locate_one_image(origin, query, outfile=None, threshold=0.3):
     '''
     _path_check(origin)
     _path_check(query)
+    print query
     img1 = cv2.imread(query, 0)  # queryImage,gray
     img2 = cv2.imread(origin, 0)  # originImage,gray
     query_img = cv2.imread(query, 1)  # queryImage
