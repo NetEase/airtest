@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-2014/07/31 jiaqianghuai: rewrite the code
+2014/08/04 jiaqianghuai: fix the code
 """
 
 __author__ = 'hzjiaqianghuai,hzsunshx'
-__version__ = '0.2.07.31'
-__description__ ='rewrite the code'
+__version__ = '0.2.08.04'
+__description__ ='fix the code'
 
 import os
 import time
@@ -37,14 +37,14 @@ def _reremove(list):
     return checked
 
 #sort the point_list in the ascending order of y coordinate
-def _sort_point_list(list):
+def _sort_point_list(list, option=1):
+    """option=1, ordered by y; option=0, ordered by x"""
     reorder_list = []
-    print "list length: ", len(list)
     for i in range(len(list)-1):
-        min, k = list[0][1], 0
+        min, k = list[0][option], 0
         for j in range(1,len(list)):
-            if list[j][1] < min:
-                min = list[j][1]
+            if list[j][option] < min:
+                min = list[j][option]
                 k = j
         reorder_list.append(list[k])
         del list[k]
@@ -576,14 +576,14 @@ def feature_similarity(image_1,image_2,threshold=0.7):
         similarity = good_match_num/num
     return similarity, good_match_num
 
-def locate_image(orig, quer, outfile='DEBUG.png', threshold=0.3):
+def locate_image(orig, quer, outfile, threshold=0.3):
     pt = locate_one_image(orig, quer, outfile, threshold)
     if pt:
         return [pt]
     else:
         return None
 
-def locate_one_image(origin, query, outfile='match.png', threshold=0.3):
+def locate_one_image(origin, query, outfile, threshold=0.3):
     '''
     Locate one image position
 
@@ -653,7 +653,7 @@ def locate_one_image(origin, query, outfile='match.png', threshold=0.3):
                 _image_rectangle(target_img, [center], width, height, outfile)
                 return center
 
-def locate_one_image_SIFT(origin, query, outfile='match.png', threshold=0.3):
+def locate_one_image_SIFT(origin, query, outfile, threshold=0.3):
     """Locate one image position with SIFT based match method
 
     @param origin: string (target filename)
@@ -718,7 +718,7 @@ def locate_one_image_SIFT(origin, query, outfile='match.png', threshold=0.3):
                 _image_rectangle(target_img, [center], width, height, outfile)
                 return center
                 
-def locate_more_image_SIFT(origin,query,outfile='match.png',threshold=0.3,num=7):
+def locate_more_image_SIFT(origin, query,outfile, threshold=0.3, num=7):
     '''
     Locate multi_object image position with SIFT feature based match method
 
@@ -770,16 +770,22 @@ def locate_more_image_SIFT(origin,query,outfile='match.png',threshold=0.3,num=7)
     if len(center_list) < 1:
         return None
     else:
-        for i in range(1, num):
-            center = center_list[-1]
+        center_xy, k = [], 1
+        while center_list[-1] and center_list[-1] != center_xy:
+            if 0 < num:
+                if k == num: break
+            center_xy = center_list[-1]
             array = _pickle_keypoints(kp2,des2)
-            kp2,des2 = _unpickle_keypoints(array,center,w,h,img2.shape[1],img2.shape[0])
+            kp2,des2 = _unpickle_keypoints(array,center_xy,w,h,
+                                            img2.shape[1],img2.shape[0])
             good, default= _searchAndmatch(des1, des2,0.9,None)
-            src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1,1,2)
-            dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1,1,2) 
+            src_pts=np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1,1,2)
+            dst_pts=np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1,1,2) 
             if len(good) > MIN_MATCH_COUNT:       
-                center = _homography_match(img2,img1,src_pts,dst_pts,num1,point_match,0)
-                if center: center_list.append(center)
+                center=_homography_match(img2,img1,src_pts,dst_pts,num1,point_match,0)
+                if center: 
+                    center_list.append(center)
+                    k = k + 1
             else:
                 if 2 <= len(good):
                     row,col,dim = dst_pts.shape
@@ -792,11 +798,12 @@ def locate_more_image_SIFT(origin,query,outfile='match.png',threshold=0.3,num=7)
                             center[1] = center[1] + y
                         [center_x,center_y] = [int(center[0]/row),int(center[1]/row)]
                         center_list.append([center_x, center_y])
+                        k = k + 1
         new_centers = _re_cluster_center(img2,center_list,point_match,w,h,ratio_num)
         _image_rectangle(target_img,new_centers,w,h,outfile)
         return new_centers
 
-def locate_more_image_Template(origin,query,outfile='match.png',num=0):
+def locate_more_image_Template(origin, query, outfile, num=0):
     '''
     Locate multi_object image position with template match method
 
@@ -818,13 +825,13 @@ def locate_more_image_Template(origin,query,outfile='match.png',num=0):
     if num == 0:
         while (1):                
                 maxval, maxloc = template_match(img2, img1, [], 0)
-                print maxval
                 if maxval < 0.96: break
                 center.append([int(maxloc[0]+w/2),int(maxloc[1]+h/2)])
                 _region_pixel_zero(img2, center[-1], w, h)
     else:        
         for i in range(num):            
             maxval, maxloc = template_match(img2, img1, [], 0)
+            if maxval < 0.96: return None
             center.append([int(maxloc[0]+w/2),int(maxloc[1]+h/2)])
             _region_pixel_zero(img2, center[-1], w, h)
     _image_rectangle(target_img, center, w, h,outfile)
