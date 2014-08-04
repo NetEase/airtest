@@ -16,3 +16,6 @@ Change Log
 3. 图像文件名支持unicode中文，支持在多个图片文件夹里自动搜索
 4. 增加globalGet函数
 
+### 2014/08/04
+1. globalSet更新支持， globalSet(key=value)，兼容原有的globalSet({})
+

@@ -31,7 +31,7 @@ def rotate_point((x, y), (w, h), d):
         return h-y, x
 
 def find_multi_image(orig, query, threshold):
-    points = image.locate_more_image_template(orig, query)
+    points = image.locate_more_image_Template(orig, query)
     if not points:
         return []
     return points
@@ -164,6 +164,7 @@ class DeviceSuit(object):
             base.makedirs(parent_dir)
 
         self.dev.snapshot(filename)
+
         if self._device == 'windows':
             return filename
         rotation = self._getRotation()
@@ -185,11 +186,16 @@ class DeviceSuit(object):
         self._log(dict(type='snapshot', filename=savefile))
         return savefile
 
-    def globalSet(self, m={}):
+    def globalSet(self, *args, **kwargs):
         '''
         app setting, be careful you should known what you are doing.
         @parma m(dict): eg:{"threshold": 0.3}
         '''
+        if len(args) > 0:
+            m = args[0]
+            assert isinstance(m, dict)
+        else:
+            m = kwargs
         for k,v in m.items():
             if hasattr(self, '_'+k):
                 setattr(self, '_'+k, v)

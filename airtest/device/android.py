@@ -83,10 +83,22 @@ class Device(object):
 
     def snapshot(self, filename):
         ''' save screen snapshot '''
-        log.debug('start take snapshot')
+        log.debug('start take snapshot(%s)'%(filename))
         pil = self.adb.takeSnapshot(reconnect=True)
-        log.debug('finish take snapshot and save to '+filename)
-        pil.save(filename)
+        return pil.save(filename)
+        # try:
+        #     if self._useScreencap:
+        #         raise IOError('trigger error, inorder to use other takesnapshot way')
+        #     pil = self.adb.takeSnapshot(reconnect=True)
+        #     pil.save(filename)
+        # except:
+        #     tmpname = '/sdcard/airtest-screen.png'
+        #     self.adb.shell('screencap -p '+tmpname)
+        #     os.system(' '.join(('adb', '-s', self._serialno, 'pull', tmpname, filename)))
+        #     self.adb.shell('rm '+tmpname)
+        #     log.debug('use Screencap to takesnapshot '+filename)
+        # else:
+        #     log.debug('finish take snapshot and save to '+filename)
 
     def touch(self, x, y, eventType=adbclient.DOWN_AND_UP):
         '''

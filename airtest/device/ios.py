@@ -127,7 +127,15 @@ class Device(object):
     def getCpu(self, appname):
         print "not provided yet on ios"
         return 0.0
-
+    
+    def getdevinfo(self):
+        return {
+                'mem_free': 0,
+                'mem_total': 1,
+                'cpu_count': 2,
+                'product_model': 'ios',
+                'product_brand': 'ios',
+                }
 
 if __name__ == '__main__':
     d = Device()
