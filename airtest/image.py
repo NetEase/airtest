@@ -288,7 +288,8 @@ def _image_rectangle(image, centers, width, height,outfile='match.png'):
                 cv2.rectangle(image,(topleft_x,topleft_y),
                                     (bottomright_x,bottomright_y),(0,0,255),1,0)
                 cv2.circle(image,(int(center[0]),int(center[1])),2,(0,255,0),-1)
-    if outfile: cv2.imwrite(outfile,image)
+    if outfile:
+        cv2.imwrite(outfile,image)
 
 #homography
 def _homography(src_pts,dst_pts,template_width,template_height,match_point=None):
@@ -576,14 +577,14 @@ def feature_similarity(image_1,image_2,threshold=0.7):
         similarity = good_match_num/num
     return similarity, good_match_num
 
-def locate_image(orig, quer, outfile, threshold=0.3):
+def locate_image(orig, quer, outfile=None, threshold=0.3):
     pt = locate_one_image(orig, quer, outfile, threshold)
     if pt:
         return [pt]
     else:
         return None
 
-def locate_one_image(origin, query, outfile, threshold=0.3):
+def locate_one_image(origin, query, outfile=None, threshold=0.3):
     '''
     Locate one image position
 
@@ -653,7 +654,7 @@ def locate_one_image(origin, query, outfile, threshold=0.3):
                 _image_rectangle(target_img, [center], width, height, outfile)
                 return center
 
-def locate_one_image_SIFT(origin, query, outfile, threshold=0.3):
+def locate_one_image_SIFT(origin, query, outfile=None, threshold=0.3):
     """Locate one image position with SIFT based match method
 
     @param origin: string (target filename)
@@ -718,7 +719,7 @@ def locate_one_image_SIFT(origin, query, outfile, threshold=0.3):
                 _image_rectangle(target_img, [center], width, height, outfile)
                 return center
                 
-def locate_more_image_SIFT(origin, query,outfile, threshold=0.3, num=7):
+def locate_more_image_SIFT(origin, query, outfile=None, threshold=0.3, num=7):
     '''
     Locate multi_object image position with SIFT feature based match method
 
@@ -803,7 +804,7 @@ def locate_more_image_SIFT(origin, query,outfile, threshold=0.3, num=7):
         _image_rectangle(target_img,new_centers,w,h,outfile)
         return new_centers
 
-def locate_more_image_Template(origin, query, outfile, num=0):
+def locate_more_image_Template(origin, query, outfile=None, num=0):
     '''
     Locate multi_object image position with template match method
 
