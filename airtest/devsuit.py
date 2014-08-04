@@ -93,7 +93,7 @@ class DeviceSuit(object):
             while True:
                 start = time.time()
                 mem = self.dev.getMem(self.appname)
-                self._log({'type':'record', 'mem':mem.get('PSS')/1024})
+                self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})
                 self._log({'type':'record', 'mem_details':mem})
                 cpu = self.dev.getCpu(self.appname)
                 self._log({'type':'record', 'cpu':cpu})

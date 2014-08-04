@@ -125,6 +125,11 @@ deviceType = 'android' # can be windows or ios
 app = airtest.connect(phoneno, appname=appname, device=deviceType)
 ```
 
+takeSnapshot(filename) # filename show with extention (.jpg or .png)
+```
+app.takeSnapshot('snapshot.png')
+```
+
 click(...) # click by image file
 ```
 app.click(P)
@@ -155,7 +160,7 @@ app.exists('apple.png')
 # just exactly call wait
 ```
 
-drap(...) # drag one place to and onother place
+drag(...) # drag one place to and onother place
 ```
 app.drag(fromP, toP)
 # fromP, toP: like click param, can be filename or position
