@@ -154,6 +154,7 @@ def main():
         if len(devices) != 1:
             sys.exit("can't determine which devices to use, please run: 'adb devices'")
         arguments['SERIALNO'] = devices[0][0]
+        serialno = arguments['SERIALNO']
 
     if action in ['snapshot']:
         return globals().get('run_'+action)()
