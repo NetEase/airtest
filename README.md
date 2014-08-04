@@ -58,7 +58,7 @@ Or manual
 ## Check if install OK
 for android
 
-Run [flappybird example program](example/flappybird)
+Run [flappybird example program](http://git.mt.nie.netease.com/hzsunshx/flappybird)
 
 download test code through:
 ```
