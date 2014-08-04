@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-2014/08/04 jiaqianghuai: fix the code
+2014/08/04 jiaqianghuai: 378行: 设置row大于0
 """
 
 __author__ = 'hzjiaqianghuai,hzsunshx'
@@ -375,7 +375,7 @@ def _re_detectAndmatch(source_image, template_image, origin_image, query_image,
     kp = source_image_match_keypoints
     dst_pts = np.float32([kp[m] for m in range(len(kp))]).reshape(-1, 1, 2)
     row, col, dim = dst_pts.shape
-    if row < 33:
+    if 0 < row < 33:
         _image_process(template_image, 0.1)
         match_value, match_posi, sift_similarity, max, k = [], [], [], 0.0, 0
         for i in range(row): #在匹配特征点附近进行模板搜索
