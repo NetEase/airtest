@@ -56,7 +56,7 @@ def get_jsonlog(filename='log/airtest.log'):
     return jlog
 
 class DeviceSuit(object):
-    def __init__(self, device, deviceType, serialno, appname=None):
+    def __init__(self, device, deviceType, serialno, appname=None, monitor=True):
         print 'DEVSUIT_SERIALNO:', serialno
         self.dev = device(serialno)
         self.appname = appname
@@ -83,12 +83,14 @@ class DeviceSuit(object):
         self._device = deviceType
         self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
         self._monitor_interval = 5
+        self._click_timeout = 20.0 # if icon not found in this time, then panic
+        self._delay_after_click = 0.5 # when finished click, wait time
 
         @patch.go
         def _monitor():
             log.debug('MONITOR started')
             if not self.appname:
-                log.debug('MONITOR finished, no package provided')
+                log.debug('MONITOR finished, no appname provided')
                 return
             while True:
                 start = time.time()
@@ -100,7 +102,8 @@ class DeviceSuit(object):
                 dur = time.time()-start
                 if self._monitor_interval > dur:
                     time.sleep(self._monitor_interval-dur)
-        _monitor()
+        if monitor:
+            _monitor()
 
     def _getRotation(self):
         '''
@@ -252,20 +255,24 @@ class DeviceSuit(object):
     def exists(self, imgfile):
         return True if self.find(imgfile) else False
 
-    def click(self, SF, seconds=20.0):
+    def click(self, SF, seconds=None):
         '''
         Click function
         @param seconds: float (if time not exceed, it will retry and retry)
         '''
-        log.info('CLICK %s', SF)
+        if seconds == None:
+            seconds = self._click_timeout
+        log.info('CLICK %s, timeout=%.2f', SF, seconds)
         point = self._PS2Point(SF)
         if point:
             (x, y) = point
             self.dev.touch(x, y)
-            return
-        (x, y) = self.wait(SF, seconds=seconds)
-        log.info('Click %s point: (%d, %d)', SF, x, y)
-        self.dev.touch(x, y)
+        else:
+            (x, y) = self.wait(SF, seconds=seconds)
+            log.info('Click %s point: (%d, %d)', SF, x, y)
+            self.dev.touch(x, y)
+        log.debug('delay after click: %.2fs' ,self._delay_after_click)
+        time.sleep(self._delay_after_click)
 
     def center(self):
         '''

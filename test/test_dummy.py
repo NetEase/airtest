@@ -7,6 +7,7 @@ sys.setdefaultencoding('utf8')
 import airtest
 import os
 import cv2
+import time
 
 app = airtest.connect('shit', device='dummy')
 screenFile = 'testdata/dummy/default.png'
@@ -19,6 +20,22 @@ def setup_function(f):
     app.dev._text = ''
     app.dev._click = None
 
+def test_connect():
+    ap = airtest.connect('test-connect', appname='hello', device='dummy', monitor=False)
+    ap.dev._getCpu = False
+    time.sleep(2.0)
+    assert ap.dev._getCpu == False
+
+    ap = airtest.connect('test-connect', appname='hello', device='dummy', monitor=True)
+    ap.dev._getCpu = False
+    time.sleep(2.0)
+    assert ap.dev._getCpu == True
+
+    ap = airtest.connect('test-connect', appname='hello', device='dummy')
+    ap.dev._getCpu = False
+    time.sleep(2.0)
+    assert ap.dev._getCpu == True
+    
 def test_snapshot():
     app.takeSnapshot('tmp/nice.png')
     assert os.path.exists('tmp/nice.png')

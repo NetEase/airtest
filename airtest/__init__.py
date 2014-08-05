@@ -17,7 +17,7 @@ IOS = 'ios'
 WINDOWS='windows'
 SEPRATOR = '::'
 
-def connect(phoneno, appname=None, device='android'):
+def connect(phoneno, appname=None, device='android', monitor=True):
     '''
     Connect device
     '''
@@ -39,7 +39,8 @@ def connect(phoneno, appname=None, device='android'):
     else:
         raise RuntimeError('device type not recognize')
 
-    return devsuit.DeviceSuit(devClass, device, phoneno, appname=appname)
+    return devsuit.DeviceSuit(devClass, device, phoneno, 
+            appname=appname, monitor=monitor)
 
 def getDevices(device='android'):
     ''' 

@@ -22,6 +22,7 @@ class Device(object):
         self._snapshot = './default.png'
         self._text = ''
         self._click = None
+        self._getCpu = False
         pass
 
     def snapshot(self, filename):
@@ -69,6 +70,7 @@ class Device(object):
         return {}
 
     def getCpu(self, appname):
+        self._getCpu = True
         return 0.0
 
     def start(self, dictSet):
