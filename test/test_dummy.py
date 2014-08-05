@@ -21,19 +21,19 @@ def setup_function(f):
     app.dev._click = None
 
 def test_connect_monitor():
-    ap = airtest.connect('test-connect', appname='hello', device='dummy', monitor=False)
+    ap = airtest.connect('test-connect', appname='hello', device='dummy', monitor=False, logfile='log/1')
     ap.dev._getCpu = False
     time.sleep(2.0)
     assert ap.dev._getCpu == False
     ap.globalSet(enable_monitor=False)
 
-    ap = airtest.connect('test-connect', appname='hello', device='dummy', monitor=True)
+    ap = airtest.connect('test-connect', appname='hello', device='dummy', monitor=True, logfile='log/2')
     ap.dev._getCpu = False
     time.sleep(2.0)
     assert ap.dev._getCpu == True
     ap.globalSet(enable_monitor=False)
 
-    ap = airtest.connect('test-connect', appname='hello', device='dummy')
+    ap = airtest.connect('test-connect', appname='hello', device='dummy', logfile='log/3')
     ap.dev._getCpu = False
     time.sleep(2.0)
     assert ap.dev._getCpu == True

@@ -17,7 +17,7 @@ IOS = 'ios'
 WINDOWS='windows'
 SEPRATOR = '::'
 
-def connect(phoneno, appname=None, device='android', monitor=True):
+def connect(phoneno, appname=None, device='android', monitor=True, logfile='log/airtest.log'):
     '''
     Connect device
     '''
@@ -39,8 +39,8 @@ def connect(phoneno, appname=None, device='android', monitor=True):
     else:
         raise RuntimeError('device type not recognize')
 
-    return devsuit.DeviceSuit(devClass, device, phoneno, 
-            appname=appname, monitor=monitor)
+    return devsuit.DeviceSuit(device, devClass, phoneno, 
+            appname=appname, logfile=logfile, monitor=monitor)
 
 def getDevices(device='android'):
     ''' 
@@ -49,7 +49,7 @@ def getDevices(device='android'):
     subprocess.call(['adb', 'start-server'])
     output = subprocess.check_output(['adb', 'devices'])
     result = []
-    for line in output.splitlines()[1:]:
+    for line in str(output).splitlines()[1:]:
         ss = line.strip().split()
         if len(ss) == 2:
             (phoneno, state) = ss
