@@ -82,7 +82,7 @@ def render(logfile, htmldir):
             file.write(out.encode('utf-8'))
 
         # store json data file, for other system
-        with open(os.path.join(htmldir, 'data.json')) as file:
+        with open(os.path.join(htmldir, 'data.json'), 'w') as file:
             json.dump(data, file)
 
 if __name__ == '__main__':
