@@ -14,7 +14,7 @@ except:
 
 setup(
       name='airtest',
-      version=airtest.__version__ + '.04',
+      version=airtest.__version__ + '.05',
       description='mobile test(black air) python lib',
       long_description=long_description,
 
