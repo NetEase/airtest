@@ -16,18 +16,17 @@ airtest具体的API依然维护这个README上面
 [![Build Status](http://jenkins.mt.nie.netease.com/job/airtest_selftest/badge/icon)](http://jenkins.mt.nie.netease.com/job/airtest_selftest/)
 
 ### For windows: 
-Windows need python2.7 32bit.
+Windows need python2.7 32bit. Remember 32bit. not 64.
 
 Download Resouce from here: <http://pan.baidu.com/s/1eQFyg4E> Password: `dt77`.
 Install according to the number one by one.
-
-Last step: Copy `cv2.pyd` to `python/lib/site-packages`
 
 install pythonlib: **androidviewclient**
 ```
 pip install -U -i http://mt.nie.netease.com:3141/simple/ androidviewclient
 ```
-install pythonlib: **airtest**
+
+install pythonlib: **airtest**, (Want update?, run this command again)
 ```
 pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
 ```
@@ -37,7 +36,6 @@ pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
 1. numpy
 1. opencv
 1. pillow
-    * Windows: download pillow from <http://www.lfd.uci.edu/~gohlke/pythonlibs/>
     * Linux: A little complicated. It's better to install from source.
 
 ### For ios test (only on Mac OS)
@@ -120,12 +118,13 @@ import airtest
 step1 connect device
 ```
 # get serialno by call: adb devices
-phoneno = os.getenv('AIRTEST_PHONENO') or 'xxxxx888882111' # phone number
-appname = os.getenv('AIRTEST_APPNAME') or 'com.netease.rz' # the application name
+phoneno = os.getenv('AIRTEST_PHONENO') or 'xxxxx888882111' # bundleid or serialno
+appname = os.getenv('AIRTEST_APPNAME') or 'com.netease.rz' # app name
 deviceType = 'android' # can be windows or ios
 
 # connect to your android devices
-app = airtest.connect(phoneno, appname=appname, device=deviceType)
+# default value: device='android', monitor=True
+app = airtest.connect(phoneno, appname=appname, device=deviceType, monitor=True)
 ```
 
 takeSnapshot(filename) # filename show with extention (.jpg or .png)
@@ -133,13 +132,16 @@ takeSnapshot(filename) # filename show with extention (.jpg or .png)
 app.takeSnapshot('snapshot.png')
 ```
 
-click(...) # click by image file
+click(P) # click by image file
 ```
 app.click(P)
 # P can be
 # - filename: 'start.png'
 # - position: (100, 200)
 # - percent: (0.1, 0.02)    # equal to (width*0.1, height*0.02)
+
+# click-timeout(only avaliable when P is string)
+# app.click('start.png', 20.0) # if start.png not found in 20s, Exception will raised.
 ```
 
 find(...) # find a image position located in screen

@@ -56,9 +56,10 @@ def get_jsonlog(filename='log/airtest.log'):
     return jlog
 
 class DeviceSuit(object):
-    def __init__(self, device, deviceType, serialno, appname=None):
-        print 'DEVSUIT_SERIALNO:', serialno
-        self.dev = device(serialno)
+    def __init__(self, device, devClass, phoneno, 
+            appname=None, logfile='log/airtest.log', monitor=True):
+        print 'DEVSUIT_SERIALNO:', phoneno
+        self.dev = devClass(phoneno)
         self.appname = appname
 
         w, h = self.dev.shape()
@@ -67,30 +68,33 @@ class DeviceSuit(object):
             self.height = max(w, h)
         else:
             self.width = w
-            self.width = h
+            self.height = h
 
         # default image search extentension and 
         self._image_exts = ['.jpg', '.png']
         self._image_dirs = ['.', 'image']
         self._image_pre_search_dirs = ['image-%d_%d'%(self.width, self.height), 
-                'image-'+deviceType]
+                'image-'+device]
 
         self._threshold = 0.3 # for findImage
         self._rotation = None # UP,DOWN,LEFT,RIGHT
-        self._log = get_jsonlog().writeline # should implementes writeline(dict)
+        self._log = get_jsonlog(logfile).writeline # should implementes writeline(dict)
         self._tmpdir = 'tmp'
         self._log(dict(type='start', timestamp=time.time()))
-        self._device = deviceType
+        self._device = device
         self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
+        self._enable_monitor = True
         self._monitor_interval = 5
+        self._click_timeout = 20.0 # if icon not found in this time, then panic
+        self._delay_after_click = 0.5 # when finished click, wait time
 
         @patch.go
         def _monitor():
             log.debug('MONITOR started')
             if not self.appname:
-                log.debug('MONITOR finished, no package provided')
+                log.debug('MONITOR finished, no appname provided')
                 return
-            while True:
+            while True and self._enable_monitor:
                 start = time.time()
                 mem = self.dev.getMem(self.appname)
                 self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})
@@ -100,7 +104,8 @@ class DeviceSuit(object):
                 dur = time.time()-start
                 if self._monitor_interval > dur:
                     time.sleep(self._monitor_interval-dur)
-        _monitor()
+        if monitor:
+            _monitor()
 
     def _getRotation(self):
         '''
@@ -252,20 +257,24 @@ class DeviceSuit(object):
     def exists(self, imgfile):
         return True if self.find(imgfile) else False
 
-    def click(self, SF, seconds=20.0):
+    def click(self, SF, seconds=None):
         '''
         Click function
         @param seconds: float (if time not exceed, it will retry and retry)
         '''
-        log.info('CLICK %s', SF)
+        if seconds == None:
+            seconds = self._click_timeout
+        log.info('CLICK %s, timeout=%.2f', SF, seconds)
         point = self._PS2Point(SF)
         if point:
             (x, y) = point
             self.dev.touch(x, y)
-            return
-        (x, y) = self.wait(SF, seconds=seconds)
-        log.info('Click %s point: (%d, %d)', SF, x, y)
-        self.dev.touch(x, y)
+        else:
+            (x, y) = self.wait(SF, seconds=seconds)
+            log.info('Click %s point: (%d, %d)', SF, x, y)
+            self.dev.touch(x, y)
+        log.debug('delay after click: %.2fs' ,self._delay_after_click)
+        time.sleep(self._delay_after_click)
 
     def center(self):
         '''

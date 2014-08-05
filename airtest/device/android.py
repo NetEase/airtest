@@ -22,16 +22,17 @@ def getMem(serialno, package):
     @param package(string): android package name
     @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
     '''
-    command = 'adb -s %s shell ps %s' %(serialno, package)
+    command = 'adb -s %s shell ps' %(serialno)
     output = base.check_output(command)
     ret = {}
-    try:
-        info = output.split('\n')[1] # ignore header
-        # USER PID PPID VSIZE RSS WCHAN PC NAME
-        values = info.split()
-        ret.update(dict(VSS=int(values[3]), RSS=int(values[4])))
-    except IndexError:
-        log.error("mem get error")
+    for line in str(output).splitlines():
+        if line and line.split()[-1] == package:
+            # USER PID PPID VSIZE RSS WCHAN PC NAME
+            values = line.split()
+            ret.update(dict(VSS=int(values[3]), RSS=int(values[4])))
+            break
+    else:
+        log.error("mem get: adb shell ps error")
         return {}
     psscmd = 'adb -s %s shell dumpsys meminfo %s' %(serialno, package)
     memout = base.check_output(psscmd)

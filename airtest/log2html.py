@@ -41,7 +41,6 @@ def render(logfile, htmldir):
     for line in open(logfile):
         d = json.loads(line)
         time_format = '%Y/%m/%d %H:%M:%S'
-        #timestamp = time.strftime(time_format, time.localtime(d.get('timestamp')))
         timestamp = d.get('timestamp') - start_time
         _type = d.get('type')
         if _type == 'start':
@@ -53,12 +52,6 @@ def render(logfile, htmldir):
             cpu = d.get('cpu')
             if cpu:
                 cpus.append([timestamp, cpu])
-                #cpus.append({'time':timestamp, 'value':cpu})
-            #args = d.get('args')
-            #args.extend([k+'='+v for k, v in d.get('kwargs').items()])
-            #cmdstr = '{func}({argv})'.format(func=d.get('function'), 
-            #        argv=' ,'.join(["'%s'"%s for s in args]))
-            #items.append({'cmd': cmdstr})
         elif _type == 'snapshot':
             filename = d.get('filename')
             basename = os.path.basename(filename)
@@ -84,18 +77,13 @@ def render(logfile, htmldir):
         content = open(fullpath).read().decode('utf-8')
         out = pystache.render(content, data)
         print fullpath
-        #print out
         outpath = os.path.join(htmldir, name)
         with open(outpath, 'w') as file:
             file.write(out.encode('utf-8'))
-        #tmplfile = os.path.join(base.dirname(__file__), 'template.html')
 
-    #tmplfile = os.path.join(base.dirname(__file__), 'template.html')
-    #template = open(tmplfile).read()
-
-    #out = pystache.render(template.decode('utf-8'), data)
-    #with open(htmlfile, 'w') as file:
-    #    file.write(out.encode('utf-8'))
+        # store json data file, for other system
+        with open(os.path.join(htmldir, 'data.json'), 'w') as file:
+            json.dump(data, file)
 
 if __name__ == '__main__':
     render('testdata/airtest.log', 'tmp/out.html')

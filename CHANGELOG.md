@@ -17,5 +17,5 @@ Change Log
 4. 增加globalGet函数
 
 ### 2014/08/04
-1. globalSet更新支持， globalSet(key=value)，兼容原有的globalSet({})
+1. globalSet更新,支持globalSet(key=value)，兼容原有的globalSet({})
 
