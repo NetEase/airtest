@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-2014/08/04 jiaqianghuai: 378行: 设置row大于0
+2014/08/05 jiaqianghuai: 354行: kp_num改为kp_num2
 """
 
 __author__ = 'hzjiaqianghuai,hzsunshx'
-__version__ = '0.2.08.04'
+__version__ = '0.2.08.05'
 __description__ ='fix the code'
 
 import os
@@ -351,9 +351,9 @@ def _homography_match(source_image, template_image, src_points, dst_points,
                         return [center_x, center_y]
                 else:
                     rect_img3 = _region_copy(source_image,re_center,height,width,2)
-                    val2,kp_num = feature_similarity(rect_img3,template_image,0.7)
-                    if DEBUG: print "354_sift_value and kp_num: ", val2, kp_num
-                    if ((0.32 < val2 and value < val2) or (35 < kp_num  
+                    val2,kp_num2 = feature_similarity(rect_img3,template_image,0.7)
+                    if DEBUG: print "354_sift_value and kp_num: ", val2, kp_num2
+                    if ((0.32 < val2 and value < val2) or (35 < kp_num2  
                         and kp_num < kp_num2)):
                             return [center_x, center_y]
                     else:
