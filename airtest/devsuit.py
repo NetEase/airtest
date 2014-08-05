@@ -82,6 +82,7 @@ class DeviceSuit(object):
         self._log(dict(type='start', timestamp=time.time()))
         self._device = deviceType
         self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
+        self._enable_monitor = True
         self._monitor_interval = 5
         self._click_timeout = 20.0 # if icon not found in this time, then panic
         self._delay_after_click = 0.5 # when finished click, wait time
@@ -92,7 +93,7 @@ class DeviceSuit(object):
             if not self.appname:
                 log.debug('MONITOR finished, no appname provided')
                 return
-            while True:
+            while True and self._enable_monitor:
                 start = time.time()
                 mem = self.dev.getMem(self.appname)
                 self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})

@@ -20,21 +20,24 @@ def setup_function(f):
     app.dev._text = ''
     app.dev._click = None
 
-def test_connect():
+def test_connect_monitor():
     ap = airtest.connect('test-connect', appname='hello', device='dummy', monitor=False)
     ap.dev._getCpu = False
     time.sleep(2.0)
     assert ap.dev._getCpu == False
+    ap.globalSet(enable_monitor=False)
 
     ap = airtest.connect('test-connect', appname='hello', device='dummy', monitor=True)
     ap.dev._getCpu = False
     time.sleep(2.0)
     assert ap.dev._getCpu == True
+    ap.globalSet(enable_monitor=False)
 
     ap = airtest.connect('test-connect', appname='hello', device='dummy')
     ap.dev._getCpu = False
     time.sleep(2.0)
     assert ap.dev._getCpu == True
+    ap.globalSet(enable_monitor=False)
     
 def test_snapshot():
     app.takeSnapshot('tmp/nice.png')
