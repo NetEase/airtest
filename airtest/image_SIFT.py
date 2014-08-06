@@ -22,6 +22,19 @@ def _path_check(image_path):
     if not os.path.exists(image_path):
         raise IOError(image_path + 'not exists')
 
+#Euclidean distance
+def _distance(point_1,point_2):
+    norm2 = ((point_1[0]-point_2[0])*(point_1[0]-point_2[0]) + 
+            (point_1[1]-point_2[1])*(point_1[1]-point_2[1]))
+    return math.sqrt(norm2)     
+
+#remove the duplicate element in the list
+def _reremove(list):
+    checked = []
+    for e in list:
+        if e not in checked: checked.append(e)
+    return checked            
+        
 #SIFT extraction
 def _sift_extract(image):
     sift = cv2.SIFT()
@@ -43,6 +56,47 @@ def _searchAndmatch(image_1_descriptors, image_2_descriptors, threshold=0.7
         if image_2_keypoint: kp2_xy.append(image_2_keypoint[m.trainIdx].pt)
         if m.distance < threshold*n.distance: Good_match_keypoints.append(m)
     return Good_match_keypoints, kp2_xy
+
+#refine center
+def _refine_center(point_list, hori_distance, veti_distance):
+    """refine center
+    
+    @param point_list: list(contains points that is near to the latent center)
+    @param hori_distance: int(restrict the horizontal distance between points)
+    @param veti_distance: int(restrict the vetical distance between points)
+    @return new_center: list(new center)
+    """
+    point_sum,re_point_sum, max, dist, index, count= [0, 0],[0, 0], 0, [], [], 0
+    re_list = _reremove(point_list)
+    if len(re_list) < 1 or len(re_list) < int(len(point_list)*0.5): return None
+    for i in range(len(re_list)):
+        point_sum[0] = point_sum[0] + re_list[i][0]
+        point_sum[1] = point_sum[1] + re_list[i][1]
+    center = [float(point_sum[0])/len(re_list),float(point_sum[1])/len(re_list)]
+    if len(re_list) == 1:
+        return center        
+    else:
+        for i in range(len(re_list)):
+            dis = _distance(center, re_list[i])
+            if max < dis:
+                max = dis
+                k = i
+        if len(re_list) == 2:
+            [re_center_x,re_center_y] = center
+        else:
+            re_point_sum[0] = point_sum[0] - re_list[k][0]
+            re_point_sum[1] = point_sum[1] - re_list[k][1]
+            del re_list[k]
+            re_center_x = float(re_point_sum[0])/len(re_list)
+            re_center_y = float(re_point_sum[1])/len(re_list)
+        for i in range(len(re_list)):
+                if (int(1.5*hori_distance) < (abs(re_center_x-re_list[i][0])) or 
+                    int(1.5*veti_distance) < (abs(re_center_y-re_list[i][1]))):
+                        count = count + 1
+        if count == len(re_list):
+            return None
+        else:
+            return [re_center_x, re_center_y]
 
 #rectangle object in an image
 def _image_rectangle(image, centers, width, height,outfile='match.png'):
