@@ -8,8 +8,10 @@ import win32api,win32con,win32gui,win32process
 import autopy
 import ctypes,ctypes.wintypes
 import pygame
-import os,sys
+import os
 import time
+
+import airtest
  
 #def getNetFlow(appname=None)
 #    Get current network flow 
@@ -224,14 +226,19 @@ class Device():
             pic.save(filename)
         return pic
         
-    def touch(self, x, y):
+    def touch(self, x, y, eventType=airtest.EV_DOWN_AND_UP):
         ''' Simulate touch '''
         (ox, oy) = self.mouseposition() # remember mouse position
         x, y = self._resetpt(x, y)
         win32api.SetCursorPos((x,y))
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
-        win32api.SetCursorPos((ox,oy)) # move back mouse position
+        if eventType == airtest.EV_DOWN:
+          win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
+        elif eventType == airtest.EV_UP:
+          win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
+        else:
+          win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
+          win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
+          win32api.SetCursorPos((ox,oy)) # move back mouse position
 
         
     def drag(self, (x1, y1), (x2, y2), duration=0.5):

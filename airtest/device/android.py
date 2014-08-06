@@ -69,18 +69,76 @@ def getCpu(serialno, package):
 #@implementer(interface.IDevice)
 class Device(object):
     def __init__(self, serialno=None):
-        print 'S:', serialno
+        print 'SerialNo:', serialno
+
         self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
         self.adb.setReconnect(True) # this way is more stable
 
         self.vc = ViewClient(self.adb, serialno, autodump=False)
         self._devinfo = self.getdevinfo()
 
+        print 'ProductBrand:', self._devinfo['product_brand']
+
         try:
             if self.adb.isLocked():
                 self.adb.unlock()
         except:
             pass
+
+        self._keyevent, (rawx, rawy) = self._getInputEvent()
+        print 'KeyEvent:', self._keyevent
+        width, height = self.shape()
+        width, height = min(width, height), max(width, height)
+        self._scalex, self._scaley = float(rawx)/width, float(rawy)/height
+
+    def _sendevent(self, raw, **kwargs):
+        for line in raw.format(**kwargs).splitlines():
+            line = line.strip()
+            p = line.find('#')
+            if p != -1:
+                line = line[:p]
+            if line.startswith('#') or not line:
+                continue
+            type_, code, value = line.split()
+            if DEBUG: print 'debug: type:%s, code:%s, value(int):%s' %(type_, code, value)
+            self.adb.shell('sendevent '+self._keyevent+' %d %d %d' % (int(type_, 16), int(code, 16), int(value)))
+
+    def _touch_down(self, (x, y)):
+        actions_down = '''
+        # 0003 0039 00000243 # tracker_id
+        0001 014a 00000001 # btn_touch down
+        0003 0035 {x} # x
+        0003 0036 {y} # y
+        0000 0000 00000000 # sync
+        '''
+        nx, ny = int(x*self._scalex), int(y*self._scaley)
+        self._sendevent(actions_down, x=nx, y=ny)
+
+    def _touch_up(self):
+        actions_up = '''
+        0003 0039 00000243 # tracker_id
+        0001 014a 00000000 # btn_touch up
+        0000 0000 00000000 # sync
+        '''
+        self._sendevent(actions_up)
+
+    def _getInputEvent(self):
+         # get all event
+        output = self.adb.shell('cat /proc/bus/input/devices') 
+        output = output.replace('\r', '')  # fix for windows
+
+        # loop each event, findout keyboard event
+        for event in re.findall('Handlers=([\w\d]+)', output):
+            out = self.adb.shell('getevent -p /dev/input/'+event)
+            out = out.replace('\r', '')
+            mx = re.search(r'0035.*max (\d+)', out)
+            my = re.search(r'0036.*max (\d+)', out)
+            if not mx or not my:
+                continue
+            max_x, max_y = mx.group(1), my.group(1)
+            if DEBUG: print 'DEBUG: getInputEvent', event, out
+            return '/dev/input/'+event, map(int, (max_x, max_y))
+        return None, (0, 0)
 
     def snapshot(self, filename):
         ''' save screen snapshot '''
@@ -105,9 +163,18 @@ class Device(object):
         '''
         same as adb -s ${SERIALNO} shell input tap x y
         '''
-        eventType=adbclient.DOWN_AND_UP
-        log.debug('touch position %s', (x, y))
-        self.adb.touch(x, y, eventType)
+        if eventType == 'down':
+            self._touch_down((x, y))
+            log.debug('touch down position %s', (x, y))
+        elif eventType == 'up':
+            self._touch_up()
+            log.debug('touch up position %s', (x, y))
+        elif eventType == 'down_and_up':
+            log.debug('touch position %s', (x, y))
+            # the self.adb.touch(, ,eventType) not working, so use sendevent instaed
+            self.adb.touch(x, y) 
+        else:
+            raise RuntimeError('unknown eventType: %s' %(eventType))
 
     def drag(self, (x0, y0), (x1, y1), duration=0.5):
         '''

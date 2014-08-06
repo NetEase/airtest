@@ -12,6 +12,8 @@ from airtest import base
 from airtest import jsonlog
 from airtest import patch
 
+import airtest
+
 log = base.getLogger('devsuit')
 
 def rotate_point((x, y), (w, h), d):
@@ -257,7 +259,7 @@ class DeviceSuit(object):
     def exists(self, imgfile):
         return True if self.find(imgfile) else False
 
-    def click(self, SF, seconds=None):
+    def click(self, SF, seconds=None, eventType=airtest.EV_DOWN_AND_UP):
         '''
         Click function
         @param seconds: float (if time not exceed, it will retry and retry)
@@ -268,11 +270,11 @@ class DeviceSuit(object):
         point = self._PS2Point(SF)
         if point:
             (x, y) = point
-            self.dev.touch(x, y)
+            self.dev.touch(x, y, eventType)
         else:
             (x, y) = self.wait(SF, seconds=seconds)
             log.info('Click %s point: (%d, %d)', SF, x, y)
-            self.dev.touch(x, y)
+            self.dev.touch(x, y, eventType)
         log.debug('delay after click: %.2fs' ,self._delay_after_click)
         time.sleep(self._delay_after_click)
 

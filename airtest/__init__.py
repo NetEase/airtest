@@ -8,14 +8,18 @@
 import time
 import subprocess
 
+ANDROID = 'android'
+IOS = 'ios'
+WINDOWS='windows'
+
+EV_DOWN = 'down'
+EV_UP = 'up'
+EV_DOWN_AND_UP = 'down_and_up'
+
 from airtest import devsuit
 
 __version__ = time.strftime('0.2.%m%d')
 
-ANDROID = 'android'
-IOS = 'ios'
-WINDOWS='windows'
-SEPRATOR = '::'
 
 def connect(phoneno, appname=None, device='android', monitor=True, logfile='log/airtest.log'):
     '''

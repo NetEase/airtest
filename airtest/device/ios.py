@@ -11,6 +11,8 @@ from airtest import base
 from appium import webdriver
 from PIL import Image
 
+import airtest
+
 DEBUG = os.getenv("DEBUG")=="true"
 log = base.getLogger('ios')
 
@@ -65,10 +67,11 @@ class Device(object):
         log.debug("cvt %s,%s to %s,%s" % (x, y, x_input, y_input))
         return (int(x_input), int(y_input))
 
-    def touch(self, x, y):
+    def touch(self, x, y, eventType=airtest.EV_DOWN_AND_UP):
         '''
         touch screen at (x, y)
         multi finger operation not provided yet
+        FIXME: not supported down_and_up in android
         '''
         x, y = self._cvtXY(x, y)
         log.debug('touch position %s', (x, y))
