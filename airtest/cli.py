@@ -6,8 +6,9 @@
 #
 
 '''
-phone(android|iphone) autotest framework
+phone(android|iphone) autotest framework. gen can generate air.json
 Usage:
+    air.test gen <apk>
     air.test (runtest|install|uninstall) [-p PLATFORM] [SERIALNO]
     air.test log2html [--listen] [--port=PORT] <HTMLDIR>
     air.test snapshot [-p PLATFORM] [-r ROTATION] [SERIALNO]
@@ -31,9 +32,10 @@ import sys
 import os
 import urllib
 import subprocess
+import re
 
 from docopt import docopt
-from com.dtmilano.android.viewclient import ViewClient 
+# from com.dtmilano.android.viewclient import ViewClient 
 
 import airtest
 from airtest.base import exec_cmd
@@ -80,10 +82,25 @@ def run_snapshot():
     #else:
     #    print 'not supported:', platform
 
+def run_gen():
+    airjson ={
+      "cmd": "python main.py",
+      "android": {
+        "apk_url": "http://10.246.13.110:10001/demo-release-signed.apk",
+        "package": "com.netease.xxx",
+        "activity": "main.activity"
+      }
+    }
+    with open('air.json', 'w') as file:
+        json.dump(file, airjson)
+
 def run_install():
     if platform == 'android':
-        urlretrieve(xpath(platform, 'apk_url'), 'test.apk')
-        exec_cmd('adb', '-s', serialno, 'install', '-r', 'test.apk')
+        apk_url = xpath(platform, 'apk_url')
+        if re.match('^\w{1,2}tp://', apk_url):
+            urlretrieve(apk_url, 'test.apk')
+            apk_url = 'test.apk'
+        exec_cmd('adb', '-s', serialno, 'install', '-r', apk_url)
         package, activity = xpath(platform, 'package'), xpath(platform, 'activity')
         exec_cmd('adb', '-s', serialno, 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
     else:
