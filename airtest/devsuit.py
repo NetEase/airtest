@@ -63,14 +63,16 @@ class DeviceSuit(object):
         print 'DEVSUIT_SERIALNO:', phoneno
         self.dev = devClass(phoneno)
         self.appname = appname
+        self._device = device
 
-        w, h = self.dev.shape()
-        if device != 'windows':
-            self.width = min(w, h)
-            self.height = max(w, h)
-        else:
-            self.width = w
-            self.height = h
+        self._initWidthHeight()
+        # w, h = self.dev.shape()
+        # if device != 'windows':
+        #     self.width = min(w, h)
+        #     self.height = max(w, h)
+        # else:
+        #     self.width = w
+        #     self.height = h
 
         # default image search extentension and 
         self._image_exts = ['.jpg', '.png']
@@ -83,7 +85,6 @@ class DeviceSuit(object):
         self._log = get_jsonlog(logfile).writeline # should implementes writeline(dict)
         self._tmpdir = 'tmp'
         self._log(dict(type='start', timestamp=time.time()))
-        self._device = device
         self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
         self._enable_monitor = True
         self._monitor_interval = 5
@@ -108,6 +109,15 @@ class DeviceSuit(object):
                     time.sleep(self._monitor_interval-dur)
         if monitor:
             _monitor()
+
+    def _initWidthHeight(self):
+        w, h = self.dev.shape()
+        if self._device != 'windows':
+            self.width = min(w, h)
+            self.height = max(w, h)
+        else:
+            self.width = w
+            self.height = h
 
     def _getRotation(self):
         '''
@@ -309,19 +319,21 @@ class DeviceSuit(object):
         @param duration: float (duration of the event in ms)
         '''
         # the duration seems not working. no matter how larger I set, nothing changes.
-        variable = {}
-        def to_point(raw):
-            if isinstance(raw, list) or isinstance(raw, tuple):
-                return self._fixPoint(raw)
-            if isinstance(raw, basestring):
-                screen = variable.get('screen')
-                if not screen:
-                    variable['screen'] = self._saveScreen('drag-XXXXXXXX.png')
-                pt = find_one_image(variable['screen'], raw, self._threshold)
-                return self._fixPoint(pt)
-            raise RuntimeError('unknown type')
-
-        fpt, tpt = to_point(fpt), to_point(tpt)
+        # variable = {}
+        # def to_point(raw):
+        #     if isinstance(raw, list) or isinstance(raw, tuple):
+        #         return self._fixPoint(raw)
+        #     if isinstance(raw, basestring):
+        #         screen = variable.get('screen')
+        #         if not screen:
+        #             variable['screen'] = self._saveScreen('drag-XXXXXXXX.png')
+        #         pt = find_one_image(variable['screen'], raw, self._threshold)
+        #         return self._fixPoint(pt)
+        #     raise RuntimeError('unknown type')
+        # FIXME: (a little slow, find should support specified images)
+        fpt = self.find(fpt)
+        tpt = self.find(tpt)
+        # fpt, tpt = to_point(fpt), to_point(tpt)
         return self.dev.drag(fpt, tpt, duration)
 
     def sleep(self, secs=1.0):
@@ -378,7 +390,9 @@ class DeviceSuit(object):
         Start a app
         '''
         s = self._safe_load_config()
-        return self.dev.start(self.appname, s.get(self._device))
+        ret = self.dev.start(self.appname, s.get(self._device))
+        self._initWidthHeight()
+        return ret
     
     def stop(self):
         '''

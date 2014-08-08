@@ -135,7 +135,8 @@ class Device():
             self.filename = filename
         HWND=self._getHandleThroughFilename()
         self.HWND = self._chosegamehandle(HWND)
-        if self.HWND==0:
+        # print 'HWND:', self.HWND
+        if not self.HWND:
             raise Exception('Can not find target application process')
         
     def _getHandleThroughFilename(self):
