@@ -4,14 +4,8 @@
 2014/08/05 jiaqianghuai: create this code
 """
 
-__author__ = 'hzjiaqianghuai,hzsunshx'
-__version__ = '0.2.08.05'
-__description__ ='create this code'
-
 import os
 import time
-import math
-import numpy as np
 import cv2
 
 DEBUG = os.getenv('DEBUG') == 'true'
@@ -105,7 +99,54 @@ def template_match(source_image, template_image, region_center, option=0):
     else:
         [x,y] = maxloc
     return max_val, [x,y]
-        
+
+def _cv2open(filename, arg=0):
+    obj = cv2.imread(filename, arg)
+    if not obj:
+        raise IOError('cv2 read file error:'+filename)
+    return obj
+
+def find(search_file, image_file, threshold=0.7):
+    '''
+    Locate image position with cv2.templateFind
+
+    Use pixel match to find pictures.
+
+    Args:
+        search_file(string): filename of search object
+        image_file(string): filename of image to search on
+        threshold: optional variable, to ensure the match rate should >= threshold
+
+    Returns:
+        A tuple like (x, y) or None if nothing found
+
+    Raises:
+        IOError: when file read error
+    '''
+    search = _cv2open(search_file)
+    image  = _cv2open(image_file)
+
+    w, h = search.shape[::-1]
+
+    method = cv2.CV_TM_CCORR_NORMED
+    res = cv2.matchTemplate(image, search, method)
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+        top_left = min_loc
+    else:
+        top_left = max_loc
+    bottom_right = (top_left[0] + w, top_left[1] + h)
+    middle_point = (top_left[0]+w/2, top_left[1]+h/2)
+    print top_left, bottom_right
+    return middle_point
+
+    # if len(region_center):
+    #     x = int(maxloc[0]+region_center[0]-source_width/2)
+    #     y = int(maxloc[1]+region_center[1]-source_height/2)
+    # else:
+    #     [x,y] = maxloc
+    # return max_val, [x,y]
+
 def locate_more_image_Template(origin, query, outfile=None, num=0):
     '''
     Locate multi_object image position with template match method
@@ -121,7 +162,7 @@ def locate_more_image_Template(origin, query, outfile=None, num=0):
     _path_check(query)
     img1 = cv2.imread(query, 0)  # queryImage,gray
     img2 = cv2.imread(origin, 0)  # originImage,gray
-    query_img = cv2.imread(query, 1)  # queryImage
+    # query_img = cv2.imread(query, 1)  # queryImage
     target_img = cv2.imread(origin, 1)  # originImage
     [h, w] = [img1.shape[0], img1.shape[1]]
     center = []

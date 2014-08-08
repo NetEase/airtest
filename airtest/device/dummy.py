@@ -6,12 +6,12 @@ This is only for test airtest itself
 '''
 
 import os
-# import re
 import shutil
+import airtest
 
 from airtest import base
 # from com.dtmilano.android.viewclient import ViewClient 
-from com.dtmilano.android.viewclient import adbclient
+# from com.dtmilano.android.viewclient import adbclient
 
 DEBUG = os.getenv("DEBUG")=="true"
 log = base.getLogger('dummy')
@@ -30,7 +30,7 @@ class Device(object):
         log.debug('DUMMY take snapshot %s' %(filename))
         shutil.copyfile(self._snapshot, filename)
 
-    def touch(self, x, y, eventType=adbclient.EV_DOWN_AND_UP):
+    def touch(self, x, y, eventType=airtest.EV_DOWN_AND_UP):
         '''
         same as adb -s ${SERIALNO} shell input tap x y
         '''

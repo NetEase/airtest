@@ -132,7 +132,7 @@ takeSnapshot(filename) # filename show with extention (.jpg or .png)
 app.takeSnapshot('snapshot.png')
 ```
 
-click(P) # click by image file
+click(P, [seconds], eventType=airtest.EV_DOWN_AND_UP) # click by image file
 ```
 app.click(P)
 # P can be
@@ -141,7 +141,13 @@ app.click(P)
 # - percent: (0.1, 0.02)    # equal to (width*0.1, height*0.02)
 
 # click-timeout(only avaliable when P is string)
-# app.click('start.png', 20.0) # if start.png not found in 20s, Exception will raised.
+# equals to app.click(app.find('start.png', 20.0))
+app.click('start.png', 20.0) # if start.png not found in 20s, Exception will raised.
+
+# long press (this is an experimental function, report problem if something goes wrong)
+app.click(P, eventType=airtest.EV_DOWN)
+time.sleep(1.0) # press 1s
+app.click(P, eventType=airtest.EV_UP)
 ```
 
 find(...) # find a image position located in screen
