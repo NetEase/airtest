@@ -38,3 +38,9 @@ Or manual
 1. opencv: `brew tap homebrew/science && brew install opencv` 
 1. pillow: `brew tap Homebrew/python && brew install pillow`
 1. appclient: `pip install Appium-Python-Client`
+
+#### Dangerous: You should known what you are doing.
+airtest develop version(not stable)
+```
+pip install -U git+http://git.mt.nie.netease.com/hzsunshx/airtest.git
+```

@@ -7,10 +7,10 @@ import time
 import json
 import PIL
 
-from airtest import image
 from airtest import base
 from airtest import jsonlog
 from airtest import patch
+from airtest.image import auto as image
 
 import airtest
 
@@ -66,13 +66,6 @@ class DeviceSuit(object):
         self._device = device
 
         self._initWidthHeight()
-        # w, h = self.dev.shape()
-        # if device != 'windows':
-        #     self.width = min(w, h)
-        #     self.height = max(w, h)
-        # else:
-        #     self.width = w
-        #     self.height = h
 
         # default image search extentension and 
         self._image_exts = ['.jpg', '.png']

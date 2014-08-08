@@ -207,11 +207,6 @@ used by call, eg
 app.keyevent("HOME")
 ```
 
-airtest develop version(not stable)
-```
-pip install -U git+http://git.mt.nie.netease.com/hzsunshx/airtest.git
-```
-
 
 ## License
 This project is under the MIT License. See the [LICENSE](LICENSE) file for the full license text.
