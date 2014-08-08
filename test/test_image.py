@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# export PYTHONPATH=/z/workspace/airtest
-
 import os
 import pytest
 import string
 
-import airtest
-from airtest import image
+from airtest.image import auto as image
 
 def test_image_locate_file_not_exists():
     with pytest.raises(IOError):
