@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-import numpy as np
 
 def _cv2open(filename, arg=0):
     obj = cv2.imread(filename, arg)
@@ -10,16 +9,16 @@ def _cv2open(filename, arg=0):
         raise IOError('cv2 read file error:'+filename)
     return obj
 
-def _show_image(filename, left_top, (w, h)):
-    img = cv2.imread(filename)
-    x, y = left_top
-    cv2.rectangle(img, (x, y), (x+w, y+h), 255, 2)
-    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    cv2.imshow('image',img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+def find(search_file, image_file, threshold=0.8):
+    '''
+    Locate image position
 
-def findall(search_file, image_file, threshold=0.7):
+    same as findall, except without arg maxcnt
+    '''
+    point = findall(search_file, image_file, threshold, maxcnt=1)
+    return point if point else None
+
+def findall(search_file, image_file, threshold=0.8, maxcnt = 0):
     '''
     Locate image position with cv2.templateFind
 
@@ -29,9 +28,10 @@ def findall(search_file, image_file, threshold=0.7):
         search_file(string): filename of search object
         image_file(string): filename of image to search on
         threshold: optional variable, to ensure the match rate should >= threshold
+        maxcnt: maximun count of searched points
 
     Returns:
-        A tuple like (x, y) or None if nothing found
+        A tuple of found points ((x, y), ...)
 
     Raises:
         IOError: when file read error
@@ -53,39 +53,30 @@ def findall(search_file, image_file, threshold=0.7):
             top_left = min_loc
         else:
             top_left = max_loc
-
-        if max_val > threshold:
-            # floodfill the already found area
-            sx, sy = top_left
-            for x in range(sx-w/2, sx+w/2):
-                for y in range(sy-h/2, sy+h/2):
-                    try:
-                        res[y][x] = np.float32(-10000) # -MAX
-                    except IndexError: # ignore out of bounds
-                        pass
-            # _show_image(image_file, top_left, (w, h))
-            middle_point = (top_left[0]+w/2, top_left[1]+h/2)
-            points.append(middle_point)
-        else:
+    
+        if max_val < threshold:
             break
+        middle_point = (top_left[0]+w/2, top_left[1]+h/2)
+        points.append(middle_point)
+        if maxcnt and len(points) >= maxcnt:
+            break
+        # floodfill the already found area
+        cv2.floodFill(res, None, max_loc, (-1000,), max_val-threshold+0.1, 1, flags=cv2.FLOODFILL_FIXED_RANGE)
     return points
 
 if __name__ == '__main__':
-    search_file = 'no.png'
-    threshold = 0.3
-    positions = findall(search_file, 'timer.png', threshold)
+    search_file = 'imgs/me.png'
+    image_file = 'imgs/timer.png'
+    threshold = 0.9
+    positions = find(search_file, image_file, threshold)
+    print 'point_count =', len(positions)
     if positions:
         w, h = cv2.imread(search_file, 0).shape[::-1]
-        img = cv2.imread('timer.png')
-        for (x, y) in positions: 
-            cv2.rectangle(img, (x-w/2, y-h/2), (x+w/2, y+h/2), 255, 2)
+        img = cv2.imread(image_file)
 
-        cv2.imshow('image',img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-        
-        # from matplotlib import pyplot as plt
-        # plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
-        # plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
-        # plt.show()
+        import imgutils
+        for (x, y) in positions: 
+            img = imgutils.markPoint(img, (x, y))
+        imgutils.showImage(img)
+    else:
+        print 'No points founded'
