@@ -120,6 +120,12 @@ find(...) # find a image position located in screen
 (x, y) = app.find(filename)
 ```
 
+findAll(self, imgfile, maxcnt=None, sort=None): # sort = <None|"x"|"y">
+```
+findAll('start.png', maxcnt=2)
+findAll('start.png', maxcnt=2, sort='x') # sort ordered by x row
+```
+
 wait(...) # wait until image shows
 ```
 app.wait(filename, [seconds])

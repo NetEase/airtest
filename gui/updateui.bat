@@ -1,0 +1,1 @@
+pyuic4.bat mainui.ui -o mainui.py
