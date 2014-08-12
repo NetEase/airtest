@@ -62,7 +62,7 @@ def _refine_center(point_list, hori_distance, veti_distance):
     """
     point_sum,re_point_sum, max, dist, index, count= [0, 0],[0, 0], 0, [], [], 0
     re_list = _reremove(point_list)
-    if len(re_list) < 1: return None
+    if len(re_list) < 1 or len(re_list) < int(len(point_list)*0.5): return None
     for i in range(len(re_list)):
         point_sum[0] = point_sum[0] + re_list[i][0]
         point_sum[1] = point_sum[1] + re_list[i][1]
@@ -284,10 +284,9 @@ def _image_rectangle(image, centers, width, height,outfile='match.png'):
             if topleft_y < 0: topleft_y = 0
             if image.shape[1] <= bottomright_x: bottomright_x = image.shape[1]-1
             if image.shape[0] <= bottomright_y: bottomright_y = image.shape[0]-1
-            if DEBUG:
-                cv2.rectangle(image,(topleft_x,topleft_y),
-                                    (bottomright_x,bottomright_y),(0,0,255),1,0)
-                cv2.circle(image,(int(center[0]),int(center[1])),2,(0,255,0),-1)
+            cv2.rectangle(image,(topleft_x,topleft_y),
+                                (bottomright_x,bottomright_y),(0,0,255),1,0)
+            cv2.circle(image,(int(center[0]),int(center[1])),2,(0,255,0),-1)
     if outfile:
         cv2.imwrite(outfile,image)
 
@@ -347,7 +346,7 @@ def _homography_match(source_image, template_image, src_points, dst_points,
                 if hist_value<-0.0006 and kp_num<=45 and value<0.37: return None
                 '''rule has been obtained from the experiments'''    
                 if ((value>0.39) or (kp_num<=14 and 0.34<value) or (22<=kp_num) 
-                    or ((kp_num <= 8) and num <= (20*kp_num))):
+                    or ((kp_num <= 8) and num <= (10*kp_num))):
                         return [center_x, center_y]
                 else:
                     rect_img3 = _region_copy(source_image,re_center,height,width,2)
@@ -403,16 +402,16 @@ def _re_detectAndmatch(source_image, template_image, origin_image, query_image,
             else:
                 [center_x, center_y] = [int(disp[0]+w/2),int(disp[1]+h/2)]
                 rect_img = _region_copy(origin_image,[center_x,center_y],w,h,1.5)
-                val = hist_similarity(rect_img, query_image)
-                if DEBUG: print "406_hist_value: ", val
-                if val < 0.1: 
+                val1 = hist_similarity(rect_img, query_image)
+                if DEBUG: print "406_hist_value: ", val1
+                if val1 < 0.1 and val < 0.99: 
                     return None
                 else:
                     rect = _region_copy(source_image,[center_x,center_y],w,h,2)
                     val_3,kp_num = feature_similarity(rect,template_image,0.7)
                     if DEBUG: print "412_sift_value: ", val_3, kp_num
                     if 0.0 < val_3: num = int(kp_num/val_3) #计算good_match点数
-                    if val_3 < 0.15 or num < 5: return None
+                    if val_3 < 0.15 or (num <= 5 and val < 0.92): return None
         else:
             value, posi = template_match(source_image, template_image,[],0)
             [center_x,center_y] = [posi[0]+int(w/2), posi[1]+int(h/2)]
@@ -610,26 +609,30 @@ def locate_one_image(origin, query, outfile=None, threshold=0.3):
         if num2 < num1: return None
     except:
         return None
-    ratio_num = int(num1 * 0.1)
+    num_single = num1%10
+    ratio_num = int(num1 * 0.103)
     '''store all the good matches as per Lowe's ratio test.'''
     good, kp2_xy= _searchAndmatch(des1, des2, threshold,kp2)
     src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1,1,2)
     dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1,1,2)
     if len(good) > MIN_MATCH_COUNT: #good matches超过给定阈值,则进行Homography
-        if DEBUG: print "617_Good"        
+        if DEBUG: print "619_Good"        
         center = _homography_match(img2, img1, src_pts, dst_pts, num1, None,1)
         if center:
             _image_rectangle(target_img, [center], width, height,outfile)
+            print center
         return center       
     else:
-        if DEBUG: print "623_Bad"
+        if DEBUG: print "626_Bad"
         row, col, dim = dst_pts.shape
+        print row, ratio_num
         '''几乎没有好的匹配点的情况'''
         if (row < 1 or (row+1) < ratio_num or (row == 1 and ratio_num < 1) 
-                or (1 < row and row == ratio_num)) :
+                or (4 < row and row == ratio_num)) :
             center = _re_detectAndmatch(img2, img1, target_img, query_img,kp2_xy)
             if center:
-                _image_rectangle(target_img, [center], width, height,outfile)                
+                _image_rectangle(target_img, [center], width, height,outfile)
+                print center
             return center
         else:
             list = []
@@ -643,16 +646,17 @@ def locate_one_image(origin, query, outfile=None, threshold=0.3):
                 [center_x, center_y] = [int(newcenter[0]),int(newcenter[1])]
                 [top_x, top_y] = [int(center_x-width/2), int(center_y-height/2)]
                 if (top_x < 0) and (top_y < 0): return None
-                if 1 <= row <= 2 and ratio_num == 1:
+                if 1 <= row <= 2 and ratio_num == 1 and num_single != 5:
                     rect_img = _region_copy(img2,[center_x,center_y],
                                             width, height, 1)
                     value, posi = template_match(rect_img, img1,[],0)
                     kp_rect, des_rect = _sift_extract(rect_img)
-                    if DEBUG: print "649_value: ", value, len(kp_rect)
-                    if value<0.85 or (len(kp_rect)<int(1.5*num1) and value<0.96): 
+                    if DEBUG: print "654_value: ", value, len(kp_rect)
+                    if value<0.86 or len(kp_rect)< (num1+2): 
                         return None
                 center = [center_x,center_y]
                 _image_rectangle(target_img, [center], width, height, outfile)
+                print center
                 return center
 
 def locate_one_image_SIFT(origin, query, outfile=None, threshold=0.3):
