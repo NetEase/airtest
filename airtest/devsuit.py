@@ -324,8 +324,9 @@ class DeviceSuit(object):
         # mark position
         import cv2
         img = cv2.imread(self._snapshot_file)
-        img = imt.toolbox.markPoint(img, (x, y))
-        cv2.imwrite(self._snapshot_file, img)
+        if img != None:
+            img = imt.toolbox.markPoint(img, (x, y))
+            cv2.imwrite(self._snapshot_file, img)
 
         time.sleep(self._delay_after_click)
 
