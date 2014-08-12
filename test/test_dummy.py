@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 #coding: utf-8
 
 import sys
@@ -11,7 +14,9 @@ import time
 
 app = airtest.connect('shit', device='dummy')
 screenFile = 'testdata/dummy/default.png'
-app.globalSet(image_dirs=['testdata/dummy'])
+app.globalSet(image_dirs=['testdata/dummy', '.'])
+app.globalSet(image_match_method='template')
+app.globalSet(threshold=0.8)
 
 ICON = 'testdata/dummy/add.png'
 
@@ -19,6 +24,12 @@ def setup_function(f):
     app.dev._snapshot = screenFile
     app.dev._text = ''
     app.dev._click = None
+
+def test_locate_image():
+    # ap = airtest.connect('test-connect', appname='hello', device='dummy', monitor=False, logfile='log/1')
+    app.dev._snapshot = 'testdata/dummy/h15_bg.png'
+    print 'get method=', app.globalGet('image_match_method')
+    print app.click('back.png')
 
 def test_connect_monitor():
     ap = airtest.connect('test-connect', appname='hello', device='dummy', monitor=False, logfile='log/1')

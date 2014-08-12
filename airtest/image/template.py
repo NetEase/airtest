@@ -2,9 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+from airtest.image import toolbox
 
-def _cv2open(filename, arg=0):
-    obj = cv2.imread(filename, arg)
+DEBUG = False
+
+def _cv2open(filename, arg=1):
+    if isinstance(filename, basestring):
+        obj = cv2.imread(filename, arg)
+    else:
+        obj = filename
     if obj == None:
         raise IOError('cv2 read file error:'+filename)
     return obj
@@ -16,9 +22,9 @@ def find(search_file, image_file, threshold=0.8):
     same as findall, except without arg maxcnt
     '''
     point = findall(search_file, image_file, threshold, maxcnt=1)
-    return point if point else None
+    return point[0] if point else None
 
-def findall(search_file, image_file, threshold=0.8, maxcnt = 0):
+def findall(search_file, image_file, threshold=0.8, maxcnt = 0, rgb=False, bgremove=False):
     '''
     Locate image position with cv2.templateFind
 
@@ -36,15 +42,33 @@ def findall(search_file, image_file, threshold=0.8, maxcnt = 0):
     Raises:
         IOError: when file read error
     '''
-    search = _cv2open(search_file)
-    image  = _cv2open(image_file)
-
-    w, h = search.shape[::-1]
-
-    method = cv2.TM_CCOEFF_NORMED
     # method = cv2.TM_CCORR_NORMED
+    # method = cv2.TM_SQDIFF_NORMED
+    method = cv2.TM_CCOEFF_NORMED
 
-    res = cv2.matchTemplate(image, search, method)
+    search = _cv2open(search_file)
+    image_  = _cv2open(image_file)
+    if rgb:
+        s_bgr = cv2.split(search) # Blue Green Red
+        i_bgr = cv2.split(image_)
+        weight = (0.3, 0.3, 0.4)
+        resbgr = [0, 0, 0]
+        for i in range(3): # bgr
+            resbgr[i] = cv2.matchTemplate(i_bgr[i], s_bgr[i], method)
+        res = resbgr[0]*weight[0] + resbgr[1]*weight[1] + resbgr[2]*weight[2]
+    else:
+        s_gray = cv2.cvtColor(search, cv2.COLOR_BGR2GRAY)
+        i_gray = cv2.cvtColor(image_, cv2.COLOR_BGR2GRAY)
+        if bgremove:
+            s_gray = cv2.Canny(s_gray, 100, 200)
+            i_gray = cv2.Canny(i_gray, 100, 200)
+        if DEBUG:
+            toolbox.showImage(s_gray)
+            toolbox.showImage(i_gray)
+
+        res = cv2.matchTemplate(i_gray, s_gray, method)
+    # toolbox.showImage(res)
+    w, h = search.shape[1], search.shape[0]
 
     points = []
     while True:
@@ -53,7 +77,8 @@ def findall(search_file, image_file, threshold=0.8, maxcnt = 0):
             top_left = min_loc
         else:
             top_left = max_loc
-    
+
+        print 'templmatch_value(thresh:%.1f) = %.3f' %(threshold, max_val) # not show debug
         if max_val < threshold:
             break
         middle_point = (top_left[0]+w/2, top_left[1]+h/2)
@@ -64,19 +89,26 @@ def findall(search_file, image_file, threshold=0.8, maxcnt = 0):
         cv2.floodFill(res, None, max_loc, (-1000,), max_val-threshold+0.1, 1, flags=cv2.FLOODFILL_FIXED_RANGE)
     return points
 
+
 if __name__ == '__main__':
-    search_file = 'imgs/me.png'
-    image_file = 'imgs/timer.png'
-    threshold = 0.9
-    positions = find(search_file, image_file, threshold)
-    print 'point_count =', len(positions)
+    search_file, image_file = 'imgs/me2.png', 'imgs/timer.png'
+    search_file, image_file = 'imgs/hand.png', 'imgs/hand_map.png'
+    search_file, image_file = 'imgs/back.png', 'imgs/back_map.png'
+    search_file, image_file = 'imgs/plus.png', 'imgs/back_map.png'
+    search_file, image_file = 'imgs/minus.png', 'imgs/back_map.png'
+    search_file, image_file = 'imgs/minus_add.png', 'imgs/back_map.png'
+
+    # dst = cv2.resize(sf, (0, 0), fx = 4, fy=4)
+    
+    threshold = 0.7
+    positions = findall(search_file, image_file, threshold, maxcnt=9)
+    print 'point_count =', len(positions or []), positions
     if positions:
         w, h = cv2.imread(search_file, 0).shape[::-1]
         img = cv2.imread(image_file)
 
-        import imgutils
         for (x, y) in positions: 
-            img = imgutils.markPoint(img, (x, y))
-        imgutils.showImage(img)
+            img = toolbox.markPoint(img, (x, y))
+        toolbox.showImage(img)
     else:
         print 'No points founded'

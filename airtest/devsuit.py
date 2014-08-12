@@ -10,7 +10,9 @@ import PIL
 from airtest import base
 from airtest import jsonlog
 from airtest import patch
-from airtest.image import auto as image
+
+from airtest import image as imt
+# from airtest.image import auto as image
 
 import airtest
 
@@ -32,20 +34,20 @@ def rotate_point((x, y), (w, h), d):
     if d == 'LEFT':
         return h-y, x
 
-def find_multi_image(orig, query, threshold):
-    points = image.locate_more_image_Template(orig, query)
-    if not points:
-        return []
-    return points
-    #return [find_one_image(orig, query, threshold)]
+# def find_multi_image(orig, query, threshold):
+#     points = image.locate_more_image_Template(orig, query)
+#     if not points:
+#         return []
+#     return points
+#     #return [find_one_image(orig, query, threshold)]
     
-def find_one_image(orig, query, threshold):
-    pts = image.locate_image(orig, query, threshold=threshold)
-    if not pts:
-        return None # return when nothing found
-    if len(pts) > 1:
-        raise RuntimeError('too many same query images')
-    return pts[0]
+# def find_one_image(orig, query, threshold):
+#     pts = image.locate_image(orig, query, threshold=threshold)
+#     if not pts:
+#         return None # return when nothing found
+#     if len(pts) > 1:
+#         raise RuntimeError('too many same query images')
+#     return pts[0]
 
 def get_jsonlog(filename='log/airtest.log'):    
     logfile = os.getenv('AIRTEST_LOGFILE', filename)
@@ -72,8 +74,9 @@ class DeviceSuit(object):
         self._image_dirs = ['.', 'image']
         self._image_pre_search_dirs = ['image-%d_%d'%(self.width, self.height), 
                 'image-'+device]
-
+        self._image_match_method = 'auto'
         self._threshold = 0.3 # for findImage
+
         self._rotation = None # UP,DOWN,LEFT,RIGHT
         self._log = get_jsonlog(logfile).writeline # should implementes writeline(dict)
         self._tmpdir = 'tmp'
@@ -83,6 +86,8 @@ class DeviceSuit(object):
         self._monitor_interval = 5
         self._click_timeout = 20.0 # if icon not found in this time, then panic
         self._delay_after_click = 0.5 # when finished click, wait time
+
+        self._snapshot_file = None
 
         @patch.go
         def _monitor():
@@ -102,6 +107,36 @@ class DeviceSuit(object):
                     time.sleep(self._monitor_interval-dur)
         if monitor:
             _monitor()
+
+    def _imfind(self, bgimg, search):
+        method = self._image_match_method
+        if method == 'auto':
+            point = imt.auto.locate_one_image(bgimg, search, threshold=self._threshold)
+        elif method == 'template':
+            point = imt.template.find(search, bgimg, self._threshold)
+        else:
+            raise RuntimeError("Unknown image match method: %s" %(method))
+        print 'find method=', method
+        return point
+
+    def _imfindall(self, bgimg, search, maxcnt, sort):
+        method = self._image_match_method
+        if method == 'auto':
+            if not maxcnt:
+                maxcnt = 0
+            points = imt.auto.locate_more_image_Template(search, bgimg, num=maxcnt)
+        elif method == 'template':
+            points = imt.template.findall(search, bgimg, self._threshold, maxcnt=maxcnt)
+        else:
+            raise RuntimeError("Unknown image match method: %s" %(method))
+        if sort:
+            def cmpy((x0, y0), (x1, y1)):
+                return y1<y0
+            def cmpx((x0, y0), (x1, y1)):
+                return x1<x1
+            m = {'x': cmpx, 'y': cmpy}
+            points.sort(cmd=m[sort])
+        return points
 
     def _initWidthHeight(self):
         w, h = self.dev.shape()
@@ -184,6 +219,7 @@ class DeviceSuit(object):
             angle = dict(RIGHT=PIL.Image.ROTATE_90, LEFT=PIL.Image.ROTATE_270).get(rotation)
             PIL.Image.open(filename).transpose(angle).save(filename)
         self._log(dict(type='snapshot', filename=filename))
+        self._snapshot_file = filename
         return filename
 
     def takeSnapshot(self, filename):
@@ -230,17 +266,22 @@ class DeviceSuit(object):
         filepath = self._search_image(imgfile)
         log.debug('Locate image path: %s', filepath)
         screen = self._saveScreen('screen-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
-        pt = find_one_image(screen, filepath, self._threshold)
+        pt = self._imfind(screen, filepath)
+        # pt = find_one_image(screen, filepath, self._threshold)
         return pt
 
-    def findAll(self, imgfile):
+    def findAll(self, imgfile, maxcnt=None, sort=None):
         '''
         Find multi positions that imgfile on screen
+
+        @maxcnt (int): max number of object restricted.
+        @sort (string): (None|x|y) x to sort with x, small in front, None to be origin order
         @return list point that found
         @warn not finished yet.
         '''
         screen = self._saveScreen('find-XXXXXXXX.png')
-        pts = find_multi_image(screen, imgfile, self._threshold)
+        # pts = find_multi_image(screen, imgfile, self._threshold)
+        pts = self._imfindall(screen, imgfile, maxcnt, sort)
         return pts
 
     def wait(self, imgfile, seconds=20):
@@ -279,6 +320,13 @@ class DeviceSuit(object):
             log.info('Click %s point: (%d, %d)', SF, x, y)
             self.dev.touch(x, y, eventType)
         log.debug('delay after click: %.2fs' ,self._delay_after_click)
+
+        # mark position
+        import cv2
+        img = cv2.imread(self._snapshot_file)
+        img = imt.toolbox.markPoint(img, (x, y))
+        cv2.imwrite(self._snapshot_file, img)
+
         time.sleep(self._delay_after_click)
 
     def center(self):
