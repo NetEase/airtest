@@ -121,6 +121,13 @@ border-color: #ccc;
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="btnRestart">
+         <property name="text">
+          <string>restart</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="horizontalSpacer_4">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -479,7 +486,7 @@ border-color: #ccc;
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="lblCutImage">
+                <widget class="QLabel" name="lblCutImage1">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                    <horstretch>0</horstretch>
@@ -727,8 +734,6 @@ background-color: #ccc;
    </item>
   </layout>
   <zorder></zorder>
-  <zorder>sbThreshold</zorder>
-  <zorder>btnFindAll</zorder>
  </widget>
  <resources/>
  <connections/>

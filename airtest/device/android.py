@@ -228,8 +228,6 @@ class Device(object):
 
         @param extra: dict (defined in air.json)
         '''
-        #exec_cmd('adb', '-s', serialno, 'shell', 'am', 'start', '-n', '/'.join([package, activity]), timeout=10)
-        # -S: force stop the target app before starting the activity
         self.adb.shell('am start -S -n '+appname+'/'+extra.get('activity'))
 
     def stop(self, appname, extra={}):

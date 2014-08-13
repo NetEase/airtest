@@ -7,6 +7,8 @@ import time
 import atexit
 import threading
 import tempfile
+import ConfigParser
+
 import cv2
 
 from PyQt4.QtGui import *
@@ -17,6 +19,8 @@ import airtest
 
 reload(sys)
 sys.setdefaultencoding('utf-8') 
+
+__dir__ = os.path.dirname(os.path.abspath(__file__))
 
 def gobackground(fn):
     ''' decorator for threading '''
@@ -46,6 +50,27 @@ class TestWidget(QWidget, Ui_Dialog):
         self.leCrop1.setText(clickfile1)
         self.leCrop2.setText(clickfile2)
 
+        # save workspace
+        self.cf = ConfigParser.SafeConfigParser()
+        cfgpath = os.path.join(__dir__, 'airtest.ini')
+        def changeWorkspace(workspace):
+            if not workspace:
+                return
+            print workspace
+            self.leWorkspace.setText(workspace)
+            self.cf.set('airtest', 'workspace', workspace)
+            os.chdir(workspace)
+            with open(cfgpath, 'w') as file:
+                self.cf.write(file)
+        if os.path.exists(cfgpath):
+            self.cf.read(cfgpath)
+        else:
+            self.cf.add_section('airtest')
+            self.cf.set('airtest', 'workspace', os.getcwd())
+        self.workspace = self.cf.get('airtest', 'workspace')
+        changeWorkspace(self.workspace)
+        self.changeWorkspace = changeWorkspace
+
         # redirect stdout to textbox(tbConsole)
         class CConsole(object):
             def __init__(self, parent, level='DEBUG'):
@@ -68,6 +93,7 @@ class TestWidget(QWidget, Ui_Dialog):
         self.btnRun.setToolTip("run test code")
         self.btnConnect.clicked.connect(self.airConnect)
         self.btnRefresh.clicked.connect(self.airRefresh)
+        self.btnRestart.clicked.connect(self.airRestart)
         self.btnSelectDir.clicked.connect(self.selectDir)
         self.btnClick.clicked.connect(self.airClick)
         self.btnDrag.clicked.connect(self.airDrag)
@@ -82,7 +108,6 @@ class TestWidget(QWidget, Ui_Dialog):
         # initial
         self.airDeviceChanged()
 
-        self.leWorkspace.setText(os.getcwd())
         self.screenImage = QImage('screen.png')
         if self.screenImage:
             self.imgWidth = self.screenImage.width()
@@ -229,8 +254,16 @@ class TestWidget(QWidget, Ui_Dialog):
         self.textBrowser.append(str(self.leCode.displayText()))
         time.sleep(0.5)
         self.airRefresh()
-        self.textBrowser.setFocus()   
-        
+        self.textBrowser.setFocus()
+
+    def airRestart(self):
+        devno = str(self.cbPhoneno.currentText())
+        device = str(self.cbDevice.currentText())
+        airtest.stop(devno, device)
+        airtest.start(devno, device)
+        time.sleep(0.5)
+        self.airConnect()
+      
     def airRefresh(self):
         if self.app != None:
             print 'start takesnapshot'
@@ -250,21 +283,21 @@ class TestWidget(QWidget, Ui_Dialog):
             self.textBrowser.setFocus()
             self.cropImage1 = None
             self.cropImage2 = None
-            self.lblCutImage.clear()
+            self.lblCutImage1.clear()
             self.lblCutImage2.clear()
-            # tmpname1 = tempfile.mktemp(prefix='', suffix=".png", dir='')
-            # self.leCrop1.setText(tmpname1)
-            # tmpname2 = tempfile.mktemp(prefix='', suffix=".png", dir='')
-            # self.leCrop1.setText(tmpname2)
+            tmpname1 = tempfile.mktemp(prefix='', suffix=".png", dir='')
+            self.leCrop1.setText(tmpname1)
+            tmpname2 = tempfile.mktemp(prefix='', suffix=".png", dir='')
+            self.leCrop1.setText(tmpname2)
             #if self.rubberBand:
             #    self.rubberBand.hide()
             
-
     def airConnect(self):
         device = self.cbDevice.currentText()
         phoneno = self.cbPhoneno.currentText()
         try:
-            self.app = airtest.connect(str(phoneno), device=str(device))
+            self.app = airtest.connect(str(phoneno), device=str(device), monitor=False)
+            self.app.globalSet(image_match_method='template', threshold=0.7)
         except Exception as e:
             print 'CONNECT FAILED: %s' %(str(e))
         else:
@@ -285,10 +318,12 @@ class TestWidget(QWidget, Ui_Dialog):
 
     def selectDir(self):
         directory = QFileDialog.getExistingDirectory(self, 'Select Dir')
+        directory = str(directory)
         if directory:
-            self.leWorkspace.setText(directory)
-            os.chdir(str(directory).encode('gb18030')) 
-            print directory, os.getcwd()
+            # self.leWorkspace.setText(directory)
+            # os.chdir(directory.encode('gb18030')) 
+            # print directory, os.getcwd()
+            self.changeWorkspace(directory)
 
     def cropSelected(self,event):            
         if not self.rubberBand:
@@ -301,11 +336,11 @@ class TestWidget(QWidget, Ui_Dialog):
         width, height = map(int, [size.width()*self.scaleRate, size.height()*self.scaleRate])
         (lrx, lry) = self._pointScreen2Image(topLeft)
         print 'rect:', (lrx, lry), (width, height)
-        max_width = self.lblCutImage.width()
-        max_height = self.lblCutImage.height()
+        max_width = self.lblCutImage1.width()
+        max_height = self.lblCutImage1.height()
         if event.button() == Qt.LeftButton:
             self.cropImage1 = self.screenImage.copy(lrx, lry, width, height)
-            self.lblCutImage.setPixmap(QPixmap.fromImage(self.cropImage1.scaled(max_width, max_height, 1)))
+            self.lblCutImage1.setPixmap(QPixmap.fromImage(self.cropImage1.scaled(max_width, max_height, 1)))
             # tmpname = tempfile.mktemp(prefix='crop-', suffix='.png', dir='')
             # self.leCrop1.setText(tmpname)
         else:
@@ -388,16 +423,15 @@ class TestWidget(QWidget, Ui_Dialog):
         commands=self.textBrowser.toPlainText()
         commands = str(commands)
         lines = commands.splitlines()
+        app = self.app
+        print app # only to skip pylint warning
         for command in lines:
             command = command.strip()
             if not command:
                 continue
             try:
-                # print command
                 self.tbConsole.append(self.trUtf8("COMMAND: "+command))
-                # exec command
-                command = command.replace('app.', 'self.app.')
-                eval(command)
+                exec command
             except Exception,e:
                 self.tbConsole.append(self.trUtf8(command))
                 self.tbConsole.append(self.trUtf8(u"Exception："+str(e)+"\n"))

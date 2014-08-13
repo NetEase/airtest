@@ -34,21 +34,6 @@ def rotate_point((x, y), (w, h), d):
     if d == 'LEFT':
         return h-y, x
 
-# def find_multi_image(orig, query, threshold):
-#     points = image.locate_more_image_Template(orig, query)
-#     if not points:
-#         return []
-#     return points
-#     #return [find_one_image(orig, query, threshold)]
-    
-# def find_one_image(orig, query, threshold):
-#     pts = image.locate_image(orig, query, threshold=threshold)
-#     if not pts:
-#         return None # return when nothing found
-#     if len(pts) > 1:
-#         raise RuntimeError('too many same query images')
-#     return pts[0]
-
 def get_jsonlog(filename='log/airtest.log'):    
     logfile = os.getenv('AIRTEST_LOGFILE', filename)
     if os.path.exists(logfile):
@@ -88,6 +73,7 @@ class DeviceSuit(object):
         self._delay_after_click = 0.5 # when finished click, wait time
 
         self._snapshot_file = None
+        self._quit = False
 
         @patch.go
         def _monitor():
@@ -95,7 +81,7 @@ class DeviceSuit(object):
             if not self.appname:
                 log.debug('MONITOR finished, no appname provided')
                 return
-            while True and self._enable_monitor:
+            while True and self._enable_monitor and not self._quit:
                 start = time.time()
                 mem = self.dev.getMem(self.appname)
                 self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})
@@ -135,7 +121,7 @@ class DeviceSuit(object):
             def cmpx((x0, y0), (x1, y1)):
                 return x1<x1
             m = {'x': cmpx, 'y': cmpy}
-            points.sort(cmd=m[sort])
+            points.sort(cmp=m[sort])
         return points
 
     def _initWidthHeight(self):
@@ -270,7 +256,7 @@ class DeviceSuit(object):
         # pt = find_one_image(screen, filepath, self._threshold)
         return pt
 
-    def findAll(self, imgfile, maxcnt=None, sort=None):
+    def findall(self, imgfile, maxcnt=None, sort=None):
         '''
         Find multi positions that imgfile on screen
 
@@ -279,9 +265,9 @@ class DeviceSuit(object):
         @return list point that found
         @warn not finished yet.
         '''
+        filepath = self._search_image(imgfile)
         screen = self._saveScreen('find-XXXXXXXX.png')
-        # pts = find_multi_image(screen, imgfile, self._threshold)
-        pts = self._imfindall(screen, imgfile, maxcnt, sort)
+        pts = self._imfindall(screen, filepath, maxcnt, sort)
         return pts
 
     def wait(self, imgfile, seconds=20):
@@ -419,7 +405,8 @@ class DeviceSuit(object):
         '''
         Release resouces
         '''
-        pass
+        self._quit = True
+        time.sleep(0.5)
 
     def _safe_load_config(self):
         import os

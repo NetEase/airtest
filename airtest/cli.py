@@ -115,7 +115,8 @@ def run_uninstall():
 def run_runtest():
     env = {
             'SERIALNO': serialno, 
-            'AIRTEST_PHONENO': serialno,
+            'AIRTEST_PHONENO': serialno, # not suggested, delete me in 2014/10/01
+            'AIRTEST_DEVNO': serialno,
             'AIRTEST_APPNAME': xpath(platform, 'package')}
     exit_code = exec_cmd(xpath('cmd'), timeout=30*60, shell=True, env=env)
     assert exit_code == 0
@@ -130,7 +131,8 @@ def run_log2html():
             #os.system('cd %s; python -mSimpleHTTPServer %s' %(F.get('htmldir'), F.get('port')))
 
 def run_update():
-    exec_cmd('pip', 'install', '--upgrade', 'git+http://git.mt.nie.netease.com/hzsunshx/airtest.git')
+    print 'run this command manualy'
+    print 'pip', 'install', '--upgrade', 'git+http://git.mt.nie.netease.com/hzsunshx/airtest.git'
 
 def main():
     global F, platform, serialno, rotation

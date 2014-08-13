@@ -19,3 +19,6 @@ Change Log
 ### 2014/08/04
 1. globalSet更新,支持globalSet(key=value)，兼容原有的globalSet({})
 
+### 2014/08/12
+1. 增加image_match_method配置项，可以手动选择图形匹配算法
+2. 环境变量AIRTEST_DEVNO改名为AIRTEST_PHONENO(影响范围，使用air.test命令行的runtest的程序)

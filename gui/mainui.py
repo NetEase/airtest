@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainui.ui'
 #
-# Created: Sun Aug 10 19:09:17 2014
+# Created: Tue Aug 12 20:56:52 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -91,6 +91,9 @@ class Ui_Dialog(object):
         self.btnRefresh = QtGui.QPushButton(Dialog)
         self.btnRefresh.setObjectName(_fromUtf8("btnRefresh"))
         self.horizontalLayout_5.addWidget(self.btnRefresh)
+        self.btnRestart = QtGui.QPushButton(Dialog)
+        self.btnRestart.setObjectName(_fromUtf8("btnRestart"))
+        self.horizontalLayout_5.addWidget(self.btnRestart)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem)
         self.verticalLayout_7.addLayout(self.horizontalLayout_5)
@@ -273,23 +276,23 @@ class Ui_Dialog(object):
         self.leCrop1.setMinimumSize(QtCore.QSize(160, 0))
         self.leCrop1.setObjectName(_fromUtf8("leCrop1"))
         self.verticalLayout_4.addWidget(self.leCrop1)
-        self.lblCutImage = QtGui.QLabel(Dialog)
+        self.lblCutImage1 = QtGui.QLabel(Dialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lblCutImage.sizePolicy().hasHeightForWidth())
-        self.lblCutImage.setSizePolicy(sizePolicy)
-        self.lblCutImage.setMinimumSize(QtCore.QSize(160, 100))
-        self.lblCutImage.setMaximumSize(QtCore.QSize(100, 100))
-        self.lblCutImage.setStyleSheet(_fromUtf8("QLabel{\n"
+        sizePolicy.setHeightForWidth(self.lblCutImage1.sizePolicy().hasHeightForWidth())
+        self.lblCutImage1.setSizePolicy(sizePolicy)
+        self.lblCutImage1.setMinimumSize(QtCore.QSize(160, 100))
+        self.lblCutImage1.setMaximumSize(QtCore.QSize(100, 100))
+        self.lblCutImage1.setStyleSheet(_fromUtf8("QLabel{\n"
 "    border-width: 1px;\n"
 "    border-style: solid;\n"
 "    border-color:green;\n"
 "    background-color: gray;\n"
 "}"))
-        self.lblCutImage.setText(_fromUtf8(""))
-        self.lblCutImage.setObjectName(_fromUtf8("lblCutImage"))
-        self.verticalLayout_4.addWidget(self.lblCutImage)
+        self.lblCutImage1.setText(_fromUtf8(""))
+        self.lblCutImage1.setObjectName(_fromUtf8("lblCutImage1"))
+        self.verticalLayout_4.addWidget(self.lblCutImage1)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_4.addItem(spacerItem2)
         self.leCrop2 = QtGui.QLineEdit(Dialog)
@@ -405,6 +408,7 @@ class Ui_Dialog(object):
         self.cbDevice.setItemText(2, _translate("Dialog", "ios", None))
         self.btnConnect.setText(_translate("Dialog", "connect", None))
         self.btnRefresh.setText(_translate("Dialog", "refresh", None))
+        self.btnRestart.setText(_translate("Dialog", "restart", None))
         self.btnSelectDir.setText(_translate("Dialog", "选择文件夹", None))
         self.label_2.setText(_translate("Dialog", "目标文件夹：", None))
         self.cbDestdir.setItemText(0, _translate("Dialog", "image", None))

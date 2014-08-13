@@ -83,13 +83,13 @@ import airtest
 step1 connect device
 ```
 # get serialno by call: adb devices
-phoneno = os.getenv('AIRTEST_PHONENO') or 'xxxxx888882111' # bundleid or serialno
+devno = os.getenv('AIRTEST_DEVNO') or 'xxxxx888882111' # <win_file_name | mac bundleid | android serialno>
 appname = os.getenv('AIRTEST_APPNAME') or 'com.netease.rz' # app name
 deviceType = 'android' # can be windows or ios
 
 # connect to your android devices
 # default value: device='android', monitor=True
-app = airtest.connect(phoneno, appname=appname, device=deviceType, monitor=True)
+app = airtest.connect(devno, appname=appname, device=deviceType, monitor=True)
 ```
 
 takeSnapshot(filename) # filename show with extention (.jpg or .png)
@@ -120,10 +120,10 @@ find(...) # find a image position located in screen
 (x, y) = app.find(filename)
 ```
 
-findAll(self, imgfile, maxcnt=None, sort=None): # sort = <None|"x"|"y">
+findall(self, imgfile, maxcnt=None, sort=None): # sort = <None|"x"|"y">
 ```
-findAll('start.png', maxcnt=2)
-findAll('start.png', maxcnt=2, sort='x') # sort ordered by x row
+findall('start.png', maxcnt=2)
+findall('start.png', maxcnt=2, sort='x') # sort ordered by x row
 ```
 
 wait(...) # wait until image shows
