@@ -23,6 +23,7 @@ def render(logfile, htmldir):
     if not os.path.exists(htmldir):
         os.makedirs(htmldir)
     cpus, items = [], []
+    fpss = []
     mems, imgs = [], []
     data = {
             'info': {
@@ -52,6 +53,9 @@ def render(logfile, htmldir):
             cpu = d.get('cpu')
             if cpu:
                 cpus.append([timestamp, cpu])
+            fps = d.get('fps')
+            if fps:
+                fpss.append([timestamp, fps])
         elif _type == 'snapshot':
             filename = d.get('filename')
             basename = os.path.basename(filename)
@@ -68,6 +72,7 @@ def render(logfile, htmldir):
 
     data['cpu_average'] = round(average(cpus), 2)
     data['mem_average'] = round(average(mems), 2)
+    data['fps_average'] = round(average(fpss), 2)
 
     tmpldir = os.path.join(base.dirname(__file__), 'htmltemplate')
     for name in os.listdir(tmpldir):
