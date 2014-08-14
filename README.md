@@ -92,6 +92,12 @@ deviceType = 'android' # can be windows or ios
 app = airtest.connect(devno, appname=appname, device=deviceType, monitor=True)
 ```
 
+```
+app.monitor.start() # start monitor
+app.monitor.stop() # stop monitor
+app.globalSet(monitor_interval=1.0) # set monitor interval to 1s
+```
+
 takeSnapshot(filename) # filename show with extention (.jpg or .png)
 ```
 app.takeSnapshot('snapshot.png')
