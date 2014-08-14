@@ -19,6 +19,9 @@ import time
 import json
 import subprocess
 
+# just import
+import monitor
+
 from airtest import devsuit
 __version__ = time.strftime('0.2.%m%d')
 

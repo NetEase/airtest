@@ -9,7 +9,6 @@ import PIL
 
 from airtest import base
 from airtest import jsonlog
-from airtest import patch
 
 from airtest import image as imt
 # from airtest.image import auto as image
@@ -67,32 +66,37 @@ class DeviceSuit(object):
         self._tmpdir = 'tmp'
         self._log(dict(type='start', timestamp=time.time()))
         self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
-        self._enable_monitor = True
-        self._monitor_interval = 5
         self._click_timeout = 20.0 # if icon not found in this time, then panic
         self._delay_after_click = 0.5 # when finished click, wait time
 
         self._snapshot_file = None
-        self._quit = False
 
-        @patch.go
-        def _monitor():
-            log.debug('MONITOR started')
-            if not self.appname:
-                log.debug('MONITOR finished, no appname provided')
-                return
-            while True and self._enable_monitor and not self._quit:
-                start = time.time()
-                mem = self.dev.getMem(self.appname)
-                self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})
-                self._log({'type':'record', 'mem_details':mem})
-                cpu = self.dev.getCpu(self.appname)
-                self._log({'type':'record', 'cpu':cpu})
-                dur = time.time()-start
-                if self._monitor_interval > dur:
-                    time.sleep(self._monitor_interval-dur)
+        self._init_monitor()
         if monitor:
-            _monitor()
+            self.monitor.start()
+        def _setinterval(x):
+            self.monitor._cycle = x
+        self._monitor_interval = _setinterval
+
+    def _init_monitor(self):
+        def _cpu_mem_monitor():
+            if not self.appname:
+                return
+            #log.debug('MONITOR started')
+            #log.debug('MONITOR finished, no appname provided')
+            start = time.time()
+            mem = self.dev.getMem(self.appname)
+            self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})
+            self._log({'type':'record', 'mem_details':mem})
+            cpu = self.dev.getCpu(self.appname)
+            self._log({'type':'record', 'cpu':cpu})
+            #dur = time.time()-start
+            #if self._monitor_interval > dur:
+            #    time.sleep(self._monitor_interval-dur)
+
+        self.monitor = airtest.monitor.Monitor()
+        self.monitor.addfunc(_cpu_mem_monitor)
+        self.monitor._cycle = 5.0 # the default value
 
     def _imfind(self, bgimg, search):
         method = self._image_match_method
@@ -230,8 +234,13 @@ class DeviceSuit(object):
         else:
             m = kwargs
         for k,v in m.items():
-            if hasattr(self, '_'+k):
-                setattr(self, '_'+k, v)
+            key = '_'+k
+            if hasattr(self, key):
+                item = getattr(self, key)
+                if callable(item):
+                    item(v)
+                else:
+                    setattr(self, key, v)
             else:
                 print 'not have such setting: %s' %(k)
 
@@ -405,7 +414,7 @@ class DeviceSuit(object):
         '''
         Release resouces
         '''
-        self._quit = True
+        self.monitor.stop()
         time.sleep(0.5)
 
     def _safe_load_config(self):
