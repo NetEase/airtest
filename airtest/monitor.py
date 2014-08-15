@@ -1,6 +1,5 @@
 # coding: utf-8
 
-import goless
 import uuid
 import threading
 import time
@@ -14,8 +13,6 @@ def go(func, *args, **kwargs):
 
 class Monitor(object):
     def __init__(self):
-        self._chan = goless.chan(0)
-        self._tchan = goless.chan(0)
         self._tasks = {}
         self._running = False
         self._cycle = 1.0
