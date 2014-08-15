@@ -141,6 +141,11 @@ app.wait(filename, [seconds])
 # this is called find(..) to get images position
 ```
 
+safeWait(filename, [seconds]) # like wait, but don't raise RuntimeError
+```
+app.safeWait(filename) # return None if not found, else point
+```
+
 exists(...) # judge if image exists
 ```
 app.exists('apple.png')

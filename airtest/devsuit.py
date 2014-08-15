@@ -279,10 +279,23 @@ class DeviceSuit(object):
         pts = self._imfindall(screen, filepath, maxcnt, sort)
         return pts
 
+    def safeWait(self, imgfile, seconds):
+        '''
+        Like wait, but don't raise RuntimeError
+
+        return None when timeout
+        return point if found
+        '''
+        try:
+            return self.wait(imgfile, seconds)
+        except:
+            return None
+
     def wait(self, imgfile, seconds=20):
         '''
         Wait until some picture exists
         @return position when imgfile shows
+        @raise RuntimeError if not found
         '''
         log.info('WAIT: %s', imgfile)
         start = time.time()

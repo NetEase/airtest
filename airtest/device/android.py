@@ -12,7 +12,7 @@ from airtest import base
 from com.dtmilano.android.viewclient import ViewClient 
 from com.dtmilano.android.viewclient import adbclient
 
-DEBUG = os.getenv("DEBUG")=="true"
+DEBUG = os.getenv("AIRDEBUG")=="true"
 log = base.getLogger('android')
 
 def getMem(serialno, package):
@@ -100,8 +100,10 @@ class Device(object):
             if line.startswith('#') or not line:
                 continue
             type_, code, value = line.split()
-            if DEBUG: print 'debug: type:%s, code:%s, value(int):%s' %(type_, code, value)
-            self.adb.shell('sendevent '+self._keyevent+' %d %d %d' % (int(type_, 16), int(code, 16), int(value)))
+            cmd = 'sendevent '+self._keyevent+' %d %d %d' % (int(type_, 16), int(code, 16), int(value))
+            if DEBUG: print cmd
+            #self.adb.shell('sendevent '+self._keyevent+' %d %d %d' % (int(type_, 16), int(code, 16), int(value)))
+            self.adb.shell(cmd)
 
     def _touch_down(self, (x, y)):
         actions_down = '''
