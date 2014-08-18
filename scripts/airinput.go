@@ -202,9 +202,15 @@ var (
 		"tapup":   {cmdTapup, ""},
 		"swipe":   {cmdSwipe, "<x1> <y1> <x2> <y2> [duration]"},
 		"test":    {cmdTest, ""},
+		"version": {cmdVersion, ""},
 	}
 	ErrArguments = errors.New("error arguments parsed")
 )
+
+func cmdVersion(args ...string) (err error) {
+	fmt.Println("1")
+	return nil
+}
 
 func cmdTap(args ...string) (err error) {
 	if len(args) != 2 && len(args) != 3 {
