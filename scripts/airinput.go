@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -98,20 +97,19 @@ func rawGetDevices() (inputdevs *InputDevices, err error) {
 	inputdevs.TouchScreen.Height = height
 
 	//procDevices, err := ioutil.ReadFile("proc.txt") // /proc/bus/input/devices
-	procDevices, err := ioutil.ReadFile("/proc/bus/input/devices") // /proc/bus/input/devices
-	if err != nil {
-		return
-	}
-	hpatten := regexp.MustCompile(`Handlers=[\w\d]+`)
+	//procDevices, err := ioutil.ReadFile("/proc/bus/input/devices") // /proc/bus/input/devices
+	//if err != nil {
+	//return
+	//}
+	//hpatten := regexp.MustCompile(`Handlers=[\w ]*(event\d+)`)
+	//devs := hpatten.FindAllStringSubmatch(string(procDevices), -1)
+	//devs := hpatten.FindAllString(string(procDevices), -1)
+	//fmt.Println(devs)
 	mxptn := regexp.MustCompile(`0035.*max (\d+)`)
 	myptn := regexp.MustCompile(`0036.*max (\d+)`)
-	devs := hpatten.FindAllString(string(procDevices), -1)
-	fmt.Println(devs)
-	for _, dev := range devs {
-		dev = dev[9:]
-		if !strings.HasPrefix(dev, "event") {
-			continue
-		}
+	for i := 0; i < 10; i++ {
+		//for _, ms := range devs {
+		dev := "event" + itoa(i) //ms[1] //#dev[9:]
 		out, err := exec.Command("getevent", "-p", "/dev/input/"+dev).Output()
 		//out, err := exec.Command("echo", "hello-"+dev).Output()
 		if err != nil {
@@ -176,6 +174,7 @@ func clickDown(x, y int) {
 	rx, ry := xy2rawxy(x, y)
 
 	sendevent(fd, "3", "0039", 0x0ffffff4) // tracking id
+	sendevent(fd, "3", "0030", 5)          // major ?
 	sendevent(fd, "1", "014a", 1)          // btn-touch down
 	sendevent(fd, "3", "0035", rx)         // abs-mt-position x
 	sendevent(fd, "3", "0036", ry)         // abs-mt-position y
@@ -203,6 +202,7 @@ var (
 		"swipe":   {cmdSwipe, "<x1> <y1> <x2> <y2> [duration]"},
 		"test":    {cmdTest, ""},
 		"version": {cmdVersion, ""},
+		"mirror":  {cmdMirror, "mirror exec.Command only for test"},
 	}
 	ErrArguments = errors.New("error arguments parsed")
 )
@@ -212,22 +212,41 @@ func cmdVersion(args ...string) (err error) {
 	return nil
 }
 
+func sh(args ...string) (err error) {
+	c := exec.Command("sh", "-c", strings.Join(args, " "))
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
+	c.Stdin = os.Stdin
+	return c.Run()
+}
+
+func cmdMirror(args ...string) (err error) {
+	/*c := exec.Command(args[0], args[1:]...)
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
+	c.Stdin = os.Stdin*/
+	return sh(args...)
+}
+
 func cmdTap(args ...string) (err error) {
 	if len(args) != 2 && len(args) != 3 {
 		return ErrArguments
 	}
-	duration := time.Millisecond * 300 // 0.3s
-	if len(args) == 3 {
-		duration, err = time.ParseDuration(args[2])
-		if err != nil {
-			return
-		}
-	}
+	//duration := time.Millisecond * 300 // 0.3s
 	x, y := atoi(args[0]), atoi(args[1])
+	fmt.Printf("airinput tap %d %d\n", x, y)
+
+	if len(args) == 2 {
+		return sh("input", "tap", args[0], args[1])
+	}
+
+	duration, err := time.ParseDuration(args[2])
+	if err != nil {
+		return
+	}
 	clickDown(x, y)
 	time.Sleep(duration)
 	clickUp()
-	fmt.Printf("xinput tap %d %d\n", x, y)
 	return nil
 }
 
@@ -235,12 +254,12 @@ func cmdSwipe(args ...string) (err error) {
 	if len(args) != 4 && len(args) != 5 {
 		return ErrArguments
 	}
-	duration := time.Millisecond * 500 // 0.5s
-	if len(args) == 5 {
-		duration, err = time.ParseDuration(args[4])
-		if err != nil {
-			return
-		}
+	if len(args) == 4 {
+		return sh("input", "swipe", args[0], args[1], args[2], args[3])
+	}
+	duration, err := time.ParseDuration(args[4])
+	if err != nil {
+		return
 	}
 	x1, y1 := atoi(args[0]), atoi(args[1])
 	x2, y2 := atoi(args[2]), atoi(args[3])
@@ -286,7 +305,6 @@ func cmdTest(args ...string) error {
 	w, h := iptdevs.TouchScreen.Width, iptdevs.TouchScreen.Height
 	x1, y1 := w/5, h/2
 	x2, y2 := w-x1, y1
-	//x, y = 500, 500
 	return cmdSwipe(itoa(x1), itoa(y2), itoa(x2), itoa(y2))
 }
 
@@ -311,7 +329,6 @@ func initDevice() (*os.File, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//fmt.Println(iptdevs)
 	tscreen := iptdevs.TouchScreen
 
 	return os.OpenFile(tscreen.InputEvent, os.O_RDWR, 0644)

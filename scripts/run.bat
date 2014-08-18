@@ -1,3 +1,3 @@
-adb push hello /data/local/tmp
-adb shell chmod 755 /data/local/tmp/hello
-adb shell /data/local/tmp/hello test
+adb push airinput /data/local/tmp/
+adb shell chmod 755 /data/local/tmp/airinput
+adb shell /data/local/tmp/airinput test
