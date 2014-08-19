@@ -7,6 +7,7 @@ basic operation for a game(like a user does)
 
 import os
 import re
+import subprocess
 
 from airtest import base
 from com.dtmilano.android.viewclient import ViewClient 
@@ -14,6 +15,8 @@ from com.dtmilano.android.viewclient import adbclient
 
 DEBUG = os.getenv("AIRDEBUG")=="true"
 log = base.getLogger('android')
+
+__dir__ = os.path.dirname(os.path.abspath(__file__))
 
 def getMem(serialno, package):
     '''
@@ -90,6 +93,27 @@ class Device(object):
         width, height = self.shape()
         width, height = min(width, height), max(width, height)
         self._scalex, self._scaley = float(rawx)/width, float(rawy)/height
+        self._airtoolbox = '/data/local/tmp/airtoolbox'
+        self._init_airtoolbox()
+
+
+    def _init_airtoolbox(self):
+        ''' init airtoolbox '''
+        serialno = self._serialno
+        def sh(*args):
+            args = ['adb', '-s', serialno] + list(args)
+            return subprocess.check_output(args)
+
+        out = sh('shell', self._airtoolbox, 'version')
+        out = out.strip()
+        print 'AirToolbox: v'+out.strip()
+        version_file = os.path.join(__dir__, '../binfiles/airtoolbox.version')
+        version = open(version_file).read().strip()
+        if out != version:
+            print 'upgrade: airtoolbox (ver %s)...' %(version)
+            toolbox = os.path.join(__dir__, '../binfiles/airtoolbox')
+            sh('push', toolbox, self._airtoolbox)
+            sh('shell', 'chmod', '755', self._airtoolbox)
 
     def _sendevent(self, raw, **kwargs):
         for line in raw.format(**kwargs).splitlines():

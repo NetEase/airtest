@@ -1,3 +1,18 @@
+/*
+click down
+
+sendevent /dev/input/event1 1 330 1
+sendevent /dev/input/event1 3 53 539
+sendevent /dev/input/event1 3 54 959
+sendevent /dev/input/event1 0 0 0
+
+click up
+
+sendevent /dev/input/event1 3 57 243
+sendevent /dev/input/event1 1 330 0
+sendevent /dev/input/event1 0 0 0
+*/
+
 package main
 
 import (
@@ -5,16 +20,12 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -37,21 +48,7 @@ type Event struct {
 	Value int32
 }
 
-func atoi(a string) int {
-	var i int
-	_, err := fmt.Sscanf(a, "%d", &i)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return i
-}
-
-func itoa(i int) string {
-	return strconv.Itoa(i)
-}
-
 var (
-	curpwd   string = filepath.Dir(os.Args[0])
 	devicefd *os.File
 	iptdevs  *InputDevices
 )
@@ -73,7 +70,6 @@ func sendevent(fd io.Writer, type_, code string, value int32) (err error) {
 }
 
 func getShape() (width int, height int, err error) {
-	//out, err := exec.Command("cat", "windows.txt").Output()
 	out, err := exec.Command("dumpsys", "window").Output()
 	if err != nil {
 		return
@@ -189,50 +185,37 @@ func clickUp() {
 	sendevent(fd, "0", "0000", 0)  // sync-report
 }
 
-type FlagCommand struct {
-	Func  func(args ...string) error
-	Usage string
-}
-
 var (
-	commands = map[string]FlagCommand{
-		"tap":     {cmdTap, "<x> <y> [duration]"},
-		"tapdown": {cmdTapdown, "<x> <y>"},
-		"tapup":   {cmdTapup, ""},
+	inputCommands = map[string]FlagCommand{
+		"tap":     {cmdInputTap, "<x> <y> [duration]"},
+		"tapdown": {cmdInputTapdown, "<x> <y>"},
+		"tapup":   {cmdInputTapup, ""},
 		"swipe":   {cmdSwipe, "<x1> <y1> <x2> <y2> [duration]"},
-		"test":    {cmdTest, ""},
+		"test":    {cmdInputTest, ""},
 		"version": {cmdVersion, ""},
 		"mirror":  {cmdMirror, "mirror exec.Command only for test"},
 	}
 	ErrArguments = errors.New("error arguments parsed")
 )
 
-func cmdVersion(args ...string) (err error) {
-	fmt.Println("1")
-	return nil
+func init() {
+	commands["input"] = FlagCommand{cmdInput, "tap|swipe"}
 }
 
-func sh(args ...string) (err error) {
-	c := exec.Command("sh", "-c", strings.Join(args, " "))
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
-	c.Stdin = os.Stdin
-	return c.Run()
+func cmdInput(args ...string) (err error) {
+	initInput()
+	defer deferInput()
+	return RunCmd(inputCommands, "Usage: airtoolbox input ...", args)
 }
 
 func cmdMirror(args ...string) (err error) {
-	/*c := exec.Command(args[0], args[1:]...)
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
-	c.Stdin = os.Stdin*/
 	return sh(args...)
 }
 
-func cmdTap(args ...string) (err error) {
+func cmdInputTap(args ...string) (err error) {
 	if len(args) != 2 && len(args) != 3 {
 		return ErrArguments
 	}
-	//duration := time.Millisecond * 300 // 0.3s
 	x, y := atoi(args[0]), atoi(args[1])
 	fmt.Printf("airinput tap %d %d\n", x, y)
 
@@ -287,7 +270,7 @@ func cmdSwipe(args ...string) (err error) {
 	return nil
 }
 
-func cmdTapdown(args ...string) (err error) {
+func cmdInputTapdown(args ...string) (err error) {
 	if len(args) != 2 {
 		return ErrArguments
 	}
@@ -296,73 +279,30 @@ func cmdTapdown(args ...string) (err error) {
 	return nil
 }
 
-func cmdTapup(args ...string) error {
+func cmdInputTapup(args ...string) error {
 	clickUp()
 	return nil
 }
 
-func cmdTest(args ...string) error {
+func cmdInputTest(args ...string) error {
 	w, h := iptdevs.TouchScreen.Width, iptdevs.TouchScreen.Height
 	x1, y1 := w/5, h/2
 	x2, y2 := w-x1, y1
 	return cmdSwipe(itoa(x1), itoa(y2), itoa(x2), itoa(y2))
 }
 
-/*
-click down
-
-sendevent /dev/input/event1 1 330 1
-sendevent /dev/input/event1 3 53 539
-sendevent /dev/input/event1 3 54 959
-sendevent /dev/input/event1 0 0 0
-
-click up
-
-sendevent /dev/input/event1 3 57 243
-sendevent /dev/input/event1 1 330 0
-sendevent /dev/input/event1 0 0 0
-*/
-
-func initDevice() (*os.File, error) {
-	var err error
+func initInput() (err error) {
 	iptdevs, err = getinputevent()
 	if err != nil {
-		log.Fatal(err)
-	}
-	tscreen := iptdevs.TouchScreen
-
-	return os.OpenFile(tscreen.InputEvent, os.O_RDWR, 0644)
-}
-
-func main() {
-	var usage = "Usage:	xinput ..."
-	for name, c := range commands {
-		usage = usage + "\n\txinput " + name + " " + c.Usage
-	}
-	flag.Usage = func() {
-		fmt.Println(usage)
-	}
-	flag.Parse()
-	if flag.NArg() == 0 {
-		flag.Usage()
 		return
 	}
+	tscreen := iptdevs.TouchScreen
+	devicefd, err = os.OpenFile(tscreen.InputEvent, os.O_RDWR, 0644)
+	return err
+}
 
-	var err error
-	devicefd, err = initDevice()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer devicefd.Close()
-
-	cmdName := flag.Arg(0)
-	cmdArgs := flag.Args()[1:]
-	fn, exists := commands[cmdName]
-	if !exists {
-		log.Fatal("command not found")
-	}
-	err = fn.Func(cmdArgs...)
-	if err != nil {
-		log.Fatal(err)
+func deferInput() {
+	if devicefd != nil {
+		devicefd.Close()
 	}
 }

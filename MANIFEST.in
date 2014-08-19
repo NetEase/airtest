@@ -1,1 +1,2 @@
 recursive-include airtest/htmltemplate *.js *.html *.json
+recursive-include airtest/binfiles airtoolbox*
