@@ -26,3 +26,7 @@ Change Log
 ### 2014/08/14
 1. 增加app.monitor变量， 可以通过app.monitor.start() 启动监控和通过app.monitor.stop()停止监控
 2. 增加fps的支持
+
+### 2014/08/20
+1. 新增airtoolbox工具（该工具可以运行在手机上，采集手机的内存，网卡信息，模拟长按的操作）
+2. 完成air.test gen命令

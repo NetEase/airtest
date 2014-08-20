@@ -19,46 +19,35 @@ airtest具体的API依然维护这个README上面
 [Click HERE](INSTALL.md)
 
 ## Check if install OK
-for android
+run `air.test` in terminal.
 
+## DEMOS
 Run [flappybird example program](http://git.mt.nie.netease.com/hzsunshx/flappybird)
 
-download test code through:
-```
-git clone http://git.mt.nie.netease.com/hzsunshx/flappybird
-```
+download through: `git clone http://git.mt.nie.netease.com/hzsunshx/flappybird`
 
-## run test case
+## LIMIT
+[airtest的目前触及到的边界](LIMIT.md)
+
+## START USING AIRTEST
 ### step1: prepare air.json file.
-the command tool `air.test` is installed. If everything goes fine.
-
-config file `air.json` is needed by `air.test`. here is an example
-```json
-{
-  "cmd": "python main.py",
-  "android": {
-    "apk_url": "http://10.246.13.110:10001/demo-release-signed.apk",
-    "package": "com.netease.xxx",
-    "activity": "main.activity"
-  }
-}
+run this command to generate file `air.json`
+```
+air.test gen $apk_file_path
 ```
 
-### step2: prepare the test code
+### step2: prepare test code
 main.py code example
 ```
 import airtest
 
-phoneno = os.getenv('AIRTEST_PHONENO')
-appname = os.getenv('AIRTEST_APPNAME')
-device = os.getenv('DEVICE') or 'android'
+devno = os.getenv('AIRTEST_DEVNO') or 'xxxxxx'  # get from: adb devices
+appname = os.getenv('AIRTEST_APPNAME') or 'com.netease.xxxx'
+device =  airtest.ANDROID
 
-app = airtest.connect(phoneno, appname=appname, device=device)
-(width, height) = app.shape() # get device size
-app.click('start.png') # locate start.png position and touch it
+app = airtest.connect(devno, appname=appname, device=device)
+print app.shape() # show device size
 ```
-
-So where is `start.png` image file from.
 
 take screen snapshot by run: `air.test snapshot`, screen will save to `screen.png`
 
