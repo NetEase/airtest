@@ -306,6 +306,13 @@ border-color: #ccc;
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_8">
              <item>
+              <widget class="QCheckBox" name="chkAutoRun">
+               <property name="text">
+                <string>自动运行代码</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QLineEdit" name="leCode">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -384,28 +391,6 @@ border-color: #ccc;
                    </property>
                    <property name="text">
                     <string>drag</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="btnWait">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>100</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>wait</string>
                    </property>
                   </widget>
                  </item>

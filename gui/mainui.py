@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainui.ui'
 #
-# Created: Tue Aug 12 20:56:52 2014
+# Created: Fri Aug 15 17:39:28 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -183,6 +183,9 @@ class Ui_Dialog(object):
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
         self.horizontalLayout_8.setObjectName(_fromUtf8("horizontalLayout_8"))
+        self.chkAutoRun = QtGui.QCheckBox(Dialog)
+        self.chkAutoRun.setObjectName(_fromUtf8("chkAutoRun"))
+        self.horizontalLayout_8.addWidget(self.chkAutoRun)
         self.leCode = QtGui.QLineEdit(Dialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -230,16 +233,6 @@ class Ui_Dialog(object):
         self.btnDrag.setMinimumSize(QtCore.QSize(100, 0))
         self.btnDrag.setObjectName(_fromUtf8("btnDrag"))
         self.verticalLayout_2.addWidget(self.btnDrag)
-        self.btnWait = QtGui.QPushButton(Dialog)
-        self.btnWait.setEnabled(False)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.btnWait.sizePolicy().hasHeightForWidth())
-        self.btnWait.setSizePolicy(sizePolicy)
-        self.btnWait.setMinimumSize(QtCore.QSize(100, 0))
-        self.btnWait.setObjectName(_fromUtf8("btnWait"))
-        self.verticalLayout_2.addWidget(self.btnWait)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.btnFindAll = QtGui.QPushButton(Dialog)
@@ -412,10 +405,10 @@ class Ui_Dialog(object):
         self.btnSelectDir.setText(_translate("Dialog", "选择文件夹", None))
         self.label_2.setText(_translate("Dialog", "目标文件夹：", None))
         self.cbDestdir.setItemText(0, _translate("Dialog", "image", None))
+        self.chkAutoRun.setText(_translate("Dialog", "自动运行代码", None))
         self.btnRun.setText(_translate("Dialog", "运行代码", None))
         self.btnClick.setText(_translate("Dialog", "click", None))
         self.btnDrag.setText(_translate("Dialog", "drag", None))
-        self.btnWait.setText(_translate("Dialog", "wait", None))
         self.btnFindAll.setText(_translate("Dialog", "findall", None))
         self.label_5.setText(_translate("Dialog", "Commands Generated", None))
         self.btnRunScripts.setText(_translate("Dialog", "Run", None))

@@ -22,3 +22,7 @@ Change Log
 ### 2014/08/12
 1. 增加image_match_method配置项，可以手动选择图形匹配算法
 2. 环境变量AIRTEST_DEVNO改名为AIRTEST_PHONENO(影响范围，使用air.test命令行的runtest的程序)
+
+### 2014/08/14
+1. 增加app.monitor变量， 可以通过app.monitor.start() 启动监控和通过app.monitor.stop()停止监控
+2. 增加fps的支持

@@ -92,7 +92,8 @@ def run_gen():
       }
     }
     with open('air.json', 'w') as file:
-        json.dump(file, airjson)
+        json.dump(airjson, file, indent=4)
+    print 'nice'
 
 def run_install():
     if platform == 'android':
@@ -140,13 +141,16 @@ def main():
 
     # set action
     action=''
-    for act in ['all', 'install', 'log2html', 'runtest', 'snapshot', 'uninstall', 'update']:
+    for act in ['all', 'install', 'log2html', 'runtest', 'snapshot', 'uninstall', 'update', 'gen']:
         if arguments.get(act):
             action = act
             break
     if not action:
         sys.exit('No action specified, see --help')
     print 'RUN action:', action
+
+    # if action in ['gen']:
+    #     return globals().get('run_'+action)()
 
     # load conf
     cnf = 'air.json'
@@ -203,7 +207,13 @@ def main():
     if action in ['install', 'uninstall', 'log2html', 'runtest']:
         print 'RUN:', action
         return globals().get('run_'+action)()
-    return
+
+    cmd_name = sys.argv[1]
+    from airtest import console
+    func = console.COMMANDS.get(cmd_name)
+    if not func:
+        sys.exit('cmd(%s) not exists' % cmd_name)
+    return func.main(*sys.argv[2:])
 
 if __name__ == '__main__':
     try:

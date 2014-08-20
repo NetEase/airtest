@@ -97,7 +97,7 @@ class TestWidget(QWidget, Ui_Dialog):
         self.btnSelectDir.clicked.connect(self.selectDir)
         self.btnClick.clicked.connect(self.airClick)
         self.btnDrag.clicked.connect(self.airDrag)
-        self.btnWait.clicked.connect(self.airWait)
+        # self.btnWait.clicked.connect(self.airWait)
         self.btnFindAll.clicked.connect(self.airFindAll)
         self.btnClear.clicked.connect(self.airClear)
         self.btnSave.clicked.connect(self.airSave)
