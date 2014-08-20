@@ -26,7 +26,6 @@ from airtest import devsuit
 __version__ = time.strftime('0.2.%m%d')
 
 
-default_config_fil
 defaultConfigFile = 'air.json'
 defaultDevice = 'android'
 
