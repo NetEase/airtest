@@ -23,7 +23,7 @@ import subprocess
 import monitor
 
 from airtest import devsuit
-__version__ = time.strftime('0.2.%m%d')
+__version__ = '0.2.0821' #time.strftime('0.2.%m%d')
 
 
 defaultConfigFile = 'air.json'
