@@ -104,12 +104,13 @@ class Device(object):
             args = ['adb', '-s', serialno] + list(args)
             return subprocess.check_output(args)
 
-        out = sh('shell', self._airtoolbox, 'version')
+        out = sh('shell','sh','-c', 'test -x {tbox} && {tbox} version'.format(
+            tbox=self._airtoolbox))
         out = out.strip()
         print 'AirToolbox: '+out.strip()
         version_file = os.path.join(__dir__, '../binfiles/airtoolbox.version')
         version = open(version_file).read().strip()
-        if out.endswith(version):
+        if not out.endswith(version):
             print 'upgrade: airtoolbox (ver %s)...' %(version)
             toolbox = os.path.join(__dir__, '../binfiles/airtoolbox')
             sh('push', toolbox, self._airtoolbox)
