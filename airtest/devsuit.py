@@ -84,7 +84,7 @@ class DeviceSuit(object):
                 return
             #log.debug('MONITOR started')
             #log.debug('MONITOR finished, no appname provided')
-            start = time.time()
+            # start = time.time()
             mem = self.dev.getMem(self.appname)
             self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})
             self._log({'type':'record', 'mem_details':mem})
@@ -381,8 +381,10 @@ class DeviceSuit(object):
         #         return self._fixPoint(pt)
         #     raise RuntimeError('unknown type')
         # FIXME: (a little slow, find should support specified images)
-        fpt = self.find(fpt)
-        tpt = self.find(tpt)
+        fpt = self._PS2Point(fpt)
+        tpt = self._PS2Point(tpt)
+        # fpt = self.find(fpt)
+        # tpt = self.find(tpt)
         # fpt, tpt = to_point(fpt), to_point(tpt)
         return self.dev.drag(fpt, tpt, duration)
 
