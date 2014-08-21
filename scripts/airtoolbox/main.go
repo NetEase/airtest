@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const VERSION = "1"
+const VERSION = "ver1.1"
 
 var (
 	commands = map[string]FlagCommand{

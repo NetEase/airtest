@@ -106,10 +106,10 @@ class Device(object):
 
         out = sh('shell', self._airtoolbox, 'version')
         out = out.strip()
-        print 'AirToolbox: v'+out.strip()
+        print 'AirToolbox: '+out.strip()
         version_file = os.path.join(__dir__, '../binfiles/airtoolbox.version')
         version = open(version_file).read().strip()
-        if out != version:
+        if out.endswith(version):
             print 'upgrade: airtoolbox (ver %s)...' %(version)
             toolbox = os.path.join(__dir__, '../binfiles/airtoolbox')
             sh('push', toolbox, self._airtoolbox)
