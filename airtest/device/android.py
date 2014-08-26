@@ -191,10 +191,14 @@ class Device(object):
         same as adb -s ${SERIALNO} shell input tap x y
         '''
         if eventType == 'down':
-            self._touch_down((x, y))
+            self.adb.shell('{toolbox} input tapdown {x} {y}'.format(
+                toolbox=self._airtoolbox, x=x, y=y))
+            # self._touch_down((x, y))
             log.debug('touch down position %s', (x, y))
         elif eventType == 'up':
-            self._touch_up()
+            self.adb.shell('{toolbox} input tapup'.format(
+                toolbox=self._airtoolbox, x=x, y=y))
+            # self._touch_up()
             log.debug('touch up position %s', (x, y))
         elif eventType == 'down_and_up':
             log.debug('touch position %s', (x, y))

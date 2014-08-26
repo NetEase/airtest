@@ -1,6 +1,5 @@
 python setup.py py2exe
 
-exit
 
 copy C:\windows\system32\OLEAUT32.dll dist
 copy C:\windows\system32\USER32.dll dist

@@ -5,7 +5,7 @@ import os
 import platform
 import time
 import json
-import PIL
+from PIL import Image
 
 from airtest import base
 from airtest import jsonlog
@@ -68,7 +68,7 @@ class DeviceSuit(object):
         self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
         self._click_timeout = 20.0 # if icon not found in this time, then panic
         self._delay_after_click = 0.5 # when finished click, wait time
-
+        self._screen_resolution = None # FIXME
         self._snapshot_file = None
 
         self._init_monitor()
@@ -206,8 +206,8 @@ class DeviceSuit(object):
         rotation = self._getRotation()
         # the origin screenshot is UP, so need to rotate it here for human
         if rotation != 'UP':
-            angle = dict(RIGHT=PIL.Image.ROTATE_90, LEFT=PIL.Image.ROTATE_270).get(rotation)
-            PIL.Image.open(filename).transpose(angle).save(filename)
+            angle = dict(RIGHT=Image.ROTATE_90, LEFT=Image.ROTATE_270).get(rotation)
+            Image.open(filename).transpose(angle).save(filename)
         self._log(dict(type='snapshot', filename=filename))
         self._snapshot_file = filename
         return filename
@@ -259,7 +259,9 @@ class DeviceSuit(object):
         @return (point founded or None if not found)
         '''
         filepath = self._search_image(imgfile)
+        
         log.debug('Locate image path: %s', filepath)
+        
         screen = self._saveScreen('screen-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
         pt = self._imfind(screen, filepath)
         # pt = find_one_image(screen, filepath, self._threshold)
