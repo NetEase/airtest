@@ -9,7 +9,7 @@ Install according to the number one by one.
 
 install pythonlib: **androidviewclient**
 ```
-pip install -U -i http://mt.nie.netease.com:3141/simple/ androidviewclient
+easy_install androidviewclient
 ```
 
 install pythonlib: **airtest**, (Want update?, run this command again)
@@ -39,7 +39,15 @@ Or manual
 1. pillow: `brew tap Homebrew/python && brew install pillow`
 1. appclient: `pip install Appium-Python-Client`
 
-#### Dangerous: You should known what you are doing.
+If meet error when run `python -m -c "import cv2"`, follow this may resolve.
+```
+brew uninstall opencv
+brew install python
+brew link python
+brew install opencv
+```
+
+#### Below is only for developers: You should known what you are doing.
 airtest develop version(not stable)
 ```
 pip install -U git+http://git.mt.nie.netease.com/hzsunshx/airtest.git
