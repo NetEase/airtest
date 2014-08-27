@@ -27,7 +27,7 @@ Run [flappybird example program](http://git.mt.nie.netease.com/hzsunshx/flappybi
 download through: `git clone http://git.mt.nie.netease.com/hzsunshx/flappybird`
 
 ## LIMIT
-[airtest的目前触及到的边界](LIMIT.md)
+[airtest的限制](LIMIT.md)
 
 ## START USING AIRTEST
 ### step1: generate air.json file.

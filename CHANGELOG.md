@@ -30,3 +30,7 @@ Change Log
 ### 2014/08/20
 1. 新增airtoolbox工具（该工具可以运行在手机上，采集手机的内存，网卡信息，模拟长按的操作）
 2. 完成air.test gen命令
+
+### 2014/08/27
+1. 支持python -mairtest 等价于 命令行的air.test
+2. log2html生成的文件支持点击放大的效果。
