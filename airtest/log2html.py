@@ -6,6 +6,7 @@ convert log to html report
 '''
 
 import os
+import sys
 import json
 import time
 import shutil
@@ -18,7 +19,8 @@ def render(logfile, htmldir):
     '''
     parse logfile and render it to html
     '''
-    assert os.path.exists(logfile)
+    if not os.path.exists(logfile):
+        sys.exit('logfile: %s not exists' %(logfile))
     #htmldir = base.dirname(htmlfile)
     if not os.path.exists(htmldir):
         os.makedirs(htmldir)
@@ -76,13 +78,17 @@ def render(logfile, htmldir):
 
     tmpldir = os.path.join(base.dirname(__file__), 'htmltemplate')
     for name in os.listdir(tmpldir):
-        if os.path.isdir(name) or name.endswith('.swp'):
-            continue
         fullpath = os.path.join(tmpldir, name)
+        outpath = os.path.join(htmldir, name)
+        if os.path.isdir(fullpath):
+            shutil.rmtree(outpath, ignore_errors=True)
+            shutil.copytree(fullpath, outpath)
+            continue
+        if fullpath.endswith('.swp'):
+            continue
         content = open(fullpath).read().decode('utf-8')
         out = pystache.render(content, data)
         print fullpath
-        outpath = os.path.join(htmldir, name)
         with open(outpath, 'w') as file:
             file.write(out.encode('utf-8'))
 

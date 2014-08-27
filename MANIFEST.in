@@ -1,3 +1,3 @@
-recursive-include airtest/htmltemplate *.js *.html *.json
+recursive-include airtest/htmltemplate *.js *.html *.json *.css *.map
 recursive-include airtest/binfiles airtoolbox*
 recursive-include airtest/console *.zip
