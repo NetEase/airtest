@@ -30,7 +30,7 @@ download through: `git clone http://git.mt.nie.netease.com/hzsunshx/flappybird`
 [airtest的目前触及到的边界](LIMIT.md)
 
 ## START USING AIRTEST
-### step1: prepare air.json file.
+### step1: generate air.json file.
 run this command to generate file `air.json`
 ```
 air.test gen $apk_file_path
@@ -50,8 +50,9 @@ print app.shape() # show device size
 ```
 
 take screen snapshot by run: `air.test snapshot`, screen will save to `screen.png`
-
 cut the image part from it.
+
+还可以使用airtest专用的gui，来完成快速的截图和代码调试，[点击安装地址](http://git.mt.nie.netease.com/hzsunshx/airtest-gui)
 
 ### step3: run test code
 1. connect you device. if you use android, `adb devices` should see a devices
