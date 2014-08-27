@@ -49,6 +49,7 @@ brew install opencv
 
 #### Below is only for developers: You should known what you are doing.
 airtest develop version(not stable)
+First install git for windows. [下载](ftp://mt.nie.netease.com/airtest-win-res/Git-1.9.4-preview20140815.exe), 记住勾选添加到PATH变量
 ```
 pip install -U git+http://git.mt.nie.netease.com/hzsunshx/airtest.git
 ```
