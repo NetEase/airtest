@@ -34,3 +34,4 @@ Change Log
 ### 2014/08/27
 1. 支持python -mairtest 等价于 命令行的air.test
 2. log2html生成的文件支持点击放大的效果。
+3. 修复air.test gen命令，对于某些apk，不生效的问题。
