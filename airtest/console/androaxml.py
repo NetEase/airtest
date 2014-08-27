@@ -19,7 +19,7 @@
 # along with Androguard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-__dir__ = os.path.relpath(os.path.dirname(os.path.abspath(__file__))) 
+__dir__ = os.path.dirname(os.path.abspath(__file__))
 
 import sys
 sys.path.append(os.path.join(__dir__, "androguard.zip"))
@@ -34,7 +34,10 @@ def xml2parse(dom): #, strformat='$package/$activity'):
     for e in root.getElementsByTagName('activity'):
         name = e.getAttribute('android:name')
         t = e.getElementsByTagName('intent-filter')
-        if t:
+        action = t and t[0].getElementsByTagName('action')
+        category = t and t[0].getElementsByTagName('category')
+        if action and action[0].getAttribute('android:name') == 'android.intent.action.MAIN' and \
+                category and category[0].getAttribute('android:name') == 'android.intent.category.LAUNCHER':
             activity = name
     return (package, activity)
 

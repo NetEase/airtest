@@ -149,8 +149,13 @@ def main():
         sys.exit('No action specified, see --help')
     print 'RUN action:', action
 
-    # if action in ['gen']:
-    #     return globals().get('run_'+action)()
+    # handle command in console
+    cmd_name = sys.argv[1]
+    from airtest import console
+    func = console.COMMANDS.get(cmd_name)
+    if func:
+        return func.main(*sys.argv[2:])
+    # else:sys.exit('cmd(%s) not exists' % cmd_name)
 
     # load conf
     cnf = 'air.json'
@@ -187,7 +192,7 @@ def main():
     #exec_cmd('adb', 'start-server', timeout=10)
 
     #print arguments
-    if not os.path.exists(cnf):
+    if not os.path.exists(cnf) and action != 'gen':
         sys.exit('config file require: %s' %(cnf))
     if action == 'all':
         exitcode = 0
@@ -208,12 +213,6 @@ def main():
         print 'RUN:', action
         return globals().get('run_'+action)()
 
-    cmd_name = sys.argv[1]
-    from airtest import console
-    func = console.COMMANDS.get(cmd_name)
-    if not func:
-        sys.exit('cmd(%s) not exists' % cmd_name)
-    return func.main(*sys.argv[2:])
 
 if __name__ == '__main__':
     try:
