@@ -15,12 +15,17 @@ EV_UP = 'up'
 EV_DOWN_AND_UP = 'down_and_up'
 
 import os
-import time
 import json
 import subprocess
+import signal, sys
 
 # just import
 import monitor
+
+def _sig_handler(signum, frame):
+    print >>sys.stderr, 'Signal INT catched !!!'
+    sys.exit(1)
+signal.signal(signal.SIGINT, _sig_handler)
 
 from airtest import devsuit
 __version__ = '0.3.0821.3' #time.strftime('0.2.%m%d')
