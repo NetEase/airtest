@@ -17,13 +17,6 @@ install pythonlib: **airtest**, (Want update?, run this command again)
 pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
 ```
 
-### For android test (on any platform)
-1. adb: <http://developer.android.com/tools/help/adb.html>
-1. numpy
-1. opencv
-1. pillow
-    * Linux: A little complicated. It's better to install from source.
-
 ### For ios test (only on Mac OS)
 Auto install airtest by run: 
 ```
@@ -48,9 +41,13 @@ brew link python
 brew install opencv
 ```
 
-## For windows and ios (all need to see)
+### For android test (on any platform)
+1. adb: <http://developer.android.com/tools/help/adb.html>
+
+Android上已经支持特殊字符的输入，需要提前安装输入法软件。
 The input method need to install into mobile phone. download through <http://mt.nie.netease.com/files/airtest-android-res/adb-keyboard.apk>
-or use Qcode ![qcode](http://cli.clewm.net/qrcode/2014/08/29/1640252455.png)
+or use Qcode ![qcode](http://mt.nie.netease.com/files/airtest-android-res/adb-keyboard.png)
+
 
 #### Below is only for developers: You should known what you are doing.
 airtest develop version(not stable)
