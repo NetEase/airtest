@@ -68,7 +68,7 @@ class DeviceSuit(object):
         self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
         self._click_timeout = 20.0 # if icon not found in this time, then panic
         self._delay_after_click = 0.5 # when finished click, wait time
-        self._screen_resolution = None # FIXME
+        self._screen_resolution = None
         self._snapshot_file = None
 
         self._init_monitor()
@@ -82,17 +82,11 @@ class DeviceSuit(object):
         def _cpu_mem_monitor():
             if not self.appname:
                 return
-            #log.debug('MONITOR started')
-            #log.debug('MONITOR finished, no appname provided')
-            # start = time.time()
             mem = self.dev.getMem(self.appname)
             self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})
             self._log({'type':'record', 'mem_details':mem})
             cpu = self.dev.getCpu(self.appname)
             self._log({'type':'record', 'cpu':cpu})
-            #dur = time.time()-start
-            #if self._monitor_interval > dur:
-            #    time.sleep(self._monitor_interval-dur)
 
         self.monitor = airtest.monitor.Monitor()
         self.monitor.addfunc(_cpu_mem_monitor)
@@ -175,7 +169,7 @@ class DeviceSuit(object):
                 fullpath = os.path.join(folder, basename+ext)
                 if os.path.exists(fullpath):
                     return fullpath
-        raise RuntimeError('Image file(%s) not found in %s' %(filename, self._image_dirs))
+        raise RuntimeError('Image file(%s) not found in %s' %(filename, self._image_pre_search_dirs+self._image_dirs))
 
     def _PS2Point(self, PS):
         '''
@@ -263,8 +257,17 @@ class DeviceSuit(object):
         log.debug('Locate image path: %s', filepath)
         
         screen = self._saveScreen('screen-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
+        if self._screen_resolution:
+            # resize image
+            w, h = self._screen_resolution
+            (ratew, rateh) = self.width/float(w), self.height/float(h)
+            im = Image.open(filepath)
+            (rw, rh) = im.size
+            new_name = base.random_name('resize-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
+            new_name = os.path.join(self._tmpdir, new_name)
+            im.resize((int(ratew*rw), int(rateh*rh))).save(new_name)
+            filepath = new_name
         pt = self._imfind(screen, filepath)
-        # pt = find_one_image(screen, filepath, self._threshold)
         return pt
 
     def findall(self, imgfile, maxcnt=None, sort=None):

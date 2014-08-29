@@ -38,6 +38,7 @@ Or manual
 1. opencv: `brew tap homebrew/science && brew install opencv` 
 1. pillow: `brew tap Homebrew/python && brew install pillow`
 1. appclient: `pip install Appium-Python-Client`
+1. androidviewclient: `easy_install androidviewclient`
 
 If meet error when run `python -m -c "import cv2"`, follow this may resolve.
 ```
