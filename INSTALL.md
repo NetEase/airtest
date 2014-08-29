@@ -48,6 +48,10 @@ brew link python
 brew install opencv
 ```
 
+## For windows and ios (all need to see)
+The input method need to install into mobile phone. download through <http://mt.nie.netease.com/files/airtest-android-res/adb-keyboard.apk>
+or use Qcode ![qcode](http://cli.clewm.net/qrcode/2014/08/29/1640252455.png)
+
 #### Below is only for developers: You should known what you are doing.
 airtest develop version(not stable)
 First install git for windows. [下载](ftp://mt.nie.netease.com/airtest-win-res/Git-1.9.4-preview20140815.exe), 记住勾选添加到PATH变量

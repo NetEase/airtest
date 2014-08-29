@@ -221,6 +221,18 @@ class Device(object):
         height = self.adb.getProperty("display.height")
         return (width, height)
 
+    def _type_raw(self, text):
+        #adb shell ime enable com.android.adbkeyboard/.AdbIME
+        #adb shell ime set com.android.adbkeyboard/.AdbIME
+        #adb shell am broadcast -a ADB_INPUT_TEXT --es msg '你好嗎? Hello?'
+        #adb shell ime disable com.android.adbkeyboard/.AdbIME
+        adbkeyboard = ['com.android.adbkeyboard/.AdbIME']
+        ime = ['adb', '-s', self._serialno, 'shell', 'ime']
+        subprocess.call(ime+['enable']+adbkeyboard)
+        subprocess.call(ime+['set']+adbkeyboard)
+        subprocess.call(['adb', '-s', self._serialno, 'shell', 'am', 'broadcast', '-a', 'ADB_INPUT_TEXT', '--es', 'msg', text])
+        subprocess.call(ime+['disable']+adbkeyboard)
+
     def type(self, text):
         '''
         Input some text
@@ -228,16 +240,15 @@ class Device(object):
         @param text: string (text want to type)
         '''
         log.debug('type text: %s', repr(text))
-        keymap = {
-                '\n': 'ENTER',
-                ' ': 'SPACE',
-                '\t': 'TAB',
-                }
-        for c in text:
-            if c in keymap:
-                self.adb.press(keymap[c])
+        first = True
+        for s in text.split('\n'):
+            if first:
+                first=False
             else:
-                self.adb.type(c)
+                self.adb.press('ENTER')
+            if not s:
+                continue
+            self._type_raw(s)
 
     def keyevent(self, event):
         '''
