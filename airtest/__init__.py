@@ -28,7 +28,7 @@ def _sig_handler(signum, frame):
 signal.signal(signal.SIGINT, _sig_handler)
 
 from airtest import devsuit
-__version__ = '0.3.0821.3' #time.strftime('0.2.%m%d')
+__version__ = '0.4.0829.1651' # 0.{n}.%m%d.%H%M
 
 
 defaultConfigFile = 'air.json'
