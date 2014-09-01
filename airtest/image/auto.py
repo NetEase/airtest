@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-2014/08/15 jiaqianghuai: fix the code
+2014/09/01 jiaqianghuai: fix the code
 """
 
 __author__ = 'hzjiaqianghuai,hzsunshx'
-__version__ = '0.2.08.15'
+__version__ = '0.2.09.01'
 __description__ ='fix the code'
 
 import os
@@ -284,11 +284,11 @@ def _image_rectangle(image, centers, width, height,outfile='match.png'):
             if topleft_y < 0: topleft_y = 0
             if image.shape[1] <= bottomright_x: bottomright_x = image.shape[1]-1
             if image.shape[0] <= bottomright_y: bottomright_y = image.shape[0]-1
-            cv2.rectangle(image,(topleft_x,topleft_y),
-                                (bottomright_x,bottomright_y),(0,0,255),1,0)
-            cv2.circle(image,(int(center[0]),int(center[1])),2,(0,255,0),-1)
-    if outfile:
-        cv2.imwrite(outfile,image)
+            if DEBUG:
+                cv2.rectangle(image,(topleft_x,topleft_y),
+                                    (bottomright_x,bottomright_y),(0,0,255),1,0)
+                cv2.circle(image,(int(center[0]),int(center[1])),2,(0,255,0),-1)
+    if outfile: cv2.imwrite(outfile,image)
 
 #homography
 def _homography(src_pts,dst_pts,template_width,template_height,match_point=None):
@@ -391,7 +391,7 @@ def _re_detectAndmatch(source_image, template_image, origin_image, query_image,
                 max = val_2
                 k = i
         if DEBUG: print "393: ", k, max, sift_similarity[k]
-        if 0.9 < max and 0.09 < sift_similarity[k]:
+        if 0.9 < max and 0.09 < sift_similarity[k] or (0.8 < max and 0.5 < sift_similarity[k]):
                 center_x = int(match_posi[k][0] + w/2)
                 center_y = int(match_posi[k][1] + h/2)
         elif 0.2 < sift_similarity[k]:
@@ -506,11 +506,11 @@ def rotate_template_match(source_image, template_image):
 def multi_scale_match(source_image, template_image):
     match_value, match_posi = [], []
     ratio = [1, 0.5, 0.75, 1.25, 1.5, 2] #放缩因子
-    [height,width] = [template_image.shape[0],template_image.shape[1]]
     value, posi = template_match(source_image, template_image,[],1)
     match_value.append(value)
     match_posi.append(posi)
     max, k = match_value[0], 0
+    [height,width] = [template_image.shape[0],template_image.shape[1]]
     for i in range(1,len(ratio)):
         size = (int(ratio[i]*width),int(ratio[i]*height))
         if source_image.shape[1] < size[0] or source_image.shape[0] < size[1]:
@@ -627,22 +627,20 @@ def locate_one_image(origin, query, outfile=None, threshold=0.3):
         center = _homography_match(img2, img1, src_pts, dst_pts, num1, None,1)
         if center:
             _image_rectangle(target_img, [center], width, height,outfile)
-            if DEBUG: print "630_GOOd center: ", center
         return center       
     else:
-        if DEBUG: print "633_Bad"
+        if DEBUG: print "632_Bad"
         row, col, dim = dst_pts.shape
-        print row, ratio_num
         '''几乎没有好的匹配点的情况'''
+        if DEBUG: print "635 row ratio_num: ", row, ratio_num
         if num1 < 35:
             flag = bool(row < ratio_num and 2 < row)
         else:
             flag = bool(row < ratio_num)
-        if (row<1 or flag or (row==1 and ratio_num<1) or (4<row and row==ratio_num)):
+        if (row<1 or flag or (row==1 and ratio_num<1) or (4<row and row==ratio_num )): ####
             center = _re_detectAndmatch(img2, img1, target_img, query_img,kp2_xy)
             if center:
-                _image_rectangle(target_img, [center], width, height,outfile)
-                if DEBUG: print "645 center: ", center
+                _image_rectangle(target_img, [center], width, height,outfile)                
             return center
         else:
             list = []
@@ -656,18 +654,18 @@ def locate_one_image(origin, query, outfile=None, threshold=0.3):
                 [center_x, center_y] = [int(newcenter[0]),int(newcenter[1])]
                 [top_x, top_y] = [int(center_x-width/2), int(center_y-height/2)]
                 if (top_x < 0) and (top_y < 0): return None
-                if 1 <= row <= 2 and ratio_num == 1 and num_single != 5:
+                if ((1 <= row <= 2 and 1 <= ratio_num <=2 and num_single != 5) or
+                    (row == (ratio_num+1) and row < 4)):
                     rect_img = _region_copy(img2,[center_x,center_y],
                                             width, height, 1)
                     value, posi = template_match(rect_img, img1,[],0)
                     kp_rect, des_rect = _sift_extract(rect_img)
-                    if DEBUG: print "664_value: ", value, len(kp_rect)
-                    if (value < 0.86 or (len(kp_rect)<=(num1+3) and value<0.9352)
+                    if DEBUG: print "663_value: ", value, len(kp_rect)
+                    if (value < 0.87 or (len(kp_rect)<=(num1+3) and value<0.9352)
                         or (0.955 < value and len(kp_rect) == 0)): 
                         return None
                 center = [center_x,center_y]
                 _image_rectangle(target_img, [center], width, height, outfile)
-                if DEBUG: print "670 center: ", center
                 return center
 
 def locate_one_image_SIFT(origin, query, outfile=None, threshold=0.3):
