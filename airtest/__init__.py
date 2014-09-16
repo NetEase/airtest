@@ -28,7 +28,7 @@ def _sig_handler(signum, frame):
 signal.signal(signal.SIGINT, _sig_handler)
 
 from airtest import devsuit
-__version__ = '0.4.0829.1651' # 0.{n}.%m%d.%H%M
+__version__ = '0.4.0916.0952' # 0.{n}.%m%d.%H%M
 
 
 defaultConfigFile = 'air.json'
@@ -79,10 +79,21 @@ def stop(devno, device=None):
 ## ----------------------------------------------------------
 #
 
-def connect(phoneno, appname=None, device=None, monitor=True, logfile='log/airtest.log'):
+def connect(phoneno=None, appname=None, device=None, monitor=True, logfile='log/airtest.log'):
     '''
     Connect device
+    @param phoneno: If phoneno is None, then get device serialno from `adb devices`
+    @param device: can be one of <android|windows|ios>
+    @param monitor: wether to enable CPU monitor
     '''
+    if not phoneno:
+        devs = getDevices()
+        if not devs:
+            sys.exit('adb: No devices found')
+        if len(devs) != 1:
+            sys.exit('adb: Too many devices, need to specify phone serialno')
+        phoneno = devs[0][0]
+
     device = device or defaultDevice
     if  device == ANDROID:
         from airtest.device import android

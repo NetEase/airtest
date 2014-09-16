@@ -98,19 +98,23 @@ class DeviceSuit(object):
             point = imt.auto.locate_one_image(bgimg, search, threshold=self._threshold)
         elif method == 'template':
             point = imt.template.find(search, bgimg, self._threshold)
+        elif method == 'sift':
+            point = imt.sift.find(search, bgimg)
         else:
             raise RuntimeError("Unknown image match method: %s" %(method))
         print 'find method=', method
         return point
 
     def _imfindall(self, bgimg, search, maxcnt, sort):
+        if not maxcnt:
+            maxcnt = 0
         method = self._image_match_method
         if method == 'auto':
-            if not maxcnt:
-                maxcnt = 0
             points = imt.auto.locate_more_image_Template(search, bgimg, num=maxcnt)
         elif method == 'template':
             points = imt.template.findall(search, bgimg, self._threshold, maxcnt=maxcnt)
+        elif method == 'sift':
+            points = imt.sift.findall(search, bgimg, maxcnt=maxcnt)
         else:
             raise RuntimeError("Unknown image match method: %s" %(method))
         if sort:
@@ -308,7 +312,7 @@ class DeviceSuit(object):
             pt = self.find(imgfile)
             if pt:
                 return pt
-            if time.time()-start > seconds:
+            if time.time()-start > seconds: 
                 break
             time.sleep(1)
         raise RuntimeError('Wait timeout(%.2f)', float(seconds))

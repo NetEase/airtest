@@ -44,7 +44,7 @@ brew install opencv
 ### For android test (on any platform)
 1. adb: <http://developer.android.com/tools/help/adb.html>
 
-Android上已经支持特殊字符的输入，需要提前安装输入法软件。
+Android上已经支持特殊字符的输入，需要提前安装输入法软件。感谢开源项目<https://github.com/senzhk/ADBKeyBoard>
 The input method need to install into mobile phone. download through <http://mt.nie.netease.com/files/airtest-android-res/adb-keyboard.apk>
 or use Qcode ![qcode](http://mt.nie.netease.com/files/airtest-android-res/adb-keyboard.png)
 

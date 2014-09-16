@@ -3,3 +3,4 @@
 
 import auto
 import template
+import sift
