@@ -9,7 +9,7 @@ Install according to the number one by one.
 
 install pythonlib: **androidviewclient**
 ```
-easy_install androidviewclient
+easy_install -i http://mt.nie.netease.com:3141/simple/ androidviewclient
 ```
 
 install pythonlib: **airtest**, (Want update?, run this command again)
