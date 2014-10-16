@@ -32,7 +32,10 @@ def getMem(serialno, package):
         if line and line.split()[-1] == package:
             # USER PID PPID VSIZE RSS WCHAN PC NAME
             values = line.split()
-            ret.update(dict(VSS=int(values[3]), RSS=int(values[4])))
+            if values[3].isdigit() and values[4].isdigit():
+                ret.update(dict(VSS=int(values[3]), RSS=int(values[4])))
+            else:
+                ret.update(dict(VSS=-1, RSS=-1))
             break
     else:
         log.error("mem get: adb shell ps error")
