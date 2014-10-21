@@ -5,6 +5,8 @@
 convert log to html report
 '''
 
+import fuckit
+
 import os
 import sys
 import json
@@ -61,8 +63,9 @@ def render(logfile, htmldir):
         elif _type == 'snapshot':
             filename = d.get('filename')
             basename = os.path.basename(filename)
-            shutil.copyfile(filename, os.path.join(htmldir, basename))
-            imgs.append({'time':timestamp, 'filename':basename})
+            with fuckit:
+                shutil.copyfile(filename, os.path.join(htmldir, basename))
+                imgs.append({'time':timestamp, 'filename':basename})
         #elif d.get('result'):
         #    data['result'] = {'status': d.get('result'), 'detail': d.get('detail')}
     data['cpu_data'] = json.dumps(cpus)

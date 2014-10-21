@@ -29,7 +29,8 @@ setup(
           'requests', 
           'docopt',
           'pystache',
-          'Appium-Python-Client'
+          'Appium-Python-Client',
+          'fuckit'
           ],
       entry_points='''
       [console_scripts]

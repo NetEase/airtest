@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#!/usr/bin/env python
-# coding: utf-8
-#
-
 '''
 phone(android|iphone) autotest framework. gen can generate air.json
 Usage:
