@@ -8,3 +8,4 @@
 * 代码地址：<http://git.mt.nie.netease.com/hzsunshx/airtest>
 * 问题反馈：<http://git.mt.nie.netease.com/hzsunshx/airtest/issues>
 * 主要维护人员: [hzsunshx](mailto:hzsunshx@corp.netease.com)
+* Popo交流群: 1275211
