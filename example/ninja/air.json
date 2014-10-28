@@ -1,8 +1,0 @@
-{
-  "cmd": "python main.py",
-  "android": {
-    "apk_url": "http://ma3.gdl.netease.com/ninja2_101_netease.apk",
-    "package": "com.netease.rz",
-    "activity": ".webview.AndroidPlugin"
-  }
-}

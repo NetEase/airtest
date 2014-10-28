@@ -1,0 +1,12 @@
+<div class="well well-small navigation">
+  <a href="{{ site.baseurl }}/"></a>
+  <p class="muted version">{{ site.version }}</p>
+  <ul class="nav nav-list">
+    {% for category in site.categories %} 
+      <li class="nav-header">{{ category[0] }}</li>
+      {% for post in category[1] %} 
+        <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li> 
+      {% endfor %}
+    {% endfor %}
+  </ul>
+</div>
