@@ -1,5 +1,15 @@
 airtest
 =====
+
+在线文档已经逐步迁移到了 <http://airtest.mt.nie.netease.com>
+
+离线文档使用方法：
+
+	git clone http://git.mt.nie.netease.com/hzsunshx/airtest && cd airtest
+	gem install jekyll
+	git checkout gh-pages
+	jekyll serve
+
 this is python lib for airtest
 
 AirTest PoPo Discuss Group: **1275211**
