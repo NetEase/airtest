@@ -4,6 +4,7 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+
 ### 2014/07/17
 1. 增加start,stop,clear函数
 1. globalSet增加mem和cpu监控周期调整。globalSet({'monitor_interval': 5})
@@ -47,3 +48,7 @@ permalink: /changelog.html
 2. 图像识别算法，分离出feature SIFT算法
 3. 修正屏幕点亮的问题。多余代码清理
 4. 易用性修改，如果只有一个android设备连接，可以不用指定serialno
+
+### 2014/11/03 - 0.6.1
+1. 更新说明文档
+2. 建立gh-pages分支。
