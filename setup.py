@@ -26,6 +26,7 @@ setup(
       package_data={},
       install_requires=[
           #'androidviewclient >= 7.1.1', 
+          'click>=3.3',
           'requests', 
           'docopt',
           'pystache',
@@ -34,5 +35,5 @@ setup(
           ],
       entry_points='''
       [console_scripts]
-      air.test = airtest.cli:main
+      air.test = airtest.cli2:main
       ''')
