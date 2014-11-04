@@ -47,6 +47,17 @@ def _run(*args, **kwargs):
     p = subprocess.Popen(args, **kwargs)
     p.wait()
 
+def _get_apk(config_file):
+    if os.path.exists(conf):# compatiable with cli-1
+        with open(config_file) as file:
+            cfg = json.load(file)
+        url = cfg.get('android', {}).get('apk_url') 
+        if url: 
+            apk = cfg['apk'] = url
+    if not apk:
+        apk = raw_input('Enter apk path or url: ')
+    return apk
+
 @click.group()
 @click.option('-v', '--verbose', is_flag=True, help='Show verbose information')
 def cli(verbose):
@@ -116,6 +127,17 @@ def install(start, conf, serialno, apk):
         pkg, act = androaxml.parse_apk(apk)
         args = adbargs + ['shell', 'am', 'start', '-n', pkg+'/'+act]
         _run(*args)
+
+@cli.command()
+@click.option('--conf', default='air.json', type=click.Path(dir_okay=False), help='config file')
+@click.option('-s', '--serialno', help='Specify which android device to connect')
+@click.argument('apk', required=False)
+def uninstall(conf, serialno, apk):
+    pkg, act = androaxml.parse_apk(apk)
+    args = ['adb']
+    if serialno:
+        args.extend(['-s', serialno])
+    _run(args + ['uninstall', pkg])
 
 if __name__ == '__main__':
     cli()
