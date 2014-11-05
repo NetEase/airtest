@@ -47,18 +47,26 @@ def _run(*args, **kwargs):
     p = subprocess.Popen(args, **kwargs)
     p.wait()
 
-def _get_apk(config_file):
+def _get_apk(config_file, cache=False):
     if os.path.exists(config_file):# compatiable with cli-1
         with open(config_file) as file:
             cfg = json.load(file)
-            url = cfg.get('android', {}).get('apk_url') 
-            if url: 
-                return url
+            apk = cfg.get('apk')
+            if apk:
+                return apk
+            apk = cfg.get('android', {}).get('apk_url') 
+            if apk: 
+                return apk
     apk = raw_input('Enter apk path or url: ')
     assert apk.lower().endswith('.apk')
     # FIXME: save to file
     with open(conf, 'wb') as file:
         file.write(json.dumps({'apk': apk}))
+    if re.match('^\w{1,2}tp://', apk):
+        if cache and os.path.exists('tmp.apk'):
+            return 'tmp.apk'
+        _wget(apk, 'tmp.apk')
+        apk = 'tmp.apk'
     return apk
 
 @click.group()
@@ -106,9 +114,6 @@ def snapshot(phoneno, platform, out):
 def install(start, conf, serialno, apk):
     apk = _get_apk(conf)
 
-    if re.match('^\w{1,2}tp://', apk):
-        _wget(apk, 'tmp.apk')
-        apk = 'tmp.apk'
     adbargs = ['adb']
     if serialno:
         adbargs.extend(['-s', serialno])
@@ -126,6 +131,7 @@ def install(start, conf, serialno, apk):
 @click.option('-s', '--serialno', help='Specify which android device to connect')
 @click.argument('apk', required=False)
 def uninstall(conf, serialno, apk):
+    apk = _get_apk(conf, cache=True)
     pkg, act = androaxml.parse_apk(apk)
     args = ['adb']
     if serialno:
