@@ -36,5 +36,6 @@ air.json文件的内容格式如下
 
 #### snapshot
 截取屏幕图像，扩展名支持png和jpg
+
 	air.test snapshot --out snapshot.png
 
