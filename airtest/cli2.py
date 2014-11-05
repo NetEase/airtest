@@ -84,9 +84,9 @@ def inspect(apkfile):
 
 @cli.command()
 @click.option('--logfile', default='log/airtest.log', help='airtest log file path',
-        type=click.Path(exists=True, dir_okay=False))
+        type=click.Path(exists=True, dir_okay=False), show_default=True)
 @click.option('--listen', is_flag=True, help='open a web serverf for listen')
-@click.option('--port', default=8800, help='listen port')
+@click.option('--port', default=8800, help='listen port', show_default=True)
 @click.argument('outdir', type=click.Path(exists=False, file_okay=False))
 def log2html(logfile, outdir, listen, port):
     log2html.render(logfile, outdir)
@@ -96,9 +96,9 @@ def log2html(logfile, outdir, listen, port):
 
 @cli.command()
 @click.option('--phoneno', help='If multi android dev connected, should specify serialno')
-@click.option('--platform', default='android', type=click.Choice(['android', 'windows', 'ios']))
+@click.option('--platform', default='android', type=click.Choice(['android', 'windows', 'ios']), show_default=True)
 @click.option('--out', default='snapshot.png', type=click.Path(dir_okay=False),
-        help='out filename [default: "snapshot.png"]')
+        help='out filename [default: "snapshot.png"]', show_default=True)
 def snapshot(phoneno, platform, out):
     try:
         app = airtest.connect(phoneno=phoneno, device=platform)
@@ -108,7 +108,7 @@ def snapshot(phoneno, platform, out):
 
 @cli.command()
 @click.option('--start', is_flag=True, help='Start app after successfully installed')
-@click.option('--conf', default='air.json', type=click.Path(dir_okay=False), help='config file')
+@click.option('--conf', default='air.json', type=click.Path(dir_okay=False), help='config file', show_default=True)
 @click.option('-s', '--serialno', help='Specify which android device to connect')
 @click.argument('apk', required=False)
 def install(start, conf, serialno, apk):
