@@ -1,27 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-phone(android|iphone) autotest framework. gen can generate air.json
-Usage:
-    air.test gen <apk>
-    air.test (runtest|install|uninstall) [-p PLATFORM] [SERIALNO]
-    air.test log2html [--listen] [--port=PORT] <HTMLDIR>
-    air.test snapshot [-p PLATFORM] [-r ROTATION] [SERIALNO]
-    air.test all [--steps STEPS] [-H HTMLDIR] [-p PLATFORM] [SERIALNO]
-    air.test update
-
-Options:
-    -h --help       Show this screen
-    -p PLATFORM     android or iphone [default: android]
-    -s SERIALNO     Specify devices serialno(needed)
-    --steps STEPS   the steps one by one [default: install,runtest,log2html,uninstall]
-    -H HTMLDIR      Save html report
-    --port PORT     for log2html open a webserver to view report [default: 8888]
-    -r ROTATION     rotation of device, one of UP,DOWN,LEFT,RIGHT
-'''
-
-
 import os
 import re
 import sys

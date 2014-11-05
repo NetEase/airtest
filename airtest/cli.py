@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# FIXME(hzsunshx): 没用了，可以删了
+
 '''
 phone(android|iphone) autotest framework. gen can generate air.json
 Usage:

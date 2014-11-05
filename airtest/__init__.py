@@ -5,6 +5,8 @@
 #
 #__all__=['devsuit', 'android', 'image', 'base', 'patch', 'ios', 'device']
 
+__version__ = '0.6.2' # 0.{n}.%m%d.%H%M
+
 
 ANDROID = 'android'
 IOS = 'ios'
@@ -28,7 +30,6 @@ def _sig_handler(signum, frame):
 signal.signal(signal.SIGINT, _sig_handler)
 
 from airtest import devsuit
-__version__ = '0.6.1' # 0.{n}.%m%d.%H%M
 
 
 defaultConfigFile = 'air.json'
