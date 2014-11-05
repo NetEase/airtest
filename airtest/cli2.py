@@ -48,14 +48,17 @@ def _run(*args, **kwargs):
     p.wait()
 
 def _get_apk(config_file):
-    if os.path.exists(conf):# compatiable with cli-1
+    if os.path.exists(config_file):# compatiable with cli-1
         with open(config_file) as file:
             cfg = json.load(file)
-        url = cfg.get('android', {}).get('apk_url') 
-        if url: 
-            apk = cfg['apk'] = url
-    if not apk:
-        apk = raw_input('Enter apk path or url: ')
+            url = cfg.get('android', {}).get('apk_url') 
+            if url: 
+                return url
+    apk = raw_input('Enter apk path or url: ')
+    assert apk.lower().endswith('.apk')
+    # FIXME: save to file
+    with open(conf, 'wb') as file:
+        file.write(json.dumps({'apk': apk}))
     return apk
 
 @click.group()
@@ -101,17 +104,7 @@ def snapshot(phoneno, platform, out):
 @click.option('-s', '--serialno', help='Specify which android device to connect')
 @click.argument('apk', required=False)
 def install(start, conf, serialno, apk):
-    if not apk and os.path.exists(conf):
-        with open(conf) as file:
-            cfg = json.load(file)
-        # compatiable with cli-1
-        url = cfg.get('android', {}).get('apk_url')
-        if url: 
-            apk = cfg['apk'] = url
-    if not apk:
-        apk = raw_input('Enter apk path or url: ')
-        cfg['apk'] = apk
-        # FIXME: save to file
+    apk = _get_apk(conf)
 
     if re.match('^\w{1,2}tp://', apk):
         _wget(apk, 'tmp.apk')
