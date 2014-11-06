@@ -4,7 +4,7 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
-### 2014/11/06 - 0.6.3
+### 2014/11/06 - 0.6.4
 1. 修复androaxml.zip丢失的bug
 
 ### 2014/11/05 - 0.6.2
