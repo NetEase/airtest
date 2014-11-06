@@ -121,13 +121,16 @@ def uninstall(conf, serialno, apk):
     args += ['uninstall', pkg]
     _run(*args)
 
+def main():
+	cli()
+	
 if __name__ == '__main__':
-    cli()
+    main()
 
 ################################################################
 
 if __name__ == '__main__':
     try:
-        cli()
+        main()
     except KeyboardInterrupt:
         print 'Exited by user'
