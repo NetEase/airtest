@@ -51,7 +51,7 @@ def _get_apk(config_file, cache=False):
 
 @click.group()
 @click.option('-v', '--verbose', is_flag=True, help='Show verbose information')
-def cli(verbose):
+def cli(verbose=False):
     global __debug
     __debug = verbose
 
