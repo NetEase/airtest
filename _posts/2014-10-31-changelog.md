@@ -4,6 +4,9 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2014/11/06 - 0.6.3
+1. 修复androaxml.zip丢失的bug
+
 ### 2014/11/05 - 0.6.2
 1. 重构air.test命令行工具
 	- air.json格式简化
