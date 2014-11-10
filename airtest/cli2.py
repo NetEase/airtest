@@ -30,6 +30,7 @@ def _run(*args, **kwargs):
     p.wait()
 
 def _get_apk(config_file, cache=False):
+    apk = None
     if os.path.exists(config_file):# compatiable with cli-1
         with open(config_file) as file:
             cfg = json.load(file)
@@ -129,7 +130,8 @@ def uninstall(conf, serialno, apk):
 @click.option('-n', '--interval', default=3, show_default=True, help='Seconds to wait between updates')
 @click.option('-s', '--serialno', help='Specify which android device to connect')
 @click.option('-h', '--human-readable', is_flag=True, help='Print size with human readable format')
-def watch(conf, package, interval, serialno, human_readable):
+@click.option('-o', '--output-file', type=click.Path(dir_okay=False), help='Save output to file(no title)')
+def watch(conf, package, interval, serialno, human_readable, output_file):
     if not package:
         apk = _get_apk(conf, cache=True)
         package, _ = androaxml.parse_apk(apk)
@@ -137,6 +139,10 @@ def watch(conf, package, interval, serialno, human_readable):
     app = airtest.connect(phoneno=serialno, device=airtest.ANDROID, monitor=False)
 
     # print app.dev.getdevinfo()
+    outfd = None
+    if output_file:
+        outfd = open(output_file, 'w')
+
     mem_items = ['PSS', 'RSS', 'VSS']
     items = ['TIME', 'CPU'] + mem_items
     format = '%-12s'*len(items)
@@ -157,6 +163,9 @@ def watch(conf, package, interval, serialno, human_readable):
             values.append(str(v))
 
         print format % tuple(values)
+        if outfd:
+            outfd.write((format + '\n') % tuple(values))
+            outfd.flush()
 
         sleep = interval - (time.time() - time_start)
         if sleep > 0:
