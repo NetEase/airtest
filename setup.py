@@ -26,12 +26,12 @@ setup(
       package_data={},
       install_requires=[
           #'androidviewclient >= 7.1.1', 
-          'click>=3.3',
-          'requests', 
-          'docopt',
-          'pystache',
-          'Appium-Python-Client',
-          'fuckit'
+          'Appium-Python-Client >= 0.10',
+          'click >= 3.3',
+          'fuckit >= 4.8.0',
+          'humanize >= 0.5',
+          'pystache >= 0.5.4',
+          'requests >= 2.4.3', 
           ],
       entry_points='''
       [console_scripts]

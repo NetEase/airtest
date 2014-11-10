@@ -5,11 +5,13 @@ import os
 import re
 import sys
 import subprocess
+import time
 import urllib
 import json
 
 import airtest
 import click
+import humanize
 from airtest import log2html as airlog2html
 from airtest import androaxml
 
@@ -32,16 +34,16 @@ def _get_apk(config_file, cache=False):
         with open(config_file) as file:
             cfg = json.load(file)
             apk = cfg.get('apk')
-            if apk:
-                return apk
-            apk = cfg.get('android', {}).get('apk_url') 
-            if apk: 
-                return apk
-    apk = raw_input('Enter apk path or url: ')
-    assert apk.lower().endswith('.apk')
-    # FIXME: save to file
-    with open(config_file, 'wb') as file:
-        file.write(json.dumps({'apk': apk}))
+            if not apk:
+                apk = cfg.get('android', {}).get('apk_url') 
+    
+    if not apk:
+        apk = raw_input('Enter apk path or url: ')
+        assert apk.lower().endswith('.apk')
+        # FIXME: save to file
+        with open(config_file, 'wb') as file:
+            file.write(json.dumps({'apk': apk}))
+
     if re.match('^\w{1,2}tp://', apk):
         if cache and os.path.exists('tmp.apk'):
             return 'tmp.apk'
@@ -55,14 +57,14 @@ def cli(verbose=False):
     global __debug
     __debug = verbose
 
-@cli.command()
+@cli.command(help='Get package and activity name from apk')
 @click.argument('apkfile', type=click.Path(exists=True))
 def inspect(apkfile):
     pkg, act = androaxml.parse_apk(apkfile)
     click.echo('Package Name: "%s"' % pkg)
     click.echo('Activity: "%s"' % act)
 
-@cli.command()
+@cli.command(help='Convert airtest.log to html')
 @click.option('--logfile', default='log/airtest.log', help='airtest log file path',
         type=click.Path(exists=True, dir_okay=False), show_default=True)
 @click.option('--listen', is_flag=True, help='open a web serverf for listen')
@@ -74,7 +76,7 @@ def log2html(logfile, outdir, listen, port):
         click.echo('Listening on port %d ...' % port)
         _run('python', '-mSimpleHTTPServer', str(port), cwd=outdir)
 
-@cli.command()
+@cli.command(help='Take a picture of phone')
 @click.option('--phoneno', help='If multi android dev connected, should specify serialno')
 @click.option('--platform', default='android', type=click.Choice(['android', 'windows', 'ios']), show_default=True)
 @click.option('--out', default='snapshot.png', type=click.Path(dir_okay=False),
@@ -86,7 +88,7 @@ def snapshot(phoneno, platform, out):
     except Exception, e:
         click.echo(e)
 
-@cli.command()
+@cli.command(help='Install apk to phone')
 @click.option('--no-start', is_flag=False, help='Start app after successfully installed')
 @click.option('--conf', default='air.json', type=click.Path(dir_okay=False), help='config file', show_default=True)
 @click.option('-s', '--serialno', help='Specify which android device to connect')
@@ -107,7 +109,7 @@ def install(no_start, conf, serialno, apk):
     args = adbargs + ['shell', 'am', 'start', '-n', pkg+'/'+act]
     _run(*args)
 
-@cli.command()
+@cli.command(help='Uninstall package from device')
 @click.option('--conf', default='air.json', type=click.Path(dir_okay=False), help='config file')
 @click.option('-s', '--serialno', help='Specify which android device to connect')
 @click.argument('apk', required=False)
@@ -121,6 +123,45 @@ def uninstall(conf, serialno, apk):
     args += ['uninstall', pkg]
     _run(*args)
 
+@cli.command(help='Watch cpu, mem')
+@click.option('--conf', default='air.json', type=click.Path(dir_okay=False), help='config file', show_default=True)
+@click.option('-p', '--package', default=None, help='Package name which can get by air.test inspect, this is conflict with --conf')
+@click.option('-n', '--interval', default=3, show_default=True, help='Seconds to wait between updates')
+@click.option('-s', '--serialno', help='Specify which android device to connect')
+@click.option('-h', '--human-readable', is_flag=True, help='Print size with human readable format')
+def watch(conf, package, interval, serialno, human_readable):
+    if not package:
+        apk = _get_apk(conf, cache=True)
+        package, _ = androaxml.parse_apk(apk)
+
+    app = airtest.connect(phoneno=serialno, device=airtest.ANDROID, monitor=False)
+
+    # print app.dev.getdevinfo()
+    mem_items = ['PSS', 'RSS', 'VSS']
+    items = ['TIME', 'CPU'] + mem_items
+    format = '%-12s'*len(items)
+    print format % tuple(items)
+    while True:
+        time_start = time.time()
+        values = []
+        values.append(time.strftime('%H:%M:%S'))
+        
+        cpu = app.dev.getCpu(package)
+        values.append(str(cpu))
+
+        mem = app.dev.getMem(package)
+        for item in mem_items:
+            v = int(mem.get(item))*1024
+            if human_readable:
+                v = humanize.naturalsize(int(v))
+            values.append(str(v))
+
+        print format % tuple(values)
+
+        sleep = interval - (time.time() - time_start)
+        if sleep > 0:
+            time.sleep(sleep)
+
 def main():
 	cli()
 	
@@ -129,8 +170,8 @@ if __name__ == '__main__':
 
 ################################################################
 
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        print 'Exited by user'
+# if __name__ == '__main__':
+#     try:
+#         main()
+#     except KeyboardInterrupt:
+#         print 'Exited by user'

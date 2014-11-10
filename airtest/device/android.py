@@ -84,6 +84,9 @@ class Device(object):
         self._devinfo = self.getdevinfo()
 
         print 'ProductBrand:', self._devinfo['product_brand']
+        print 'CpuCount: %d' % self._devinfo['cpu_count']
+        print 'TotalMem: %d MB' % self._devinfo['mem_total']
+        print 'FreeMem: %d MB' % self._devinfo['mem_free']
 
         try:
             if self.adb.isScreenOn():
