@@ -1,3 +1,3 @@
 recursive-include airtest/htmltemplate *.js *.html *.json *.css *.map
-recursive-include airtest/binfiles airtoolbox* *.apk
+recursive-include airtest/binfiles airtoolbox* *.apk *.version
 recursive-include airtest/androaxml *.zip
