@@ -4,6 +4,11 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2014/11/10 - 0.7.2
+1. 部分bug修复
+2. 新增air.test watch命令，用于查看内存和cpu数据
+3. gh-pages分支，增加评论功能
+
 ### 2014/11/06 - 0.6.4
 1. 修复androaxml.zip丢失的bug
 
