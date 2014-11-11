@@ -1,5 +1,5 @@
 --- 
-title: Airtest-GUI的使用
+title: airtest-gui
 layout: post
 category: components
 permalink: /components/airtest-gui.html

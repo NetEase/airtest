@@ -1,8 +1,8 @@
 --- 
-title: Android版本号与api对应关系
+title: Android版本号与API版本号
 layout: post
-category: links
-permalink: /api-version.html
+category: wikipedia
+permalink: /wikipedia/api-version.html
 ---
 API级别与NDK的对应关系如下： 
 
