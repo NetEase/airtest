@@ -8,7 +8,7 @@ permalink: /overview/quick_start.html
 下面将用一个例子说明一下怎么使用Airtest.
 
 
-1. 按照[安装文档][installing]上的说明，一步步的完成安装
+1. 按照安装文档 [win](/deployment/win-installing.html), [mac](/deployment/mac-installing.html)上的说明，一步步的完成安装
 
 2. 下载[样例代码](http://git.mt.nie.netease.com/hzsunshx/flappybird): *如果没有git，[点此下载](ftp://mt.nie.netease.com/airtest-win-res/Git-1.9.4-preview20140815.exe)*
 

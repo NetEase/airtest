@@ -39,3 +39,21 @@ air.json文件的内容格式如下
 
 	air.test snapshot --out snapshot.png
 
+#### watch
+监控cpu，内存数据。内存数据分为PSS，RSS，VSS。如果不清楚可以看[这篇文章](/wikipedia/memory.html)
+
+连接手机后，运行`air.test watch -h -p com.netease.h15` 会出现下面的信息，默认每3s更新一次，`Ctrl+C`终止。
+
+其中`com.netease.h15`是包名。-h是以人类可读的方式显示大小。更多的参数可以从`--help`中找到。
+
+
+    TIME        CPU         PSS         RSS         VSS
+    10:32:04    0.6         90.4 MB     126.1 MB    960.3 MB
+    10:32:07    2.325       90.5 MB     126.2 MB    960.3 MB
+    10:32:10    2.325       90.5 MB     126.3 MB    960.3 MB
+    10:32:13    2.325       90.6 MB     126.4 MB    960.3 MB
+    10:32:16    2.25        90.6 MB     126.4 MB    960.3 MB
+    10:32:19    2.25        90.7 MB     126.5 MB    960.3 MB
+    10:32:22    3.25        90.8 MB     126.5 MB    960.3 MB
+    Signal INT catched !!!
+
