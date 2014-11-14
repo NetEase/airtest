@@ -1,7 +1,7 @@
 # coding: utf-8
 #
 
-imort sys
+import sys
 sys.path.insert(0,'/usr/lib/pyshared/python2.7')
 
 from setuptools import setup, find_packages
