@@ -1,6 +1,9 @@
 Airtest
 =====
-This is python lib for airtest
+[![Build Status](https://travis-ci.org/NetEase/airtest.svg)](https://travis-ci.org/NetEase/airtest)
+
+Python lib for Mobile phone app test.
+
 
 Popo交流群: **1275211** *成功也好，失败也好，或者只想吐槽，欢迎直接反馈到群里。*
 
@@ -18,9 +21,6 @@ Popo交流群: **1275211** *成功也好，失败也好，或者只想吐槽，�
 具体需要参考这篇文章 [airtest中的屏幕旋转如何设置](http://doc.mt.nie.netease.com/doku.php?id=airtest-screen-rotate)
 
 目前的wiki在, 很多问题可以再上面找到答案： <http://doc.mt.nie.netease.com/doku.php?id=airtest>
-
-
-[![Build Status](http://jenkins.mt.nie.netease.com/job/airtest_selftest/badge/icon)](http://jenkins.mt.nie.netease.com/job/airtest_selftest/)
 
 ## development document
 AndroidKeyMap: <http://developer.android.com/reference/android/view/KeyEvent.html>
