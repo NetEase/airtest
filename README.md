@@ -1,7 +1,5 @@
 Airtest
 =====
-[![Build Status](https://travis-ci.org/NetEase/airtest.svg)](https://travis-ci.org/NetEase/airtest)
-
 Python lib for Mobile phone app test.
 
 
