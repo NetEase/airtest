@@ -69,7 +69,9 @@ class DeviceSuit(object):
         self._click_timeout = 20.0 # if icon not found in this time, then panic
         self._delay_after_click = 0.5 # when finished click, wait time
         self._screen_resolution = None
+
         self._snapshot_file = None
+        self._keep_capture = False # for func:keepScreen,releaseScreen
 
         self._init_monitor()
         if monitor:
@@ -188,6 +190,10 @@ class DeviceSuit(object):
         return (x, y)
 
     def _saveScreen(self, filename, random_name=True, tempdir=True):
+        # use last snapshot file
+        if self._snapshot_file and self._keep_capture:
+            return self._snapshot_file
+
         if random_name:
             filename = base.random_name(filename)
         if tempdir:
@@ -209,6 +215,18 @@ class DeviceSuit(object):
         self._log(dict(type='snapshot', filename=filename))
         self._snapshot_file = filename
         return filename
+
+    def keepCapture(self):
+        '''
+        Use screen in memory
+        '''
+        self._keep_capture = True
+
+    def releaseCapture(self):
+        '''
+        Donot use screen in memory (this is default behavior)
+        '''
+        self._keep_capture = False
 
     def takeSnapshot(self, filename):
         '''
@@ -339,11 +357,11 @@ class DeviceSuit(object):
         log.debug('delay after click: %.2fs' ,self._delay_after_click)
 
         # mark position
-        import cv2
-        img = cv2.imread(self._snapshot_file)
-        if img != None:
-            img = imt.toolbox.markPoint(img, (x, y))
-            cv2.imwrite(self._snapshot_file, img)
+        # import cv2
+        # img = cv2.imread(self._snapshot_file)
+        # if img != None:
+        #     img = imt.toolbox.markPoint(img, (x, y))
+        #     cv2.imwrite(self._snapshot_file, img)
 
         time.sleep(self._delay_after_click)
 

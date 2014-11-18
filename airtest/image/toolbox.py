@@ -35,6 +35,20 @@ def showImage(image):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+def _shape(image):
+    ''' @return width and height or a image '''
+    img = _readImage(image)
+    w, h = img.shape[0], img.shape[1]
+    return (w, h)
+
+def markAndShow(image, (x, y), maxheight=500):
+    img = markPoint(image, (x, y))
+    w, h = _shape(img)
+    if h > maxheight:
+        scale = float(maxheight)/h
+    img = cv2.resize(img, (0,0), fx=scale, fy=scale)
+    showImage(img)
+
 if __name__ == '__main__':
     img = _readImage('timer.png')
     # cv2.floodFill(img, None, (0, 0), (255, 255, 2), 0.1) 
