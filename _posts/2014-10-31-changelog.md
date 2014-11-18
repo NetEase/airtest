@@ -4,6 +4,9 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2014/11/18 - 0.8.0
+1. 添加keepCapture和releaseCapture这两个函数
+
 ### 2014/11/10 - 0.7.2
 1. 部分bug修复
 2. 新增air.test watch命令，用于查看内存和cpu数据
