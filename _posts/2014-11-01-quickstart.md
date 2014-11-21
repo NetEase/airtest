@@ -34,7 +34,7 @@ permalink: /overview/quick_start.html
 
     1. cmd到flappybird那个目录
     2. 运行`air.test install`。安装flappybird那个程序到手机
-    3. 运行`air.test runtest`。运行测试代码
+    3. 运行`python main.py`。运行测试代码
     4. 运行`air.test log2html --listen --port=8800 htmldir`生成测试报告。打开浏览器localhost:8800查看测试报告。
     5. 最后运行`air.test uninstall`从手机中卸载应用。
 
