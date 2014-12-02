@@ -32,11 +32,11 @@ permalink: /overview/quick_start.html
 
 4. 成品代码[filename: main.py]
 
-    import airtest
-    app = airtest.connect(appname='com.dotgears.flappybird', device=airtest.WINDOWS)
-    w, h = app.shape()
-    app.click(w/2, h/2) # 屏幕中间点一下
-    app.takeSnapshot('screen.png') # 截图保存到screen.png
+        import airtest
+        app = airtest.connect(appname='com.dotgears.flappybird', device=airtest.WINDOWS)
+        w, h = app.shape()
+        app.click(w/2, h/2) # 屏幕中间点一下
+        app.takeSnapshot('screen.png') # 截图保存到screen.png
 
 5. 最后运行下，查看下效果。
 
@@ -49,3 +49,5 @@ permalink: /overview/quick_start.html
     注：
 
     >air.test是airtest的辅助运行工具，它依赖air.json这个文件。可以通过air.test gen flappybird.apk生成。`air.json`默认生成在当前目录。
+
+    为了能让airtest运行的更准确，还需要参考下[配置的设置]({site.baseurl}/components/setting.html)
