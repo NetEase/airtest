@@ -18,8 +18,8 @@ Airtest-gui的安装地址[http://git.mt.nie.netease.com/hzsunshx/airtest-gui](h
 
 
 ####使用
-![alt text](/static/img/gui1.png )
+![alt text]({{ site.baseurl }}/static/img/gui1.png )
 
-![alt text](/static/img/gui2.png )
+![alt text]({{ site.baseurl }}/static/img/gui2.png )
 
-![alt text](/static/img/gui3.png )
+![alt text]({{ site.baseurl }}/static/img/gui3.png )
