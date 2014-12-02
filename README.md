@@ -3,16 +3,16 @@ Airtest
 Python lib for Mobile phone app test.
 
 
-Popo交流群: **1275211** *成功也好，失败也好，或者只想吐槽，欢迎直接反馈到群里。*
+网易内部Popo交流群: **1275211** *
 
-在线文档已经逐步迁移到了 <http://airtest.mt.nie.netease.com>
+在线文档 <http://netease.github.io/airtest>
 
 离线文档使用方法：
 
 	git clone http://git.mt.nie.netease.com/hzsunshx/airtest && cd airtest
 	gem install jekyll
 	git checkout gh-pages
-	jekyll serve
+	jekyll serve --baseurl=''
 
 
 关于**屏幕旋转**一直也没有一个很好的解决方案，现在的方法需要手工去设置旋转方向。
@@ -20,7 +20,7 @@ Popo交流群: **1275211** *成功也好，失败也好，或者只想吐槽，�
 
 目前的wiki在, 很多问题可以再上面找到答案： <http://doc.mt.nie.netease.com/doku.php?id=airtest>
 
-## development document
+## Development document
 AndroidKeyMap: <http://developer.android.com/reference/android/view/KeyEvent.html>
 
 used by call, eg
