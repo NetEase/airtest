@@ -7,7 +7,7 @@ permalink: /deployment/mac-installing.html
 
 一键安装脚本
 
-    bash -c "$(curl -s http://git.mt.nie.netease.com/hzsunshx/airtest/raw/master/scripts/mac_install.sh)"
+    bash -c "$(curl -s https://raw.githubusercontent.com/NetEase/airtest/master/scripts/mac_install.sh)"
 
 或者手动安装，首先[安装brew](http://brew.sh/), 其中opencv一定不能早于python安装
 
@@ -40,4 +40,4 @@ permalink: /deployment/mac-installing.html
 
 ### airtest开发版安装方法
     brew install git
-    pip install -U git+http://git.mt.nie.netease.com/hzsunshx/airtest.git
+    pip install -U git+https://github.com/netease/airtest.git

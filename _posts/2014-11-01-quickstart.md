@@ -10,15 +10,15 @@ permalink: /overview/quick_start.html
 
 1. 按照安装文档 [win](/deployment/win-installing.html), [mac](/deployment/mac-installing.html)上的说明，一步步的完成安装
 
-2. 下载[样例代码](http://git.mt.nie.netease.com/hzsunshx/flappybird): *如果没有git，[点此下载](ftp://mt.nie.netease.com/airtest-win-res/Git-1.9.4-preview20140815.exe)*
+2. 下载[样例代码](http://git.mt.nie.netease.com/hzsunshx/flappybird): *如果没有git，[点此下载](http://goandroid.qiniudn.com/Git-1.9.4-preview20140929.exe)*
 
 		git clone http://git.mt.nie.netease.com/hzsunshx/flappybird
 
 3. 打开flappybird中的main.py文件，中有几行代码是
 
-        devnum = os.getenv('AIRTEST_DEVNO') or '4d005f1f9df03107'
+        devnum  = os.getenv('AIRTEST_DEVNO') or '4d005f1f9df03107'
         appname = os.getenv('AIRTEST_APPNAME') or 'com.dotgears.flappybird'
-        device = os.getenv('DEVICE') or airtest.ANDROID
+        device  = os.getenv('AIRTEST_DEVICE') or airtest.ANDROID
 
         app = airtest.connect(devnum, appname=appname, device=device)
 
@@ -30,7 +30,15 @@ permalink: /overview/quick_start.html
 
         app = airtest.connect(appname=appname, device=device)
 
-4. 最后运行下，查看下效果。
+4. 成品代码[filename: main.py]
+
+    import airtest
+    app = airtest.connect(appname='com.dotgears.flappybird', device=airtest.WINDOWS)
+    w, h = app.shape()
+    app.click(w/2, h/2) # 屏幕中间点一下
+    app.takeSnapshot('screen.png') # 截图保存到screen.png
+
+5. 最后运行下，查看下效果。
 
     1. cmd到flappybird那个目录
     2. 运行`air.test install`。安装flappybird那个程序到手机

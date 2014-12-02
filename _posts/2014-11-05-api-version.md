@@ -4,6 +4,10 @@ layout: post
 category: wikipedia
 permalink: /wikipedia/api-version.html
 ---
+查看手机API Level的方法
+
+	adb shell getprop ro.build.version.sdk
+	
 API级别与NDK的对应关系如下： 
 
 	Code name			Version			API level

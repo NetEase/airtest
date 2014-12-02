@@ -1,5 +1,5 @@
 source: .
-version: 0.1.1
+version: beta
 pygments: true
 baseurl: '/airtest'
 markdown: kramdown
