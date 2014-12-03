@@ -171,6 +171,17 @@ def watch(conf, package, interval, serialno, human_readable, output_file):
         if sleep > 0:
             time.sleep(sleep)
 
+@cli.command(help='Run GUI in browser')
+@click.option('--workdir', default=os.getcwd(), type=click.Path(file_okay=False), help='working directory')
+@click.option('-s', '--serialno', help='Specify which android device to connect')
+@click.option('--reload', default=False, is_flag=True, help='For developer to auto reload code when code change')
+def gui(workdir, serialno, reload):
+    from . import webgui
+    os.environ['WORKDIR'] = workdir
+    import webbrowser
+    webbrowser.open('http://localhost:5000')
+    webgui.serve(use_reloader=reload)
+
 def main():
 	cli()
 	

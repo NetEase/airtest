@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import collections
 import os
 import platform
 import time
@@ -50,7 +51,7 @@ class DeviceSuit(object):
         self.dev = devClass(phoneno)
         self.appname = appname
         self._device = device
-
+        self._inside_depth = 0
         self._initWidthHeight()
 
         # default image search extentension and 
@@ -73,12 +74,32 @@ class DeviceSuit(object):
         self._snapshot_file = None
         self._keep_capture = False # for func:keepScreen,releaseScreen
 
+        #-- start of func setting
         self._init_monitor()
         if monitor:
             self.monitor.start()
         def _setinterval(x):
             self.monitor._cycle = x
         self._monitor_interval = _setinterval
+
+        # Only for android phone method=<adb|screencap>
+        def _snapshot_method(method):
+            if method and self._device == 'android':
+                self.dev._snapshot_method = method
+        self._snapshot_method = _snapshot_method
+        #-- end of func setting
+
+    def __getattribute__(self, name):
+        v = object.__getattribute__(self, name)
+        if isinstance(v, collections.Callable):
+            objdict = object.__getattribute__(self, '__dict__')
+            def _wrapper(*args, **kwargs):
+                objdict['_inside_depth'] += 1
+                ret = v(*args, **kwargs)
+                objdict['_inside_depth'] -= 1
+                return ret
+            return _wrapper
+        return v
 
     def _init_monitor(self):
         def _cpu_mem_monitor():
@@ -290,6 +311,15 @@ class DeviceSuit(object):
             im.resize((int(ratew*rw), int(rateh*rh))).save(new_name)
             filepath = new_name
         pt = self._imfind(screen, filepath)
+        return pt
+
+    def mustFind(self, imgfile):
+        ''' 
+        Raise Error if image not found
+        '''
+        pt = self.find(imgfile)
+        if not pt:
+            raise RuntimeError("Image[%s] not found" %(imgfile))
         return pt
 
     def findall(self, imgfile, maxcnt=None, sort=None):

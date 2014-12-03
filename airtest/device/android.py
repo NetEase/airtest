@@ -75,6 +75,7 @@ def getCpu(serialno, package):
 #@implementer(interface.IDevice)
 class Device(object):
     def __init__(self, serialno=None):
+        self._snapshot_method = 'adb'
         print 'SerialNo:', serialno
 
         self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
@@ -128,22 +129,17 @@ class Device(object):
 
     def snapshot(self, filename):
         ''' save screen snapshot '''
-        log.debug('start take snapshot(%s)'%(filename))
-        pil = self.adb.takeSnapshot(reconnect=True)
-        return pil.save(filename)
-        # try:
-        #     if self._useScreencap:
-        #         raise IOError('trigger error, inorder to use other takesnapshot way')
-        #     pil = self.adb.takeSnapshot(reconnect=True)
-        #     pil.save(filename)
-        # except:
-        #     tmpname = '/sdcard/airtest-screen.png'
-        #     self.adb.shell('screencap -p '+tmpname)
-        #     os.system(' '.join(('adb', '-s', self._serialno, 'pull', tmpname, filename)))
-        #     self.adb.shell('rm '+tmpname)
-        #     log.debug('use Screencap to takesnapshot '+filename)
-        # else:
-        #     log.debug('finish take snapshot and save to '+filename)
+        if self._snapshot_method == 'adb':
+            log.debug('start take snapshot(%s)'%(filename))
+            pil = self.adb.takeSnapshot(reconnect=True)
+            pil.save(filename)
+        elif self._snapshot_method == 'screencap':
+            tmpname = '/data/local/tmp/airtest-tmp-snapshot.png'
+            self.adb.shell('screencap -p '+tmpname)
+            os.system(' '.join(('adb', '-s', self._serialno, 'pull', tmpname, filename)))
+        else:
+            raise RuntimeError("No such snapshot method: [%s]" % self._snapshot_method)
+
 
     def touch(self, x, y, eventType=adbclient.DOWN_AND_UP):
         '''

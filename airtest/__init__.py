@@ -79,27 +79,27 @@ def stop(devno, device=None):
 ## ----------------------------------------------------------
 #
 
-def connect(phoneno=None, appname=None, device=None, monitor=True, logfile='log/airtest.log'):
+def connect(devno=None, appname=None, device=None, monitor=True, logfile='log/airtest.log'):
     '''
     Connect device
-    @param phoneno: If phoneno is None, then get device serialno from `adb devices`
+    @param devno: If devno is None, then get device serialno from `adb devices`
     @param device: can be one of <android|windows|ios>
     @param monitor: wether to enable CPU monitor
     '''
-    if not phoneno:
+    if not devno:
         devs = getDevices()
         if not devs:
             sys.exit('adb: No devices found')
         if len(devs) != 1:
             sys.exit('adb: Too many devices, need to specify phone serialno')
-        phoneno = devs[0][0]
+        devno = devs[0][0]
 
     device = device or defaultDevice
     if  device == ANDROID:
         from airtest.device import android
         subprocess.call(['adb', 'start-server'])
-        if not phoneno:
-            phoneno = [d for d, t in getDevices() if t == 'device'][0]
+        if not devno:
+            devno = [d for d, t in getDevices() if t == 'device'][0]
         devClass = android.Device
     elif device == IOS:
         from airtest.device import ios
@@ -113,7 +113,7 @@ def connect(phoneno=None, appname=None, device=None, monitor=True, logfile='log/
     else:
         raise RuntimeError('device type not recognize')
 
-    return devsuit.DeviceSuit(device, devClass, phoneno, 
+    return devsuit.DeviceSuit(device, devClass, devno, 
             appname=appname, logfile=logfile, monitor=monitor)
 
 def getDevices(device='android'):
@@ -126,6 +126,6 @@ def getDevices(device='android'):
     for line in str(output).splitlines()[1:]:
         ss = line.strip().split()
         if len(ss) == 2:
-            (phoneno, state) = ss
-            result.append((phoneno, state))
+            (devno, state) = ss
+            result.append((devno, state))
     return result

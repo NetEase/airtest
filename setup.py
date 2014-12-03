@@ -34,7 +34,9 @@ setup(
           'fuckit >= 4.8.0',
           'humanize >= 0.5',
           'pystache >= 0.5.4',
-          'requests >= 2.4.3', 
+          # 'requests >= 2.4.3', 
+          'Flask >= 0.10.1',
+          # 'pony >= 0.5.3',
           ],
       entry_points='''
       [console_scripts]
