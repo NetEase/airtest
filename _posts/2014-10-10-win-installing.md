@@ -7,10 +7,9 @@ permalink: /deployment/win-installing.html
 
 软件依赖 python2.7 32bit. 强调一遍<a style="color:red"> 32bit. not 64.</a>
 
-从百度网盘下载安装依赖的软件包：
+从七牛CDN上下载安装依赖的软件包：
 
-    网址：http://pan.baidu.com/s/1eQFyg4E
-    密码: dt77
+    http://goandroid.qiniudn.com/airtest-dependency.zip
 
 软件包中包含有：
 
@@ -25,9 +24,10 @@ permalink: /deployment/win-installing.html
     9. opencv
 
 上述安装完后，打开命令行，继续安装两个软件包
+(*官方的androidviewclient更新快的有点不稳定，所以这里还是用老版本*)
 
-    easy_install -i http://mt.nie.netease.com:3141/simple/ androidviewclient    
-    pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest
+    easy_install http://goandroid.qiniudn.com/androidviewclient-7.1.2.tar.gz
+    pip install --upgrade airtest
 
 
 最后下载adb.exe客户端 - [下载地址](http://goandroid.qiniudn.com/adb.zip),下好解压后放到PATH下, 软件[来源](http://adbshell.com/download/download-adb-for-windows.html)
