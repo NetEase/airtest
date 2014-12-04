@@ -7,6 +7,13 @@ permalink: /overview/command_line.html
 
 使用pip安装完airtest后，就可以再命令行中使用`air.test`这个命令了。等价于调用`python -mairtest`
 
+#### gui
+WEB GUI客户端，主要用于截图和调试
+
+    air.test gui --workdir='.' 
+
+workdir默认当前目录，截图也全部保存在这个下面。
+
 #### install
 	air.test install [apk-file] # 如果不指定apk-file,便会去查找air.json这个文件
 	air.test install --no-start [apk-file]  # 安装完后，不自动启动

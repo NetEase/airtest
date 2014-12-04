@@ -4,6 +4,10 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2014/12/03 - 0.9.0
+1. 添加snapshot_method到globalSet选项中，来适应部分手机截图故障问题
+2. 添加webgui，方便截图和调试
+
 ### 2014/11/18 - 0.8.0
 1. 添加keepCapture和releaseCapture这两个函数
 
