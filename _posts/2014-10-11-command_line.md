@@ -14,6 +14,8 @@ WEB GUI客户端，主要用于截图和调试
 
 workdir默认当前目录，截图也全部保存在这个下面。
 
+![webgui]({{site.baseurl}}/static/img/airtest-webgui.png)
+
 #### install
 	air.test install [apk-file] # 如果不指定apk-file,便会去查找air.json这个文件
 	air.test install --no-start [apk-file]  # 安装完后，不自动启动
