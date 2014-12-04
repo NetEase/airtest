@@ -7,3 +7,9 @@ nsqd
 nsqlookupd
 apps
 bench
+*.py
+*.pyc
+build/
+airtest/
+airtest.egg-info/
+*.log
