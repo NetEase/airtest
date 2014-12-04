@@ -9,3 +9,5 @@
 [主要维护人员](mailto:codeskyblue@gmail.com)
 
 Popo交流群: **1275211**
+
+点击查看 [快速入门](overview/quick_start.html)
