@@ -14,8 +14,11 @@ import time
 import shutil
 
 import pystache
+import markupsafe
 
 from airtest import base
+
+TIME_FORMAT = '%Y/%m/%d %H:%M:%S'
 
 def render(logfile, htmldir):
     '''
@@ -45,7 +48,6 @@ def render(logfile, htmldir):
     start_time = 0
     for line in open(logfile):
         d = json.loads(line)
-        time_format = '%Y/%m/%d %H:%M:%S'
         timestamp = d.get('timestamp') - start_time
         _type = d.get('type')
         if _type == 'start':
@@ -70,6 +72,35 @@ def render(logfile, htmldir):
         #    data['result'] = {'status': d.get('result'), 'detail': d.get('detail')}
     data['cpu_data'] = json.dumps(cpus)
     data['mem_data'] = json.dumps(mems)
+
+    from . import proto
+    records = []
+    for line in open(logfile):
+        v = json.loads(line)
+        r = {'time': time.strftime(TIME_FORMAT, time.localtime(v.get('timestamp')))}
+        d = v.get('data', {})
+        tag = v.get('tag')
+
+        if tag == proto.TAG_FUNCTION:
+            tag = markupsafe.Markup('<span class="glyphicon glyphicon-sound-dolby"></span>')    
+            args = map(json.dumps, d.get('args'))
+            kwargs = [ '%s=%s' %(k, json.dumps(_v)) for k, _v in d.get('kwargs', {}).items() ]
+            message = '<code>%s(%s)</code>' %(d.get('name'), ', '.join(args+kwargs))
+            message = markupsafe.Markup(message)
+        elif tag == proto.TAG_SNAPSHOT:
+            message = d.get('filename')
+        elif tag == proto.TAG_CPU:
+            message = 'total: %d, average: %d' %(d.get('total'), d.get('average'))
+        else:
+            message = None
+        
+        if message:
+            r['tag'] = tag
+            r['message'] = message
+            records.append(r)
+
+
+    data['records'] = records
     def average(ss):
         if ss:
             return reduce(lambda x,y: x+y, [value for _,value in ss])/float(len(ss))
@@ -90,7 +121,7 @@ def render(logfile, htmldir):
         if fullpath.endswith('.swp'):
             continue
         content = open(fullpath).read().decode('utf-8')
-        out = pystache.render(content, data)
+        out = pystache.Renderer(escape=markupsafe.escape).render(content, data)
         print fullpath
         with open(outpath, 'w') as file:
             file.write(out.encode('utf-8'))

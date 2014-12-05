@@ -4,7 +4,9 @@
 import os
 import time
 import flask
+
 import airtest
+import airtest.image as aim
 import cv2
 
 from . import utils
@@ -45,6 +47,22 @@ def crop():
     return flask.jsonify(dict(success=True, 
         message="文件已保存: "+output_path.encode('utf-8')))
 
+@bp.route('/cropcheck')
+def crop_check():
+    rget = flask.request.args.get
+    
+    screen = rget('screen')
+    x, y = int(rget('x')), int(rget('y'))
+    width, height = int(rget('width')), int(rget('height'))
+
+    screen_file = screen.lstrip('/').replace('/', os.sep)
+    screen_path = os.path.join(utils.selfdir(), screen_file)
+
+    im = cv2.imread(screen_path)
+    im = im[y:y+height, x:x+width]  # crop image
+    siftcnt = aim.sift_point_count(im)
+    return flask.jsonify(dict(siftcnt=siftcnt))
+
 @bp.route('/run')
 def run_code():
     global app
@@ -65,4 +83,4 @@ def connect():
     except Exception, e:
         return flask.jsonify(dict(success=False, message=str(e)))
         
-    return flask.jsonify(dict(success=True, message=""))
+    return flask.jsonify(dict(success=True, message="连接成功"))

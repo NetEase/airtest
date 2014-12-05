@@ -46,7 +46,8 @@
                     Y: <span id="dataY"></span><br/>
                     Width: <span id="dataWidth"></span><br/>
                     Height: <span id="dataHeight"></span><br/>
-                    Middle: <span id="dataMiddle"></span>
+                    Middle: <span id="dataMiddle"></span><br/>
+                    特征点数量: <span id="dataSiftCount"></span>
                 </div>
             </div>
         </div>
@@ -95,10 +96,27 @@ $(function(){
         $dataY = $("#dataY"),
         $dataWidth = $("#dataWidth"),
         $dataHeight = $("#dataHeight"),
-        $dataMiddle = $("#dataMiddle");
+        $dataMiddle = $("#dataMiddle"),
+        $dataSiftCount = $("#dataSiftCount");
 
     var cropperData = {};
     var screenFilename = null;
+
+    var updateSiftCount = function(data){
+        $.ajax({
+            url: "/api/cropcheck",
+            dataType: "json",
+            data: $.extend(data, 
+                {screen: screenFilename}),
+            success: function(e){
+                console.log(e);
+                $dataSiftCount.text(e.siftcnt);
+            },
+            error: function(e){
+                console.log(e);
+            }
+        });
+    };
     var cropperImage = function(source){
         // $screen.cropper("reset");
         screenFilename = source;
@@ -109,7 +127,6 @@ $(function(){
             autoCropArea: 0.3,
             data: cropperData,
             done: function(data) {
-                console.log(data.x);
                 var $preview = $(".img-preview");
                 $preview.css("width", 150*data.width/data.height+"px");
                 $preview.css("height", 300*data.height/data.width+"px");
@@ -126,6 +143,9 @@ $(function(){
                     width: data.width, height: data.height,
                     middle: middle
                 }
+            },
+            dragend: function(data){
+                updateSiftCount(cropperData);
             }
         });    
     };
@@ -172,7 +192,6 @@ $(function(){
             data: $.extend(cropperData, 
                 {screen: screenFilename, filename: filename}),
             success: function(e){
-                console.log(e);
                 $message.text(e.message);
                 $codearea.val("app.click(u'{0}')".format($cropname.val()));
             },
@@ -187,13 +206,6 @@ $(function(){
         var y = cropperData.middle.y;
         $codearea.val("app.click(({0}, {1}))".format(x, y));
     });
-
-    // $("#btn-click-crop").click(function(){
-    //     $codearea.val("app.click(u'{0}')".format($cropname.val()));
-    //     var e = document.createEvent('MouseEvent');
-    //     e.initEvent('click', false, false);
-    //     $("#btn-run")[0].dispatchEvent(e);
-    // });
 
     $("#btn-run").click(function(){
         $message.text("run in background ...");

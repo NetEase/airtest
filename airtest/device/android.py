@@ -18,7 +18,7 @@ log = base.getLogger('android')
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 
-def getMem(serialno, package):
+def _get_meminfo(serialno, package):
     '''
     @description details view: http://my.oschina.net/goskyblue/blog/296798
 
@@ -53,7 +53,7 @@ def getMem(serialno, package):
     ret.update(dict(PSS=int(pss)))
     return ret
 
-def getCpu(serialno, package):
+def _get_cpuinfo(serialno, package):
     '''
     @param package(string): android package name
     @return float: the cpu usage
@@ -63,7 +63,6 @@ def getCpu(serialno, package):
     try:
         xym_cpu = filter(lambda x: package in x, cpu_info)[0].split()[0]
         cpu = float(xym_cpu[:-1])
-        #log.info("cpu: %.2f" % cpu)
         return cpu
     except IndexError:
         log.error("cpu_info error")
@@ -210,11 +209,21 @@ class Device(object):
         '''
         self.adb.shell('input keyevent '+str(event))
 
-    def getMem(self, appname):
-        return getMem(self._serialno, appname)
+    def meminfo(self, appname):
+        '''
+        Retrive memory info for app
+        @param package(string): android package name
+        @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
+        '''
+        return _get_meminfo(self._serialno, appname)
 
-    def getCpu(self, appname):
-        return getCpu(self._serialno, appname)/self._devinfo['cpu_count']
+    def cpuinfo(self, appname):
+        '''
+        @param package(string): android package name
+        @return dict: {'total': float, 'average': float}
+        '''
+        total = _get_cpuinfo(self._serialno, appname)
+        return dict(total=total, average=total/self._devinfo['cpu_count'])
 
     def start(self, appname, extra={}):
         '''

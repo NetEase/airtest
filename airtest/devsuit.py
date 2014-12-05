@@ -5,13 +5,16 @@ import collections
 import os
 import platform
 import time
+import threading
 import json
 from PIL import Image
 
-from airtest import base
-from airtest import jsonlog
-
-from airtest import image as imt
+from . import base
+# from . import jsonlog
+from . import proto
+from .image import auto as imtauto
+from .image import sift as imtsift
+from .image import template as imttemplate
 # from airtest.image import auto as image
 
 import airtest
@@ -34,15 +37,15 @@ def rotate_point((x, y), (w, h), d):
     if d == 'LEFT':
         return h-y, x
 
-def get_jsonlog(filename='log/airtest.log'):    
-    logfile = os.getenv('AIRTEST_LOGFILE', filename)
-    if os.path.exists(logfile):
-        backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
-        os.rename(logfile, backfile)
-    else:
-        base.makedirs(base.dirname(logfile))
-    jlog = jsonlog.JSONLog(logfile)
-    return jlog
+# def get_jsonlog(filename='log/airtest.log'):    
+#     logfile = os.getenv('AIRTEST_LOGFILE', filename)
+#     if os.path.exists(logfile):
+#         backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
+#         os.rename(logfile, backfile)
+#     else:
+#         base.makedirs(base.dirname(logfile))
+#     jlog = jsonlog.JSONLog(logfile)
+#     return jlog
 
 class DeviceSuit(object):
     def __init__(self, device, devClass, phoneno, 
@@ -63,9 +66,7 @@ class DeviceSuit(object):
         self._threshold = 0.3 # for findImage
 
         self._rotation = None # UP,DOWN,LEFT,RIGHT
-        self._log = get_jsonlog(logfile).writeline # should implementes writeline(dict)
         self._tmpdir = 'tmp'
-        self._log(dict(type='start', timestamp=time.time()))
         self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
         self._click_timeout = 20.0 # if icon not found in this time, then panic
         self._delay_after_click = 0.5 # when finished click, wait time
@@ -73,6 +74,17 @@ class DeviceSuit(object):
 
         self._snapshot_file = None
         self._keep_capture = False # for func:keepScreen,releaseScreen
+        self._logfile = logfile
+        self._loglock = threading.Lock()
+
+        if os.path.exists(logfile):
+            backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
+            os.rename(logfile, backfile)
+
+        # self.log(proto.TAG_FUNCTION, 'just a test')
+        # TODO: need to remove
+        # self._log = get_jsonlog(logfile).writeline # should implementes writeline(dict)
+        # self._log(dict(type='start', timestamp=time.time()))
 
         #-- start of func setting
         self._init_monitor()
@@ -90,12 +102,17 @@ class DeviceSuit(object):
         #-- end of func setting
 
     def __getattribute__(self, name):
+        # print name
         v = object.__getattribute__(self, name)
         if isinstance(v, collections.Callable):
             objdict = object.__getattribute__(self, '__dict__')
+            # print objdict
             def _wrapper(*args, **kwargs):
                 objdict['_inside_depth'] += 1
+                # log function call
                 ret = v(*args, **kwargs)
+                if objdict['_inside_depth'] == 1 and not v.__name__.startswith('_'):
+                    self.log(proto.TAG_FUNCTION, dict(name=v.__name__, args=args, kwargs=kwargs))
                 objdict['_inside_depth'] -= 1
                 return ret
             return _wrapper
@@ -105,11 +122,13 @@ class DeviceSuit(object):
         def _cpu_mem_monitor():
             if not self.appname:
                 return
-            mem = self.dev.getMem(self.appname)
-            self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})
-            self._log({'type':'record', 'mem_details':mem})
-            cpu = self.dev.getCpu(self.appname)
-            self._log({'type':'record', 'cpu':cpu})
+            meminfo = self.dev.meminfo(self.appname)
+            self.log(proto.TAG_MEMORY, meminfo)
+            # self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})
+            # self._log({'type':'record', 'mem_details':mem})
+            cpuinfo = self.dev.cpuinfo(self.appname)
+            self.log(proto.TAG_CPU, cpuinfo)
+            # self._log({'type':'record', 'cpu':cpu})
 
         self.monitor = airtest.monitor.Monitor()
         self.monitor.addfunc(_cpu_mem_monitor)
@@ -118,11 +137,11 @@ class DeviceSuit(object):
     def _imfind(self, bgimg, search):
         method = self._image_match_method
         if method == 'auto':
-            point = imt.auto.locate_one_image(bgimg, search, threshold=self._threshold)
+            point = imtauto.locate_one_image(bgimg, search, threshold=self._threshold)
         elif method == 'template':
-            point = imt.template.find(search, bgimg, self._threshold)
+            point = imttemplate.find(search, bgimg, self._threshold)
         elif method == 'sift':
-            point = imt.sift.find(search, bgimg)
+            point = imtsift.find(search, bgimg)
         else:
             raise RuntimeError("Unknown image match method: %s" %(method))
         print 'find method=', method
@@ -133,11 +152,11 @@ class DeviceSuit(object):
             maxcnt = 0
         method = self._image_match_method
         if method == 'auto':
-            points = imt.auto.locate_more_image_Template(search, bgimg, num=maxcnt)
+            points = imtauto.locate_more_image_Template(search, bgimg, num=maxcnt)
         elif method == 'template':
-            points = imt.template.findall(search, bgimg, self._threshold, maxcnt=maxcnt)
+            points = imttemplate.findall(search, bgimg, self._threshold, maxcnt=maxcnt)
         elif method == 'sift':
-            points = imt.sift.findall(search, bgimg, maxcnt=maxcnt)
+            points = imtsift.findall(search, bgimg, maxcnt=maxcnt)
         else:
             raise RuntimeError("Unknown image match method: %s" %(method))
         if sort:
@@ -233,9 +252,24 @@ class DeviceSuit(object):
         if rotation != 'UP':
             angle = dict(RIGHT=Image.ROTATE_90, LEFT=Image.ROTATE_270).get(rotation)
             Image.open(filename).transpose(angle).save(filename)
-        self._log(dict(type='snapshot', filename=filename))
+        if tempdir:
+            self.log(proto.TAG_SNAPSHOT, dict(filename=filename))
         self._snapshot_file = filename
         return filename
+
+    def log(self, tag, message):
+        self._loglock.acquire()
+        timestamp = time.time()
+        try:
+            dirname = os.path.dirname(self._logfile) or '.'
+            if not os.path.exists(dirname):
+                os.path.makedirs(dirname)
+        except:
+            pass
+        with open(self._logfile, 'a') as file:
+            data = dict(timestamp=int(timestamp), tag=tag, data=message)
+            file.write(json.dumps(data) + '\n')
+        self._loglock.release()
 
     def keepCapture(self):
         '''
@@ -257,7 +291,6 @@ class DeviceSuit(object):
         @return string: (filename that really save to)
         '''
         savefile = self._saveScreen(filename, random_name=False, tempdir=False)
-        self._log(dict(type='snapshot', filename=savefile))
         return savefile
 
     def globalSet(self, *args, **kwargs):
