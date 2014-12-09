@@ -14,7 +14,6 @@ from . import proto
 from .image import auto as imtauto
 from .image import sift as imtsift
 from .image import template as imttemplate
-# from airtest.image import auto as image
 
 import airtest
 
@@ -72,11 +71,6 @@ class DeviceSuit(object):
         if os.path.exists(logfile):
             backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
             os.rename(logfile, backfile)
-
-        # self.log(proto.TAG_FUNCTION, 'just a test')
-        # TODO: need to remove
-        # self._log = get_jsonlog(logfile).writeline # should implementes writeline(dict)
-        # self._log(dict(type='start', timestamp=time.time()))
 
         #-- start of func setting
         self._init_monitor()
