@@ -22,6 +22,7 @@ step1 connect device
     app.globalSet(monitor_interval=1.0) # set monitor interval to 1s
 
 
+### 图像相关
 #### takeSnapshot(filename) # filename show with extention (.jpg or .png)
 
     app.takeSnapshot('snapshot.png')
@@ -33,7 +34,8 @@ step1 connect device
 #### releaseCapture()
 关闭keepCapture
 
-#### click(P, [seconds], eventType=airtest.EV_DOWN_AND_UP) # click by image file
+### 操作相关
+#### click(P, [seconds]) # click by image file
 
     app.click(P)
     # P can be
@@ -45,13 +47,7 @@ step1 connect device
     # equals to app.click(app.find('start.png', 20.0))
     app.click('start.png', 20.0) # if start.png not found in 20s, Exception will raised.
 
-    # long press (this is an experimental function, report problem if something goes wrong)
-    app.click(P, eventType=airtest.EV_DOWN)
-    time.sleep(1.0) # press 1s
-    app.click(P, eventType=airtest.EV_UP)
-
-
-#### find(...) # find a image position located in screen
+#### find(image_file) # find a image position located in screen
 
     (x, y) = app.find(filename)
 
@@ -61,7 +57,19 @@ step1 connect device
     findall('start.png', maxcnt=2)
     findall('start.png', maxcnt=2, sort='x') # sort ordered by x row
 
+#### sleep(secs) # sleep for a while
 
+    app.sleep(2.0)  # sleep 2.0s
+    # same as time.sleep but can find sleep func call in log
+
+#### log(tag_name, object)
+
+    app.log('myTag', {'name': 'tt'})
+    # log will be like {"timestamp": ..., "tag": "myTag", "data": {"name": "tt"}}
+
+    # also support
+    app.log('myTag', 'helloworld')
+    
 #### wait(...) # wait until image shows
 
     app.wait(filename, [seconds])

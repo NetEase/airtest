@@ -4,6 +4,20 @@
 
 它并不是一个什么框架，而是一个python包。这样的设计可以使其非常灵活，不用担心受限于框架的各种框框。
 
+#### Sample
+
+    import airtest
+
+    def main():
+        app = airtest.connect()
+        app.click('Start.png') # 点击开始图片
+        app.click('Next.png')  # 点击下一步
+        app.sleep(2.0)
+        app.takeSnapshot('snap-start.png') # 保存截图
+
+    main()
+
+
 [代码地址](https://github.com/netease/airtest) |
 [问题反馈](http://git.mt.nie.netease.com/hzsunshx/airtest/issues) |
 [主要维护人员](mailto:codeskyblue@gmail.com)
