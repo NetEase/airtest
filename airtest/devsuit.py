@@ -10,7 +10,6 @@ import json
 from PIL import Image
 
 from . import base
-# from . import jsonlog
 from . import proto
 from .image import auto as imtauto
 from .image import sift as imtsift
@@ -36,16 +35,6 @@ def rotate_point((x, y), (w, h), d):
         return y, w-x
     if d == 'LEFT':
         return h-y, x
-
-# def get_jsonlog(filename='log/airtest.log'):    
-#     logfile = os.getenv('AIRTEST_LOGFILE', filename)
-#     if os.path.exists(logfile):
-#         backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
-#         os.rename(logfile, backfile)
-#     else:
-#         base.makedirs(base.dirname(logfile))
-#     jlog = jsonlog.JSONLog(logfile)
-#     return jlog
 
 class DeviceSuit(object):
     def __init__(self, device, devClass, phoneno, 
@@ -77,6 +66,9 @@ class DeviceSuit(object):
         self._logfile = logfile
         self._loglock = threading.Lock()
 
+        logdir = os.path.dirname(logfile) or '.'
+        if not os.path.exists(logdir):
+            os.makedirs(logdir)
         if os.path.exists(logfile):
             backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
             os.rename(logfile, backfile)
@@ -124,11 +116,8 @@ class DeviceSuit(object):
                 return
             meminfo = self.dev.meminfo(self.appname)
             self.log(proto.TAG_MEMORY, meminfo)
-            # self._log({'type':'record', 'mem':mem.get('PSS', 0)/1024})
-            # self._log({'type':'record', 'mem_details':mem})
             cpuinfo = self.dev.cpuinfo(self.appname)
             self.log(proto.TAG_CPU, cpuinfo)
-            # self._log({'type':'record', 'cpu':cpu})
 
         self.monitor = airtest.monitor.Monitor()
         self.monitor.addfunc(_cpu_mem_monitor)

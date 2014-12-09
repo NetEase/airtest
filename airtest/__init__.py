@@ -11,6 +11,8 @@ ANDROID = 'android'
 IOS = 'ios'
 WINDOWS='windows'
 
+ANDROIDWIFI = 'androidwifi'
+
 EV_DOWN = 'down'
 EV_UP = 'up'
 EV_DOWN_AND_UP = 'down_and_up'

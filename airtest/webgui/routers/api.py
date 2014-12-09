@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import os
-import time
 import flask
 
 import airtest
 import airtest.image as aim
 import cv2
+import time
 
 from . import utils
 
@@ -21,7 +21,6 @@ def home():
 
 @bp.route('/snapshot')
 def snapshot():
-    global idx
     filename = '%d-screen.png' % int(time.time())
     if os.path.exists(filename):
         os.unlink(filename)

@@ -223,7 +223,7 @@ class Device(object):
         @return dict: {'total': float, 'average': float}
         '''
         total = _get_cpuinfo(self._serialno, appname)
-        return dict(total=total, average=total/self._devinfo['cpu_count'])
+        return dict(total=total, ncpu=self._devinfo['cpu_count'])
 
     def start(self, appname, extra={}):
         '''

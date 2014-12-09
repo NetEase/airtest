@@ -23,6 +23,12 @@ def sift_point_count(image_file):
     kp_sch, des_sch = _sift.detectAndCompute(im, None)
     return len(kp_sch)
 
+# def find(img, template, rect=None, method='auto'):
+#     '''
+#     @return rect, ratio 
+#     '''
+#     pass
+
 def _testmain():
     print sift_point_count('testdata/hand.png')
 
