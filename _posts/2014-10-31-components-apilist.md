@@ -22,7 +22,6 @@ step1 connect device
     app.globalSet(monitor_interval=1.0) # set monitor interval to 1s
 
 
-### 图像相关
 #### takeSnapshot(filename) # filename show with extention (.jpg or .png)
 
     app.takeSnapshot('snapshot.png')
@@ -34,7 +33,6 @@ step1 connect device
 #### releaseCapture()
 关闭keepCapture
 
-### 操作相关
 #### click(P, [seconds]) # click by image file
 
     app.click(P)
@@ -69,7 +67,7 @@ step1 connect device
 
     # also support
     app.log('myTag', 'helloworld')
-    
+
 #### wait(...) # wait until image shows
 
     app.wait(filename, [seconds])
