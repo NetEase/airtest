@@ -6,7 +6,7 @@ Python lib for **android** and **ios** app test.
 
 离线文档使用方法：
 
-	git clone http://git.mt.nie.netease.com/hzsunshx/airtest && cd airtest
+	git clone https://github.com/netease/airtest && cd airtest
 	gem install jekyll
 	git checkout gh-pages
 	jekyll serve --baseurl=''
