@@ -84,7 +84,7 @@ def log2html(logfile, outdir, listen, port):
         help='out filename [default: "snapshot.png"]', show_default=True)
 def snapshot(phoneno, platform, out):
     try:
-        app = airtest.connect(phoneno=phoneno, device=platform)
+        app = airtest.connect(phoneno, device=platform)
         app.takeSnapshot(out)
     except Exception, e:
         click.echo(e)
@@ -136,7 +136,7 @@ def watch(conf, package, interval, serialno, human_readable, output_file):
         apk = _get_apk(conf, cache=True)
         package, _ = androaxml.parse_apk(apk)
 
-    app = airtest.connect(phoneno=serialno, device=airtest.ANDROID, monitor=False)
+    app = airtest.connect(serialno, device=airtest.ANDROID, monitor=False)
 
     # print app.dev.getdevinfo()
     outfd = None
