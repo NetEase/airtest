@@ -8,6 +8,7 @@ basic operation for a game(like a user does)
 
 # import os
 import re
+import urllib
 import requests
 
 # from .. import base
@@ -27,7 +28,7 @@ class Device(object):
 
     def snapshot(self, filename):
         ''' save screen snapshot '''
-        return requests.get(self._addr+'/snapshot')
+        urllib.urlretrieve(self._addr+'/screen.png', filename)
 
     def touch(self, x, y, eventType=None):
         '''

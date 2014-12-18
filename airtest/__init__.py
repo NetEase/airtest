@@ -112,6 +112,9 @@ def connect(devno=None, appname=None, device=None, monitor=True, logfile='log/ai
     elif device == 'dummy': # this class is only for test
         from airtest.device import dummy
         devClass = dummy.Device 
+    elif device == ANDROIDWIFI:
+        from airtest.device import androidwifi
+        devClass = androidwifi.Device
     else:
         raise RuntimeError('device type not recognize')
 
