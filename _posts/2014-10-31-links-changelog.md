@@ -4,6 +4,9 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2014/12/29 - 0.9.3
+1. airtest 两个命令 click, drag 增加 duration的支持
+
 ### 2014/12/09 - 0.9.1
 1. 更新airtest的log格式
 2. webgui可以查看截图中的sift特征点的数量。

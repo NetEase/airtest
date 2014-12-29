@@ -33,7 +33,10 @@ step1 connect device
 #### releaseCapture()
 关闭keepCapture
 
-#### click(P, [seconds]) # click by image file
+#### click(P, [seconds], duration=0.1) # click by image file
+
+    长按的支持：
+    eg: 点击2s  click((100, 200), duration=2.0)
 
     app.click(P)
     # P can be
@@ -95,6 +98,10 @@ step1 connect device
     # return width and height
 
 #### drag(...) # drag one place to and onother place
+
+    drag时间的支持, 如 drag 2s
+
+    app.drag((x1, y1), (x2, y2), duration=2.0)
 
 `app.drag(fromP, toP)` # fromP, toP: like click param, can be filename or position
 
