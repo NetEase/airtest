@@ -55,7 +55,6 @@ class DeviceSuit(object):
 
         self._rotation = None # UP,DOWN,LEFT,RIGHT
         self._tmpdir = 'tmp'
-        self._configfile = os.getenv('AIRTEST_CONFIG') or 'air.json'
         self._click_timeout = 20.0 # if icon not found in this time, then panic
         self._delay_after_click = 0.5 # when finished click, wait time
         self._screen_resolution = None
@@ -384,30 +383,22 @@ class DeviceSuit(object):
     def exists(self, imgfile):
         return True if self.find(imgfile) else False
 
-    def click(self, SF, seconds=None, eventType=airtest.EV_DOWN_AND_UP):
+    def click(self, SF, seconds=None, duration=0.1):
         '''
         Click function
         @param seconds: float (if time not exceed, it will retry and retry)
         '''
         if seconds == None:
             seconds = self._click_timeout
-        log.info('CLICK %s, timeout=%.2f', SF, seconds)
+        log.info('CLICK %s, timeout=%.2fs, duration=%.2fs', SF, seconds, duration)
         point = self._PS2Point(SF)
         if point:
             (x, y) = point
-            self.dev.touch(x, y, eventType)
         else:
             (x, y) = self.wait(SF, seconds=seconds)
             log.info('Click %s point: (%d, %d)', SF, x, y)
-            self.dev.touch(x, y, eventType)
+        self.dev.touch(x, y, duration)
         log.debug('delay after click: %.2fs' ,self._delay_after_click)
-
-        # mark position
-        # import cv2
-        # img = cv2.imread(self._snapshot_file)
-        # if img != None:
-        #     img = imt.toolbox.markPoint(img, (x, y))
-        #     cv2.imwrite(self._snapshot_file, img)
 
         time.sleep(self._delay_after_click)
 
@@ -434,31 +425,15 @@ class DeviceSuit(object):
             log.debug('ignore for no exists %s', imgfile)
             return False
 
-    def drag(self, fpt, tpt, duration=500):
+    def drag(self, fpt, tpt, duration=0.5):
         ''' 
         Drag from one place to another place
 
         @param fpt,tpt: filename or position
-        @param duration: float (duration of the event in ms)
+        @param duration: float (duration of the event in seconds)
         '''
-        # the duration seems not working. no matter how larger I set, nothing changes.
-        # variable = {}
-        # def to_point(raw):
-        #     if isinstance(raw, list) or isinstance(raw, tuple):
-        #         return self._fixPoint(raw)
-        #     if isinstance(raw, basestring):
-        #         screen = variable.get('screen')
-        #         if not screen:
-        #             variable['screen'] = self._saveScreen('drag-XXXXXXXX.png')
-        #         pt = find_one_image(variable['screen'], raw, self._threshold)
-        #         return self._fixPoint(pt)
-        #     raise RuntimeError('unknown type')
-        # FIXME: (a little slow, find should support specified images)
         fpt = self._PS2Point(fpt)
         tpt = self._PS2Point(tpt)
-        # fpt = self.find(fpt)
-        # tpt = self.find(tpt)
-        # fpt, tpt = to_point(fpt), to_point(tpt)
         return self.dev.drag(fpt, tpt, duration)
 
     def sleep(self, secs=1.0):
@@ -498,39 +473,4 @@ class DeviceSuit(object):
             return self.dev.keyevent(event)
         raise RuntimeError('keyevent not support')
 
-    def close(self):
-        '''
-        Release resouces
-        '''
-        self.monitor.stop()
-        time.sleep(0.5)
-
-    def _safe_load_config(self):
-        import os
-        if os.path.exists(self._configfile):
-            return json.load(open(self._configfile))
-        return {}
-            
-    def start(self):
-        '''
-        Start a app
-        '''
-        s = self._safe_load_config()
-        ret = self.dev.start(self.appname, s.get(self._device))
-        self._initWidthHeight()
-        return ret
-    
-    def stop(self):
-        '''
-        Stop a app
-        '''
-        s = self._safe_load_config()
-        return self.dev.stop(self.appname, s.get(self._device))
-
-    def clear(self):
-        '''
-        Stop app and clear data
-        '''
-        s = self._safe_load_config()
-        return self.dev.clear(self.appname, s.get(self._device))
 

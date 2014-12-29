@@ -30,7 +30,7 @@ class Device(object):
         log.debug('DUMMY take snapshot %s' %(filename))
         shutil.copyfile(self._snapshot, filename)
 
-    def touch(self, x, y, eventType=airtest.EV_DOWN_AND_UP):
+    def touch(self, x, y, duration=0.1):
         '''
         same as adb -s ${SERIALNO} shell input tap x y
         '''

@@ -11,7 +11,7 @@ import subprocess
 
 from airtest import base
 from com.dtmilano.android.viewclient import ViewClient 
-from com.dtmilano.android.viewclient import adbclient
+# from com.dtmilano.android.viewclient import adbclient
 
 DEBUG = os.getenv("AIRDEBUG")=="true"
 log = base.getLogger('android')
@@ -68,10 +68,6 @@ def _get_cpuinfo(serialno, package):
         log.error("cpu_info error")
         return 0
 
-# from zope.interface.declarations import implementer
-# from airtest import interface
-
-#@implementer(interface.IDevice)
 class Device(object):
     def __init__(self, serialno=None):
         self._snapshot_method = 'adb'
@@ -96,28 +92,20 @@ class Device(object):
 
         width, height = self.shape()
         width, height = min(width, height), max(width, height)
-        self._airtoolbox = '/data/local/tmp/airtoolbox'
-        self._init_airtoolbox()
+        self._airnative = '/data/local/tmp/air-native'
+        self._init_airnative()
         self._init_adbinput()
 
-    def _init_airtoolbox(self):
-        ''' init airtoolbox '''
+    def _init_airnative(self):
+        ''' install air-native '''
         serialno = self._serialno
         def sh(*args):
             args = ['adb', '-s', serialno] + list(args)
             return subprocess.check_output(args)
 
-        out = sh('shell','sh','-c', 'test -x {tbox} && {tbox} version'.format(
-            tbox=self._airtoolbox))
-        out = out.strip()
-        print 'AirToolbox: '+out.strip()
-        version_file = os.path.join(__dir__, '../binfiles/airtoolbox.version')
-        version = open(version_file).read().strip()
-        if not out.endswith(version):
-            print 'upgrade: airtoolbox (ver %s)...' %(version)
-            toolbox = os.path.join(__dir__, '../binfiles/airtoolbox')
-            sh('push', toolbox, self._airtoolbox)
-            sh('shell', 'chmod', '755', self._airtoolbox)
+        airnative = os.path.join(__dir__, '../binfiles/air-native')
+        sh('push', airnative, self._airnative)
+        sh('shell', 'chmod', '755', self._airnative)
 
     def _init_adbinput(self):
         apkfile = os.path.join(__dir__, '../binfiles/adb-keyboard.apk')
@@ -140,29 +128,21 @@ class Device(object):
             raise RuntimeError("No such snapshot method: [%s]" % self._snapshot_method)
 
 
-    def touch(self, x, y, eventType=adbclient.DOWN_AND_UP):
+    def touch(self, x, y, duration=0.1):
         '''
         same as adb -s ${SERIALNO} shell input tap x y
         '''
-        if eventType == 'down':
-            self.adb.shell('{toolbox} input tapdown {x} {y}'.format(
-                toolbox=self._airtoolbox, x=x, y=y))
-            log.debug('touch down position %s', (x, y))
-        elif eventType == 'up':
-            self.adb.shell('{toolbox} input tapup'.format(
-                toolbox=self._airtoolbox, x=x, y=y))
-            log.debug('touch up position %s', (x, y))
-        elif eventType == 'down_and_up':
-            log.debug('touch position %s', (x, y))
-            self.adb.touch(x, y) 
-        else:
-            raise RuntimeError('unknown eventType: %s' %(eventType))
+        assert duration >= 0
+        self.adb.shell('{cmd} -runjs="tap({x}, {y}, {dur})"'.format(
+            cmd=self._airnative, x=x, y=y, dur=int(duration*1000)))
 
     def drag(self, (x0, y0), (x1, y1), duration=0.5):
         '''
         Drap screen
         '''
-        self.adb.drag((x0, y0), (x1, y1), duration)
+        self.adb.shell('{cmd} -runjs="drag({x0}, {y0}, {x1}, {y1}, {steps}, {dur})"'.format(
+            cmd=self._airnative, x0=x0, y0=y0, x1=x1, y1=y1, steps=10, dur=int(duration*1000)))
+        # self.adb.drag((x0, y0), (x1, y1), duration)
 
     def shape(self):
         ''' 

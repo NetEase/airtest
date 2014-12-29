@@ -30,11 +30,12 @@ class Device(object):
         ''' save screen snapshot '''
         urllib.urlretrieve(self._addr+'/screen.png', filename)
 
-    def touch(self, x, y, eventType=None):
+    def touch(self, x, y, duration=0.1):
         '''
         touch position
         '''
-        self._req('click', dict(x=x, y=y, event=eventType))
+        # self._req('click', dict(x=x, y=y, event=eventType))
+        pass
 
     def drag(self, (x0, y0), (x1, y1), duration=0.5):
         '''
