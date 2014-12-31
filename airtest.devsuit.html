@@ -1,0 +1,159 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module airtest.devsuit</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="airtest.html"><font color="#ffffff">airtest</font></a>.devsuit</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/hzsunshx/workspace/airtest/airtest/devsuit.py">/home/hzsunshx/workspace/airtest/airtest/devsuit.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;-*-&nbsp;coding:&nbsp;utf-8&nbsp;-*-</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="PIL.Image.html">PIL.Image</a><br>
+<a href="airtest.html">airtest</a><br>
+<a href="airtest.base.html">airtest.base</a><br>
+<a href="collections.html">collections</a><br>
+</td><td width="25%" valign=top><a href="airtest.image.auto.html">airtest.image.auto</a><br>
+<a href="airtest.image.sift.html">airtest.image.sift</a><br>
+<a href="airtest.image.template.html">airtest.image.template</a><br>
+<a href="json.html">json</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="platform.html">platform</a><br>
+<a href="airtest.proto.html">airtest.proto</a><br>
+<a href="threading.html">threading</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="airtest.devsuit.html#DeviceSuit">DeviceSuit</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DeviceSuit">class <strong>DeviceSuit</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="DeviceSuit-__getattribute__"><strong>__getattribute__</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="DeviceSuit-__init__"><strong>__init__</strong></a>(self, device, devClass, phoneno, appname<font color="#909090">=None</font>, logfile<font color="#909090">='log/airtest.log'</font>, monitor<font color="#909090">=True</font>)</dt></dl>
+
+<dl><dt><a name="DeviceSuit-center"><strong>center</strong></a>(self)</dt><dd><tt>Center&nbsp;position</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-click"><strong>click</strong></a>(self, SF, seconds<font color="#909090">=None</font>, duration<font color="#909090">=0.1</font>)</dt><dd><tt>Click&nbsp;function<br>
+@param&nbsp;seconds:&nbsp;float&nbsp;(if&nbsp;time&nbsp;not&nbsp;exceed,&nbsp;it&nbsp;will&nbsp;retry&nbsp;and&nbsp;retry)</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-clickIfExists"><strong>clickIfExists</strong></a>(self, imgfile)</dt><dd><tt>Click&nbsp;when&nbsp;image&nbsp;file&nbsp;exists<br>
+&nbsp;<br>
+@return&nbsp;(True|False)&nbsp;if&nbsp;clicked</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-drag"><strong>drag</strong></a>(self, fpt, tpt, duration<font color="#909090">=0.5</font>)</dt><dd><tt>Drag&nbsp;from&nbsp;one&nbsp;place&nbsp;to&nbsp;another&nbsp;place<br>
+&nbsp;<br>
+@param&nbsp;fpt,tpt:&nbsp;filename&nbsp;or&nbsp;position<br>
+@param&nbsp;duration:&nbsp;float&nbsp;(duration&nbsp;of&nbsp;the&nbsp;event&nbsp;in&nbsp;seconds)</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-exists"><strong>exists</strong></a>(self, imgfile)</dt></dl>
+
+<dl><dt><a name="DeviceSuit-find"><strong>find</strong></a>(self, imgfile)</dt><dd><tt>Find&nbsp;image&nbsp;position&nbsp;on&nbsp;screen<br>
+&nbsp;<br>
+@return&nbsp;(point&nbsp;founded&nbsp;or&nbsp;None&nbsp;if&nbsp;not&nbsp;found)</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-findall"><strong>findall</strong></a>(self, imgfile, maxcnt<font color="#909090">=None</font>, sort<font color="#909090">=None</font>)</dt><dd><tt>Find&nbsp;multi&nbsp;positions&nbsp;that&nbsp;imgfile&nbsp;on&nbsp;screen<br>
+&nbsp;<br>
+@maxcnt&nbsp;(int):&nbsp;max&nbsp;number&nbsp;of&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;restricted.<br>
+@sort&nbsp;(string):&nbsp;(None|x|y)&nbsp;x&nbsp;to&nbsp;sort&nbsp;with&nbsp;x,&nbsp;small&nbsp;in&nbsp;front,&nbsp;None&nbsp;to&nbsp;be&nbsp;origin&nbsp;order<br>
+@return&nbsp;list&nbsp;point&nbsp;that&nbsp;found<br>
+@warn&nbsp;not&nbsp;finished&nbsp;yet.</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-globalGet"><strong>globalGet</strong></a>(self, key)</dt><dd><tt>get&nbsp;app&nbsp;setting</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-globalSet"><strong>globalSet</strong></a>(self, *args, **kwargs)</dt><dd><tt>app&nbsp;setting,&nbsp;be&nbsp;careful&nbsp;you&nbsp;should&nbsp;known&nbsp;what&nbsp;you&nbsp;are&nbsp;doing.<br>
+@parma&nbsp;m(dict):&nbsp;eg:{"threshold":&nbsp;0.3}</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-keepCapture"><strong>keepCapture</strong></a>(self)</dt><dd><tt>Use&nbsp;screen&nbsp;in&nbsp;memory</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-keyevent"><strong>keyevent</strong></a>(self, event)</dt><dd><tt>Send&nbsp;keyevent&nbsp;(only&nbsp;support&nbsp;android&nbsp;and&nbsp;ios)<br>
+&nbsp;<br>
+@param&nbsp;event:&nbsp;string&nbsp;(one&nbsp;of&nbsp;MENU,BACK,HOME)<br>
+@return&nbsp;nothing</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-log"><strong>log</strong></a>(self, tag, message)</dt></dl>
+
+<dl><dt><a name="DeviceSuit-mustFind"><strong>mustFind</strong></a>(self, imgfile)</dt><dd><tt>Raise&nbsp;Error&nbsp;if&nbsp;image&nbsp;not&nbsp;found</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-releaseCapture"><strong>releaseCapture</strong></a>(self)</dt><dd><tt>Donot&nbsp;use&nbsp;screen&nbsp;in&nbsp;memory&nbsp;(this&nbsp;is&nbsp;default&nbsp;behavior)</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-safeWait"><strong>safeWait</strong></a>(self, imgfile, seconds)</dt><dd><tt>Like&nbsp;wait,&nbsp;but&nbsp;don't&nbsp;raise&nbsp;RuntimeError<br>
+&nbsp;<br>
+return&nbsp;None&nbsp;when&nbsp;timeout<br>
+return&nbsp;point&nbsp;if&nbsp;found</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-shape"><strong>shape</strong></a>(self)</dt><dd><tt>Get&nbsp;device&nbsp;shape<br>
+&nbsp;<br>
+@return&nbsp;(width,&nbsp;height)</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-sleep"><strong>sleep</strong></a>(self, secs<font color="#909090">=1.0</font>)</dt><dd><tt>Sleeps&nbsp;for&nbsp;the&nbsp;specified&nbsp;number&nbsp;of&nbsp;seconds<br>
+&nbsp;<br>
+@param&nbsp;secs:&nbsp;float&nbsp;(number&nbsp;of&nbsp;seconds)<br>
+@return&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-takeSnapshot"><strong>takeSnapshot</strong></a>(self, filename)</dt><dd><tt>Take&nbsp;screen&nbsp;snapshot<br>
+&nbsp;<br>
+@param&nbsp;filename:&nbsp;string&nbsp;(base&nbsp;filename&nbsp;want&nbsp;to&nbsp;save&nbsp;as&nbsp;basename)<br>
+@return&nbsp;string:&nbsp;(filename&nbsp;that&nbsp;really&nbsp;save&nbsp;to)</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-type"><strong>type</strong></a>(self, text)</dt><dd><tt>Input&nbsp;some&nbsp;text<br>
+&nbsp;<br>
+@param&nbsp;text:&nbsp;string&nbsp;(text&nbsp;want&nbsp;to&nbsp;type)</tt></dd></dl>
+
+<dl><dt><a name="DeviceSuit-wait"><strong>wait</strong></a>(self, imgfile, seconds<font color="#909090">=20</font>)</dt><dd><tt>Wait&nbsp;until&nbsp;some&nbsp;picture&nbsp;exists<br>
+@return&nbsp;position&nbsp;when&nbsp;imgfile&nbsp;shows<br>
+@raise&nbsp;RuntimeError&nbsp;if&nbsp;not&nbsp;found</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-rotate_point"><strong>rotate_point</strong></a>((x, y), (w, h), d)</dt><dd><tt>@param&nbsp;(x,y):&nbsp;input&nbsp;point<br>
+@param&nbsp;(w,h):&nbsp;width&nbsp;and&nbsp;height<br>
+@param&nbsp;d(string):&nbsp;one&nbsp;of&nbsp;UP,DOWN,LEFT,RIGHT<br>
+@return&nbsp;(x,&nbsp;y):&nbsp;rotated&nbsp;point</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>log</strong> = &lt;logging.Logger object&gt;</td></tr></table>
+</body></html>
