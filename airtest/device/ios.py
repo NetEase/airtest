@@ -5,36 +5,53 @@
 basic operation for a game(like a user does)
 '''
 
-import os
+import subprocess
+import paramiko
+import logging
+
 
 from airtest import base
 from appium import webdriver
 from PIL import Image
-import subprocess
-from functools import partial
+# from functools import partial
 
 from .. import patch
-
-DEBUG = os.getenv("DEBUG")=="true"
+ 
 log = base.getLogger('ios')
+logging.getLogger("paramiko").setLevel(logging.WARNING)
 
 class Monitor(object):
     def __init__(self, ip, appname):
+        self._ssh = paramiko.client.SSHClient()
+        self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self._ssh.connect(ip, username='root', password='alpine')
         self._ip = ip 
         self._name = appname
         def _sh(*args):
-            return subprocess.check_output(['echo'] + list(args))
+            cmd = args[0] if len(args) == 1 else subprocess.list2cmdline(args)
+            stdin, out, err = self._ssh.exec_command(cmd)
+            return out.read()
         self.sh = _sh
-        self.adbshell = partial(_sh, 'shell')
 
     @patch.run_once
     def ncpu(self):
         ''' number of cpu '''
-        return None
+        out = self.sh('sysctl', 'hw.ncpu')
+        return int(out.strip().split()[1])
+
+    @patch.run_once
+    def pid(self):
+        name = '/['+self._name[0]+']'+self._name[1:]  # change "grep name" -> "grep [n]ame"
+        output = self.sh('ps -eo pid,command | grep '+name)
+        return int(output.split()[0])
 
     def cpu(self):
         ''' cpu usage, range must be in [0, 100] '''
-        return None
+        pid = self.pid()
+        output = self.sh('ps -o pcpu -p %d | tail -n+2' % pid)
+        cpu = output.strip()
+        return float(cpu)/self.ncpu()
+        
 
     def memory(self):
         '''
@@ -43,7 +60,10 @@ class Monitor(object):
         @param package(string): android package name
         @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
         '''
-        return None
+        output = self.sh('ps -o pmem,rss,vsz -p %d | tail -n+2' % self.pid())
+        pmem, rss, vss = output.split()
+        return dict(VSS=int(vss), RSS=int(rss), PMEM=float(pmem))
+
 
 
 #@implementer(interface.IDevice)
