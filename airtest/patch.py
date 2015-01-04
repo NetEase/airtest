@@ -1,17 +1,34 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
-import json
 import time
 import threading
 
 from functools import partial
 
 from airtest import base
-from airtest import jsonlog
 
 log = base.getLogger('patch')
+
+def run_once(f):
+    ''' 
+    Decorator: Make sure function only call once
+    not thread safe
+
+    @run_once
+    def foo():
+        print 'bar'
+        return 1+2
+    foo()
+    foo() # 'bar' only print once
+    '''
+    def wrapper(*args, **kwargs):
+        if not wrapper.has_run:
+            wrapper.result = f(*args, **kwargs)
+            wrapper.has_run = True
+        return wrapper.result
+    wrapper.has_run = False
+    return wrapper
 
 def attachmethod(target):
     if isinstance(target, type):

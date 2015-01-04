@@ -10,12 +10,41 @@ import os
 from airtest import base
 from appium import webdriver
 from PIL import Image
+import subprocess
+from functools import partial
+
+from .. import patch
 
 DEBUG = os.getenv("DEBUG")=="true"
 log = base.getLogger('ios')
 
-# from zope.interface.declarations import implementer
-# from airtest import interface
+class Monitor(object):
+    def __init__(self, ip, appname):
+        self._ip = ip 
+        self._name = appname
+        def _sh(*args):
+            return subprocess.check_output(['echo'] + list(args))
+        self.sh = _sh
+        self.adbshell = partial(_sh, 'shell')
+
+    @patch.run_once
+    def ncpu(self):
+        ''' number of cpu '''
+        return None
+
+    def cpu(self):
+        ''' cpu usage, range must be in [0, 100] '''
+        return None
+
+    def memory(self):
+        '''
+        @description details view: http://my.oschina.net/goskyblue/blog/296798
+
+        @param package(string): android package name
+        @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
+        '''
+        return None
+
 
 #@implementer(interface.IDevice)
 class Device(object):

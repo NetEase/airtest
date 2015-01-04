@@ -5,7 +5,7 @@
 #
 #__all__=['devsuit', 'android', 'image', 'base', 'patch', 'ios', 'device']
 
-__version__ = '0.9.4'
+__version__ = '0.9.5'
 
 ANDROID = 'android'
 IOS = 'ios'
@@ -80,6 +80,28 @@ def stop(devno, device=None):
 #
 ## ----------------------------------------------------------
 #
+
+class Monitor(object):
+    '''
+    Create a new monitor
+    @addr: eg: android://<serialno>  or ios://127.0.0.1
+    @appname: android package name or ios bundle id
+    '''
+    def __init__(self, addr, appname):
+        import urlparse
+        p = urlparse.urlparse(addr)
+        exec('from .device import '+p.scheme)#, p.netloc, p.path
+        module = eval(p.scheme)
+        self._m = module.Monitor(p.netloc, appname)
+
+    def __getattr__(self, key):
+        if hasattr(self._m, key):
+            return getattr(self._m, key)
+        raise AttributeError('Monitor object has no attribute "%s"' % key)
+
+    def watch(self):
+        pass
+
 
 def connect(devno=None, appname=None, device=None, monitor=True, logfile='log/airtest.log'):
     '''

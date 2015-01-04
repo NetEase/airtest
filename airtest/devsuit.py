@@ -19,22 +19,6 @@ import airtest
 
 log = base.getLogger('devsuit')
 
-def rotate_point((x, y), (w, h), d):
-    '''
-    @param (x,y): input point
-    @param (w,h): width and height
-    @param d(string): one of UP,DOWN,LEFT,RIGHT
-    @return (x, y): rotated point
-    '''
-    if d == 'UP':
-        return x, y
-    if d == 'DOWN':
-        return w-x, y-y
-    if d == 'RIGHT':
-        return y, w-x
-    if d == 'LEFT':
-        return h-y, x
-
 class DeviceSuit(object):
     def __init__(self, device, devClass, phoneno, 
             appname=None, logfile='log/airtest.log', monitor=True):
