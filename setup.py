@@ -36,7 +36,8 @@ setup(
           'pystache >= 0.5.4',
           # 'requests >= 2.4.3', 
           'Flask >= 0.10.1',
-          'paramiko'
+          'paramiko',
+          'aircv'
           ],
       entry_points='''
       [console_scripts]

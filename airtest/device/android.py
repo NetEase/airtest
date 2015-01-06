@@ -130,6 +130,21 @@ class Monitor(object):
         ret.update(dict(PSS=int(pss)))
         return ret
 
+    @patch.run_once
+    def sys_memory(self):
+        '''
+        unit KB
+        '''
+        output = self.adbshell('cat', '/proc/meminfo')
+        print output
+        match = re.compile('MemTotal:\s*(\d+)\s*kB\s*MemFree:\s*(\d+)', re.IGNORECASE).match(output)
+        if match:
+            total = int(match.group(1), 10)
+            free = int(match.group(2), 10)
+        else:
+            total, free = 0, 0
+        return dict(TOTAL=total, FREE=free)
+
 class Device(object):
     def __init__(self, serialno=None):
         self._snapshot_method = 'adb'

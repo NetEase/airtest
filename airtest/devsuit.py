@@ -384,6 +384,14 @@ class DeviceSuit(object):
         self.dev.touch(x, y, duration)
         log.debug('delay after click: %.2fs' ,self._delay_after_click)
 
+        # FIXME(ssx): mark point(not tested) alse need globalSet
+        # import cv2
+        # import aircv as ac
+        # if os.path.exists(self._snapshot_file):
+        #     img = ac.imread(self._snapshot_file)
+        #     ac.mark_point(img, (x, y))
+        #     cv2.imwrite(self._snapshot_file, img)
+
         time.sleep(self._delay_after_click)
 
     def center(self):
