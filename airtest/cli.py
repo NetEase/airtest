@@ -152,12 +152,13 @@ def watch(conf, package, interval, serialno, human_readable, output_file):
         values = []
         values.append(time.strftime('%H:%M:%S'))
         
-        cpu = app.dev.getCpu(package)
+        cpu = app.dev.cpuinfo(package)
         values.append(str(cpu))
 
-        mem = app.dev.getMem(package)
+        mem = app.dev.meminfo(package)
         for item in mem_items:
-            v = int(mem.get(item))*1024
+            v = int(mem.get(item, 0))*1024
+
             if human_readable:
                 v = humanize.naturalsize(int(v))
             values.append(str(v))
