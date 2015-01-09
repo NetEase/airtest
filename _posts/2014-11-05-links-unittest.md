@@ -22,19 +22,21 @@ unittest有两个函数setUp, tearDown. 分别在每个测试函数的开始和�
     import unittest
     import airtest
     
-    devno = os.getenv('AIRTEST_DEVNO') or 'localhost:5552'
+	# adb devices可以查到
+    devno = os.getenv('AIRTEST_DEVNO') or 'af89123lkjv'
     appname = os.getenv('AIRTEST_APPNAME') or 'com.netease.h15'
     device = os.getenv('AIRTEST_DEVICE') or airtest.ANDROID
     
     app = airtest.connect(devno, appname=appname, device=device, monitor=False)
-    app.globalSet(image_match_method='template', threshold=0.8)
+    app.globalSet(image_match_method='template', threshold=0.7)
     
     class TestFunctions(unittest.TestCase):
         def setUp(self):
-            airtest.start(devno, device)
+			activity = '.Main' # 不用的应用activity不一样，用air.test inspect <apkfile> 可以查看activity
+            os.system('adb shell am start -s -N ' + appname + '/'+activity)
     
         def tearDown(self):
-            airtest.stop(devno, device)
+			os.system('adb shell am force-stop ' + appname)
     
         def _randname(self, length=6):
             import random, string
