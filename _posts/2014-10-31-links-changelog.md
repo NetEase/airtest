@@ -4,6 +4,18 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2015/01/09 - 0.9.6
+1. 监控数据与设备控制命令分离
+	连接方式从 airtest.connect 更新成
+
+		m = airtest.Monitor('android://xxxx', package_name)
+		m.cpu(); m.memory()
+
+		d = airtest.Device('android://xxxx')
+		d.click(position)
+2. 支持ios的性能监控
+		m = airtest.Monitor('ios://xxxx', package_name)
+
 ### 2014/12/29 - 0.9.3
 1. airtest 两个命令 click, drag 增加 duration的支持
 
