@@ -22,7 +22,7 @@ unittest有两个函数setUp, tearDown. 分别在每个测试函数的开始和�
     import unittest
     import airtest
     
-	# adb devices可以查到
+    # adb devices可以查到
     devno = os.getenv('AIRTEST_DEVNO') or 'af89123lkjv'
     appname = os.getenv('AIRTEST_APPNAME') or 'com.netease.h15'
     device = os.getenv('AIRTEST_DEVICE') or airtest.ANDROID
@@ -32,11 +32,11 @@ unittest有两个函数setUp, tearDown. 分别在每个测试函数的开始和�
     
     class TestFunctions(unittest.TestCase):
         def setUp(self):
-			activity = '.Main' # 不用的应用activity不一样，用air.test inspect <apkfile> 可以查看activity
+            activity = '.Main' # 不用的应用activity不一样，用air.test inspect <apkfile> 可以查看activity
             os.system('adb shell am start -s -N ' + appname + '/'+activity)
     
         def tearDown(self):
-			os.system('adb shell am force-stop ' + appname)
+            os.system('adb shell am force-stop ' + appname)
     
         def _randname(self, length=6):
             import random, string
