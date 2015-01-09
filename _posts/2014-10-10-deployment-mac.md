@@ -19,7 +19,8 @@ permalink: /deployment/mac-installing.html
     brew tap homebrew/science && brew install opencv
     brew tap Homebrew/python && brew install pillow
     pip install Appium-Python-Client
-    easy_install -i http://mt.nie.netease.com:3141/simple/ androidviewclient
+
+	easy_install androidviewclient
     pip install -U -i http://mt.nie.netease.com:3141/simple/ airtest #开发版安装方法，见下面
 
 #### opencv安装检查：

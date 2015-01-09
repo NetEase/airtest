@@ -24,7 +24,9 @@ permalink: /deployment/win-installing.html
 上述安装完后，打开命令行，继续安装两个软件包
 (*官方的androidviewclient更新快的有点不稳定，所以这里还是用老版本*)
 
-    easy_install http://goandroid.qiniudn.com/androidviewclient-7.1.2.tar.gz
+<del>easy_install http://goandroid.qiniudn.com/androidviewclient-7.1.2.tar.gz</dev>
+
+    easy_install androidviewclient
     pip install --upgrade airtest # or  easy_install -U airtest
 
 
