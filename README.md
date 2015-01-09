@@ -14,5 +14,10 @@ Python lib for **android** and **ios** app test.
 	git checkout gh-pages
 	jekyll serve --baseurl=''
 
+## 如何给给该项目贡献
+因为刚项目常常更新，所以可能会有一些没有测试到的bug。
+
+可以在发现了问题后，提个issue给作者。 另外一些新的思路也可以提到issue中。
+
 ## License
 This project is under the MIT License. See the [LICENSE](LICENSE) file for the full license text.

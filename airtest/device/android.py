@@ -150,57 +150,51 @@ class Device(object):
         self._snapshot_method = 'adb'
         print 'SerialNo:', serialno
 
-        self.adb, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
-        self.adb.setReconnect(True) # this way is more stable
+        self.adbclient, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
+        self.adbclient.setReconnect(True) # this way is more stable
 
-        self.vc = ViewClient(self.adb, serialno, autodump=False)
+        self.vc = ViewClient(self.adbclient, serialno, autodump=False)
+
+        def _adb(*args):
+            return subprocess.check_output(['adb', '-s', self._serialno] + list(args))
+        self.adb = _adb
+        self.adbshell = partial(_adb, 'shell')
+
         self._devinfo = self.getdevinfo()
-
-        print 'ProductBrand:', self._devinfo['product_brand']
-        print 'CpuCount: %d' % self._devinfo['cpu_count']
-        print 'TotalMem: %d MB' % self._devinfo['mem_total']
-        print 'FreeMem: %d MB' % self._devinfo['mem_free']
-
-        try:
-            if self.adb.isScreenOn():
-                self.adb.wake()
-        except:
-            pass
+        # try:
+        #     if not self.adb.isScreenOn():
+        #         self.adb.wake()
+        # except:
+        #     pass
 
         width, height = self.shape()
         width, height = min(width, height), max(width, height)
         self._airnative = '/data/local/tmp/air-native'
-        self._init_airnative()
-        self._init_adbinput()
 
-    def _init_airnative(self):
-        ''' install air-native '''
-        serialno = self._serialno
-        def sh(*args):
-            args = ['adb', '-s', serialno] + list(args)
-            return subprocess.check_output(args)
-
+        # install air-native
         airnative = os.path.join(__dir__, '../binfiles/air-native')
-        sh('push', airnative, self._airnative)
-        sh('shell', 'chmod', '755', self._airnative)
+        self.adb('push', airnative, self._airnative)
+        self.adbshell('chmod', '755', self._airnative)
+
+        self._init_adbinput()
 
     def _init_adbinput(self):
         apkfile = os.path.join(__dir__, '../binfiles/adb-keyboard.apk')
         pkgname = 'com.android.adbkeyboard'
-        if not self.adb.shell('pm path %s' %(pkgname)).strip():
+        if not self.adbshell('pm', 'path', pkgname).strip():
             print 'Install adbkeyboard.apk input method'
-            subprocess.call(['adb', '-s', self._serialno, 'install', '-r', apkfile])
+            self.adb('install', '-r', apkfile)
 
     def snapshot(self, filename):
         ''' save screen snapshot '''
         if self._snapshot_method == 'adb':
             log.debug('start take snapshot(%s)'%(filename))
-            pil = self.adb.takeSnapshot(reconnect=True)
+            pil = self.adbclient.takeSnapshot(reconnect=True)
             pil.save(filename)
         elif self._snapshot_method == 'screencap':
             tmpname = '/data/local/tmp/airtest-tmp-snapshot.png'
-            self.adb.shell('screencap -p '+tmpname)
-            os.system(' '.join(('adb', '-s', self._serialno, 'pull', tmpname, filename)))
+            self.adbshell('screencap', '-p', tmpname)
+            self.adb('pull', tmpname, filename)
         else:
             raise RuntimeError("No such snapshot method: [%s]" % self._snapshot_method)
 
@@ -210,36 +204,45 @@ class Device(object):
         same as adb -s ${SERIALNO} shell input tap x y
         '''
         assert duration >= 0
-        self.adb.shell('{cmd} -runjs="tap({x}, {y}, {dur})"'.format(
-            cmd=self._airnative, x=x, y=y, dur=int(duration*1000)))
+        self.adbshell(self._airnative, '-runjs', 'tap({x}, {y}, {dur})'.format(
+            x=x, y=y, dur=int(duration*1000)))
 
     def drag(self, (x0, y0), (x1, y1), duration=0.5):
         '''
         Drap screen
         '''
-        self.adb.shell('{cmd} -runjs="drag({x0}, {y0}, {x1}, {y1}, {steps}, {dur})"'.format(
-            cmd=self._airnative, x0=x0, y0=y0, x1=x1, y1=y1, steps=10, dur=int(duration*1000)))
+        self.adbshell(self._airnative, '-runjs', 'drag({x0}, {y0}, {x1}, {y1}, {steps}, {dur})'.format(
+            x0=x0, y0=y0, x1=x1, y1=y1, steps=10, dur=int(duration*1000)))
         # self.adb.drag((x0, y0), (x1, y1), duration)
 
+    @patch.run_once
     def shape(self):
         ''' 
         Get screen width and height 
         '''
-        width = self.adb.getProperty("display.width")
-        height = self.adb.getProperty("display.height")
+        width = self.adbclient.getProperty("display.width")
+        height = self.adbclient.getProperty("display.height")
         return (width, height)
 
     def _type_raw(self, text):
-        #adb shell ime enable com.android.adbkeyboard/.AdbIME
-        #adb shell ime set com.android.adbkeyboard/.AdbIME
-        #adb shell am broadcast -a ADB_INPUT_TEXT --es msg '你好嗎? Hello?'
-        #adb shell ime disable com.android.adbkeyboard/.AdbIME
-        adbkeyboard = ['com.android.adbkeyboard/.AdbIME']
-        ime = ['adb', '-s', self._serialno, 'shell', 'ime']
-        subprocess.call(ime+['enable']+adbkeyboard)
-        subprocess.call(ime+['set']+adbkeyboard)
-        subprocess.call(['adb', '-s', self._serialno, 'shell', 'am', 'broadcast', '-a', 'ADB_INPUT_TEXT', '--es', 'msg', text])
-        subprocess.call(ime+['disable']+adbkeyboard)
+        '''
+        Command Order are: 
+            adb shell ime enable com.android.adbkeyboard/.AdbIME
+            adb shell ime set com.android.adbkeyboard/.AdbIME
+            adb shell am broadcast -a ADB_INPUT_TEXT --es msg '你好嗎? Hello?'
+            adb shell ime disable com.android.adbkeyboard/.AdbIME
+        '''
+        # adbkeyboard = ['com.android.adbkeyboard/.AdbIME']
+        # ime = ['adb', '-s', self._serialno, 'shell', 'ime']
+        adbime = 'com.android.adbkeyboard/.AdbIME'
+        self.adbshell('ime', 'enable', adbime)
+        self.adbshell('ime', 'set', adbime)
+        self.adbshell('am', 'broadcast', '-a', 'ADB_INPUT_TEXT', '--es', 'msg', text)
+        self.adbshell('ime', 'disable', adbime)
+        # subprocess.call(ime+['enable']+adbkeyboard)
+        # subprocess.call(ime+['set']+adbkeyboard)
+        # subprocess.call(['adb', '-s', self._serialno, 'shell', 'am', 'broadcast', '-a', 'ADB_INPUT_TEXT', '--es', 'msg', text])
+        # subprocess.call(ime+['disable']+adbkeyboard)
 
     def type(self, text):
         '''
@@ -253,7 +256,7 @@ class Device(object):
             if first:
                 first=False
             else:
-                self.adb.press('ENTER')
+                self.adbclient.press('ENTER')
             if not s:
                 continue
             self._type_raw(s)
@@ -264,8 +267,24 @@ class Device(object):
 
         @param event: string (one of MENU, HOME, BACK)
         '''
-        self.adb.shell('input keyevent '+str(event))
+        self.adbshell('input', 'keyevent', str(event))
 
+    def start_app(self, appname, activity=None):
+        '''
+        Start a program
+
+        @param extra: dict (defined in air.json)
+        '''
+        self.adbshell('am', 'start', '-s', '-N', appname+'/'+activity)
+
+    def stop_app(self, appname):
+        '''
+        Stop app
+        '''
+        self.adbshell('am', 'force-stop', appname)
+    #
+    # ------------ useless below -------------------
+    #
     def meminfo(self, appname):
         '''
         Retrive memory info for app
@@ -283,33 +302,20 @@ class Device(object):
         ncpu=self._devinfo['cpu_count']
         return total/ncpu #dict(total=total, )
 
-    def start(self, appname, extra={}):
-        '''
-        Start a program
 
-        @param extra: dict (defined in air.json)
-        '''
-        self.adb.shell('am start -S -n '+appname+'/'+extra.get('activity'))
-
-    def stop(self, appname, extra={}):
-        '''
-        Stop app
-        '''
-        self.adb.shell('am force-stop '+appname)
-
-    def clear(self, appname, extra={}):
+    def clear(self, appname):
         '''
         Stop app and clear data
         '''
-        self.adb.shell('pm clear '+appname)
+        self.adbshell('pm', 'clear', appname)
 
     def getdevinfo(self):
         # cpu
-        output = self.adb.shell('cat /proc/cpuinfo')
+        output = self.adbshell('cat', '/proc/cpuinfo')
         matches = re.compile('processor').findall(output)
         cpu_count = len(matches)
         # mem
-        output = self.adb.shell('cat /proc/meminfo')
+        output = self.adbshell('cat', '/proc/meminfo')
         match = re.compile('MemTotal:\s*(\d+)\s*kB\s*MemFree:\s*(\d+)', re.IGNORECASE).match(output)
         if match:
             mem_total = int(match.group(1), 10)>>10 # MB
@@ -323,6 +329,6 @@ class Device(object):
             'cpu_count': cpu_count,
             'mem_total': mem_total,
             'mem_free': mem_free,
-            'product_brand': self.adb.getProperty('ro.product.brand'),
-            'product_model': self.adb.getProperty('ro.product.model')
+            'product_brand': self.adbclient.getProperty('ro.product.brand'),
+            'product_model': self.adbclient.getProperty('ro.product.model')
             }
