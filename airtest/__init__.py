@@ -5,7 +5,7 @@
 #
 #__all__=['devsuit', 'android', 'image', 'base', 'patch', 'ios', 'device']
 
-__version__ = '0.9.7'
+__version__ = '0.9.8'
 
 ANDROID = 'android'
 IOS = 'ios'
