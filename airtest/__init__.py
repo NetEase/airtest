@@ -92,7 +92,8 @@ class Monitor(object):
         p = urlparse.urlparse(addr)
         exec('from .device import '+p.scheme)#, p.netloc, p.path
         module = eval(p.scheme)
-        self._m = module.Monitor(p.netloc, appname)
+        loc = p.netloc or mustOneDevice()
+        self._m = module.Monitor(loc, appname)
 
     def __getattr__(self, key):
         if hasattr(self._m, key):
@@ -156,3 +157,9 @@ def getDevices(device='android'):
             (devno, state) = ss
             result.append((devno, state))
     return result
+
+def mustOneDevice():
+    ''' make sure only one devices connected '''
+    devs = [d for d, t in getDevices() if t == 'device']
+    assert len(devs) == 1
+    return devs[0]

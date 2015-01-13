@@ -41,5 +41,5 @@ setup(
           ],
       entry_points='''
       [console_scripts]
-      air.test = airtest.cli2:main
+      air.test = airtest.console:main
       ''')

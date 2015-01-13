@@ -5,6 +5,7 @@
 basic operation for a game(like a user does)
 '''
 
+import json
 import os
 import re
 import subprocess
@@ -14,6 +15,7 @@ from functools import partial
 from com.dtmilano.android.viewclient import ViewClient 
 
 from .. import patch, base
+from .. import proto
 
 DEBUG = os.getenv("AIRDEBUG")=="true"
 log = base.getLogger('android')
@@ -86,14 +88,25 @@ class Monitor(object):
         matches = re.compile('processor').findall(output)
         return len(matches)
 
-    def cpu(self):
-        ''' cpu usage, range must be in [0, 100] '''
+    def cpu(self, percpu=False):
+        ''' cpu usage, range must be in [0, 100] '''      
         for line in StringIO.StringIO(self.adbshell('dumpsys', 'cpuinfo')):
             line = line.strip()
             # 0% 11655/im.yixin: 0% user + 0% kernel / faults: 10 minor
             if '/'+self._pkg+':' in line:
                 return float(line.split()[0][:-1])/self.ncpu()
         return None
+
+    def sys_cpu(self, percpu=False):
+        ''' use air-native '''
+        if percpu:
+            output = self.adbshell(proto.AIRNATIVE, '-q', '-runjs', 
+                'console.log(JSON.stringify(cpuPercent(300, true)))')
+            return json.loads(output)
+        else:
+            output = self.adbshell(proto.AIRNATIVE, '-q', '-runjs', 
+                'console.log(JSON.stringify(cpuPercent(300, false)))')
+            return float(output)
 
     def memory(self):
         '''

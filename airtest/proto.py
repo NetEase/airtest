@@ -4,3 +4,5 @@ TAG_FUNCTION = 'func'
 TAG_MEMORY = 'memory'
 TAG_CPU = 'cpu'
 TAG_SNAPSHOT = 'screen'
+
+AIRNATIVE = '/data/local/tmp/air-native'
