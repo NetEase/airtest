@@ -138,7 +138,7 @@ def watch(conf, package, interval, serialno, human_readable, syscpu, output_file
         package, _ = androaxml.parse_apk(apk)
 
     # app = airtest.connect(serialno, device=airtest.ANDROID, monitor=False)
-
+    airtest.connect(serialno, monitor=False)
     m = airtest.Monitor('android://'+serialno, package)
 
     # print app.dev.getdevinfo()
@@ -177,7 +177,7 @@ def watch(conf, package, interval, serialno, human_readable, syscpu, output_file
             cpustr = '|'.join([str(round(v, 2)) for v in syscpus])
             sysavg = sum(syscpus)/len(syscpus)
             values += [str(round(sysavg, 2)), cpustr]
-            
+
         print format % tuple(values)
         if outfd:
             outfd.write((format + '\n') % tuple(values))
