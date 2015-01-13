@@ -4,6 +4,14 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2015/01/13 - 0.9.9
+1. air.test watch 增加了 --syscpu选项，来导出系统cpu占用率
+	增加了SYSAVGCPU,SYSALLCPU
+
+		TIME        CPU         PSS         RSS         VSS         SYSAVGCPU   SYSALLCPU
+		15:28:34    0.025       47.3 MB     89.5 MB     965.2 MB    14.63       38.71|12.9|3.45|3.4
+		15:28:37    0.025       47.3 MB     89.5 MB     965.2 MB    13.18       0.0|3.33|10.0|39.39
+
 ### 2015/01/09 - 0.9.6
 1. 监控数据与设备控制命令分离
 	连接方式从 airtest.connect 更新成
