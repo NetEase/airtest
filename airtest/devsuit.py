@@ -11,21 +11,20 @@ from PIL import Image
 
 from . import base
 from . import proto
+from . import monitor
 from .image import auto as imtauto
 from .image import sift as imtsift
 from .image import template as imttemplate
 
-import airtest
-
 log = base.getLogger('devsuit')
 
 class DeviceSuit(object):
-    def __init__(self, device, devClass, phoneno, 
+    def __init__(self, devtype, dev, 
             appname=None, logfile='log/airtest.log', monitor=True):
-        print 'DEVSUIT_SERIALNO:', phoneno
-        self.dev = devClass(phoneno)
+        # print 'DEVSUIT_SERIALNO:', phoneno
+        self.dev = dev
         self.appname = appname
-        self._device = device
+        self._devtype = devtype
         self._inside_depth = 0
         self._initWidthHeight()
 
@@ -33,7 +32,7 @@ class DeviceSuit(object):
         self._image_exts = ['.jpg', '.png']
         self._image_dirs = ['.', 'image']
         self._image_pre_search_dirs = ['image-%d_%d'%(self.width, self.height), 
-                'image-'+device]
+                'image-'+devtype]
         self._image_match_method = 'auto'
         self._threshold = 0.3 # for findImage
 
@@ -65,7 +64,7 @@ class DeviceSuit(object):
 
         # Only for android phone method=<adb|screencap>
         def _snapshot_method(method):
-            if method and self._device == 'android':
+            if method and self._devtype == 'android':
                 self.dev._snapshot_method = method
         self._snapshot_method = _snapshot_method
         #-- end of func setting
@@ -96,7 +95,7 @@ class DeviceSuit(object):
             cpuinfo = self.dev.cpuinfo(self.appname)
             self.log(proto.TAG_CPU, cpuinfo)
 
-        self.monitor = airtest.monitor.Monitor()
+        self.monitor = monitor.Monitor()
         self.monitor.addfunc(_cpu_mem_monitor)
         self.monitor._cycle = 5.0 # the default value
 
@@ -134,9 +133,10 @@ class DeviceSuit(object):
             points.sort(cmp=m[sort])
         return points
 
+    # FIXME(ssx): use rotation func + patch.run_once instead initial
     def _initWidthHeight(self):
         w, h = self.dev.shape()
-        if self._device != 'windows':
+        if self._devtype != 'windows':
             self.width = min(w, h)
             self.height = max(w, h)
         else:
@@ -147,7 +147,7 @@ class DeviceSuit(object):
         '''
         @return UP|RIGHT|DOWN|LEFT
         '''
-        if self._device == 'windows':
+        if self._devtype == 'windows':
             return 'UP'
         rotation = self._rotation
         if not rotation:
@@ -211,7 +211,7 @@ class DeviceSuit(object):
 
         self.dev.snapshot(filename)
 
-        if self._device == 'windows':
+        if self._devtype == 'windows':
             return filename
         rotation = self._getRotation()
         # the origin screenshot is UP, so need to rotate it here for human

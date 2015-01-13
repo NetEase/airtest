@@ -182,12 +182,11 @@ class Device(object):
 
         width, height = self.shape()
         width, height = min(width, height), max(width, height)
-        self._airnative = '/data/local/tmp/air-native'
 
         # install air-native
         airnative = os.path.join(__dir__, '../binfiles/air-native')
-        self.adb('push', airnative, self._airnative)
-        self.adbshell('chmod', '755', self._airnative)
+        self.adb('push', airnative, proto.AIRNATIVE)
+        self.adbshell('chmod', '755', proto.AIRNATIVE)
 
         self._init_adbinput()
 
@@ -217,14 +216,14 @@ class Device(object):
         same as adb -s ${SERIALNO} shell input tap x y
         '''
         assert duration >= 0
-        self.adbshell(self._airnative, '-runjs', 'tap({x}, {y}, {dur})'.format(
+        self.adbshell(proto.AIRNATIVE, '-runjs', 'tap({x}, {y}, {dur})'.format(
             x=x, y=y, dur=int(duration*1000)))
 
     def drag(self, (x0, y0), (x1, y1), duration=0.5):
         '''
         Drap screen
         '''
-        self.adbshell(self._airnative, '-runjs', 'drag({x0}, {y0}, {x1}, {y1}, {steps}, {dur})'.format(
+        self.adbshell(proto.AIRNATIVE, '-runjs', 'drag({x0}, {y0}, {x1}, {y1}, {steps}, {dur})'.format(
             x0=x0, y0=y0, x1=x1, y1=y1, steps=10, dur=int(duration*1000)))
         # self.adb.drag((x0, y0), (x1, y1), duration)
 

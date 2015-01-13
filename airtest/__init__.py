@@ -5,7 +5,7 @@
 #
 #__all__=['devsuit', 'android', 'image', 'base', 'patch', 'ios', 'device']
 
-__version__ = '0.9.9'
+__version__ = '0.9.10'
 
 ANDROID = 'android'
 IOS = 'ios'
@@ -13,17 +13,14 @@ WINDOWS='windows'
 
 ANDROIDWIFI = 'androidwifi'
 
-EV_DOWN = 'down'
-EV_UP = 'up'
-EV_DOWN_AND_UP = 'down_and_up'
-
 import os
 import json
 import subprocess
-import signal, sys
+import signal
+import sys
 
 # just import
-import monitor
+# import monitor
 
 def _sig_handler(signum, frame):
     print >>sys.stderr, 'Signal INT catched !!!'
@@ -81,18 +78,30 @@ def stop(devno, device=None):
 ## ----------------------------------------------------------
 #
 
+def _parse_addr(addr):
+    '''
+    通过 proto://url 拿到相应的模块和地址
+    '''
+    import urlparse
+    p = urlparse.urlparse(addr)
+    exec('from .device import '+p.scheme)#, p.netloc, p.path
+    module = eval(p.scheme)
+    # 自动查找设备
+    loc = p.netloc
+    if p.scheme == 'android' and not loc:
+        loc = mustOneDevice()
+    return module, loc, p
+
 class Monitor(object):
     '''
     Create a new monitor
-    @addr: eg: android://<serialno>  or ios://127.0.0.1
-    @appname: android package name or ios bundle id
     '''
     def __init__(self, addr, appname):
-        import urlparse
-        p = urlparse.urlparse(addr)
-        exec('from .device import '+p.scheme)#, p.netloc, p.path
-        module = eval(p.scheme)
-        loc = p.netloc or mustOneDevice()
+        '''
+        @addr: eg: android://<serialno>  or ios://127.0.0.1
+        @appname: android package name or ios bundle id
+        '''
+        module, loc, _ = _parse_addr(addr)
         self._m = module.Monitor(loc, appname)
 
     def __getattr__(self, key):
@@ -100,10 +109,55 @@ class Monitor(object):
             return getattr(self._m, key)
         raise AttributeError('Monitor object has no attribute "%s"' % key)
 
-    def watch(self):
+    # def watch(self, interval=3.0, threading_lock=None, outfd=sys.stdout):
+    #     if threading_lock: threading_lock.acquire()
+    #     if threading_lock: threading_lock.release()
+
+class Device(object):
+    '''
+    Create a new device instance and use this instance to control device
+    '''
+    def __init__(self, addr, logfile=None):
+        '''
+        @addr: eg: android://<serialno> or ios://127.0.0.1
+        '''
+        module, loc, p = _parse_addr(addr)
+        dev = module.Device(loc)
+        self._m = devsuit.DeviceSuit(p.scheme, dev, appname=None, logfile=logfile, monitor=False)
+
+    def __getattr__(self, key):
+        if hasattr(self._m, key):
+            return getattr(self._m, key)
+        raise AttributeError('Monitor object has no attribute "%s"' % key)
+
+class _JoinClass(object):
+    def __init__(self, clss):
+        ''' clss ~ list:classes '''
+        self._clss = clss
+    def __getattr__(self, key):
+        for cl in self._clss:
+            if hasattr(cl, key):
+                return getattr(cl, key)
+        raise AttributeError('Object has no attribute "%s"' % key)
+
+def connect2(addr, appname=None, monitor=True, interval=3.0, logfile='log/airtest.log'):
+    clss = []
+    if appname:
+        m = Monitor(addr, appname)
+        clss.append(m)
+    clss.append(Device(addr, logfile))
+    c = _JoinClass(clss)
+    def _start_monitor():
+        print 'start monitor'
         pass
+    def _stop_monitor():
+        print 'stop monitor'
+        pass
+    c.startMonitor = _start_monitor
+    c.stopMonitor = _stop_monitor
+    return c
 
-
+# def conn()
 def connect(devno=None, appname=None, device=None, monitor=True, logfile='log/airtest.log'):
     '''
     Connect device
@@ -141,7 +195,7 @@ def connect(devno=None, appname=None, device=None, monitor=True, logfile='log/ai
     else:
         raise RuntimeError('device type not recognize')
 
-    return devsuit.DeviceSuit(device, devClass, devno, 
+    return devsuit.DeviceSuit(device, devClass(devno), 
             appname=appname, logfile=logfile, monitor=monitor)
 
 def getDevices(device='android'):
