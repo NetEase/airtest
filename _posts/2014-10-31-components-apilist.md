@@ -8,6 +8,8 @@ permalink: /components/apilist.html
 
 	easy_install --upgrade androidviewclient
 
+adb也同时需要更新到1.0.32
+
 装完后，下面的代码应该是可以顺利运行的
 
 	import airtest
@@ -51,12 +53,15 @@ airtest主要由两个类组成
 
 	connect的函数是这样定义的。
 
-		def connect(devno, appname=None, dtype='android', 
+		def connect(addr, appname=None, device=None,
 				monitor=True, interval=3.0, logfile='log/airtest.log')
 
-	调用的例子（保持这种也是为了和过去的用法兼容，不想让用户改来改去）
+	调用的例子（保持这种也是为了和过去的用法兼容，不过还是要修改一点)
 
-		app = airtest.connect('uubbff', 'com.netease.test', 'android', monitor=False)
+	原来的 `airtest.connect('ubbff', appname='com.netease.test', device='android')`
+	同时也支持 `airtest.connect('android://uubbff', 'com.netease.test')`
+
+		app = airtest.connect('android://uubbff', 'com.netease.test', 'android', monitor=False)
 		print app.cpu()
 		app.click(u'start.png')
 
@@ -93,7 +98,7 @@ airtest主要由两个类组成
 #### sys_cpu(percpu:bool(False))
 只android上有。 获取系统的cpu占用率
 
-* percpu=false的时候，返回一个float值 [0, 100.0]
+* percpu=false的时候，返回一个float值，范围 [0, 100.0]
 * percpu=true 的时候，返回一个list列表, eg `[30.0, 20.1, 40, 80.0]`
 
 #### pid()
