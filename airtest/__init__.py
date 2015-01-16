@@ -5,7 +5,7 @@
 #
 #__all__=['devsuit', 'android', 'image', 'base', 'patch', 'ios', 'device']
 
-__version__ = '0.9.10'
+__version__ = '0.9.11'
 
 ANDROID = 'android'
 IOS = 'ios'
@@ -19,6 +19,9 @@ import subprocess
 import signal
 import sys
 
+from . import patch
+from . import proto
+from . import cron
 # just import
 # import monitor
 
@@ -109,7 +112,8 @@ class Monitor(object):
             return getattr(self._m, key)
         raise AttributeError('Monitor object has no attribute "%s"' % key)
 
-    # def watch(self, interval=3.0, threading_lock=None, outfd=sys.stdout):
+    def watch(self, interval=3.0, outfd=sys.stdout):
+        pass
     #     if threading_lock: threading_lock.acquire()
     #     if threading_lock: threading_lock.release()
 
@@ -142,19 +146,38 @@ class _JoinClass(object):
 
 def connect2(addr, appname=None, monitor=True, interval=3.0, logfile='log/airtest.log'):
     clss = []
+    dev = Device(addr, logfile)
+    clss.append(dev)
+
     if appname:
         m = Monitor(addr, appname)
         clss.append(m)
-    clss.append(Device(addr, logfile))
+
     c = _JoinClass(clss)
-    def _start_monitor():
-        print 'start monitor'
-        pass
-    def _stop_monitor():
+
+    @patch.attachmethod(c)
+    def logPerformance(self):
+        if not hasattr(m, 'cpu'):
+            return
+        print m.cpu()
+        dev.log(proto.TAG_CPU, m.cpu())
+        dev.log(proto.TAG_MEMORY, m.memory())
+
+    @patch.attachmethod(c)
+    def startMonitor(self):
+        c.cron.start()
+
+    @patch.attachmethod(c)
+    def stopMonitor(self):
+        c.cron.stop()
         print 'stop monitor'
-        pass
-    c.startMonitor = _start_monitor
-    c.stopMonitor = _stop_monitor
+
+    c.cron = cron.Crontab()
+    c.cron.addfunc(c.logPerformance)
+
+    if monitor:
+        c.startMonitor()
+    
     return c
 
 # def conn()
@@ -215,5 +238,8 @@ def getDevices(device='android'):
 def mustOneDevice():
     ''' make sure only one devices connected '''
     devs = [d for d, t in getDevices() if t == 'device']
-    assert len(devs) == 1
+    if len(devs) == 0:
+        raise RuntimeError('no device connected')
+    if len(devs) > 1:
+        raise RuntimeError('must specify one device')
     return devs[0]

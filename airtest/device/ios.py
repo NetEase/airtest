@@ -6,14 +6,11 @@ basic operation for a game(like a user does)
 '''
 
 import subprocess
-import paramiko
 import logging
-
 
 from airtest import base
 from appium import webdriver
 from PIL import Image
-# from functools import partial
 
 from .. import patch
  
@@ -22,6 +19,11 @@ logging.getLogger("paramiko").setLevel(logging.WARNING)
 
 class Monitor(object):
     def __init__(self, ip, appname):
+        try:
+            import paramiko
+        except:
+            raise RuntimeError("Require python-lib 'paramiko' installed")
+
         self._ssh = paramiko.client.SSHClient()
         self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self._ssh.connect(ip, username='root', password='alpine')
@@ -65,11 +67,11 @@ class Monitor(object):
         return dict(VSS=int(vss), RSS=int(rss), PMEM=float(pmem))
 
 
-
-#@implementer(interface.IDevice)
 class Device(object):
-    def __init__(self, serialno=None):
-        self.url = 'http://127.0.0.1:4723/wd/hub'
+    def __init__(self, addr=None):
+        if not addr:
+            addr = '127.0.0.1'
+        self.url = 'http://%s:4723/wd/hub' % addr
         self.driver = webdriver.Remote(
             command_executor=self.url,
             desired_capabilities={
@@ -170,23 +172,6 @@ class Device(object):
         @param text: string (text want to type)
         '''
         print "not provided yet on ios"
-
-    def getMem(self, appname):
-        print "not provided yet on ios"
-        return {}
-
-    def getCpu(self, appname):
-        print "not provided yet on ios"
-        return 0.0
-    
-    def getdevinfo(self):
-        return {
-                'mem_free': 0,
-                'mem_total': 1,
-                'cpu_count': 2,
-                'product_model': 'ios',
-                'product_brand': 'ios',
-                }
 
 if __name__ == '__main__':
     d = Device()

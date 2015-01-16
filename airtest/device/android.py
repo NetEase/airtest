@@ -227,10 +227,21 @@ class Device(object):
             x0=x0, y0=y0, x1=x1, y1=y1, steps=10, dur=int(duration*1000)))
         # self.adb.drag((x0, y0), (x1, y1), duration)
 
-    @patch.run_once
+    def rotation(self):
+        '''
+        dumpsys ref: http://imsardine.simplbug.com/note/android/adb/commands/dumpsys.html
+        '''
+        patten = re.compile('SurfaceOrientation:\s+(\d+)')
+        output = self.adbshell('dumpsys', 'input')
+        match = patten.search(output)
+        if match:
+            return int(match.group(1))
+        return proto.ROTATION_0
+        # return self.adbclient.getProperty('display.orientation')
+
     def shape(self):
         ''' 
-        Get screen width and height 
+        Get screen width and height, when landscape width > height
         '''
         width = self.adbclient.getProperty("display.width")
         height = self.adbclient.getProperty("display.height")
@@ -281,13 +292,13 @@ class Device(object):
         '''
         self.adbshell('input', 'keyevent', str(event))
 
-    def start_app(self, appname, activity=None):
+    def start_app(self, appname, activity):
         '''
         Start a program
 
         @param extra: dict (defined in air.json)
         '''
-        self.adbshell('am', 'start', '-s', '-N', appname+'/'+activity)
+        self.adbshell('am', 'start', '-n', appname+'/'+activity)
 
     def stop_app(self, appname):
         '''

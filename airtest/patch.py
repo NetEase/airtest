@@ -10,6 +10,22 @@ from airtest import base
 
 log = base.getLogger('patch')
 
+def thread_safe(f):
+    '''
+    add thread lock for function
+
+    @thread_safe
+    def sayhi(name):
+        print 'Hi', name
+    '''
+    lock = threading.Lock()
+    def wrapper(*args, **kwargs):
+        lock.acquire()
+        ret = f(*args, **kwargs)
+        lock.release()
+        return ret
+    return wrapper
+
 def run_once(f):
     ''' 
     Decorator: Make sure function only call once
@@ -31,6 +47,21 @@ def run_once(f):
     return wrapper
 
 def attachmethod(target):
+    '''
+    Reference: https://blog.tonyseek.com/post/open-class-in-python/
+
+    class Spam(object):
+        pass
+
+    @attach_method(Spam)
+    def egg1(self, name):
+        print((self, name))
+
+    spam1 = Spam()
+    # OpenClass 加入的方法 egg1 可用
+    spam1.egg1("Test1")
+    # 输出Test1
+    '''
     if isinstance(target, type):
         def decorator(func):
             setattr(target, func.__name__, func)

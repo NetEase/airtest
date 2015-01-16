@@ -7,12 +7,15 @@ import platform
 import time
 import threading
 import json
-from PIL import Image
+
+import cv2
+import aircv as ac
 
 from . import base
 from . import proto
 from . import monitor
-from .image import auto as imtauto
+from . import patch
+# from .image import auto as imtauto
 from .image import sift as imtsift
 from .image import template as imttemplate
 
@@ -46,6 +49,7 @@ class DeviceSuit(object):
         self._keep_capture = False # for func:keepScreen,releaseScreen
         self._logfile = logfile
         self._loglock = threading.Lock()
+        self._operation_mark = False
 
         logdir = os.path.dirname(logfile) or '.'
         if not os.path.exists(logdir):
@@ -102,14 +106,18 @@ class DeviceSuit(object):
     def _imfind(self, bgimg, search):
         method = self._image_match_method
         if method == 'auto':
-            point = imtauto.locate_one_image(bgimg, search, threshold=self._threshold)
+            imsrc = ac.imread(bgimg)
+            imsch = ac.imread(search)
+            point = ac.find(imsrc, imsch)
+
+            # point = imtauto.locate_one_image(bgimg, search, threshold=self._threshold)
         elif method == 'template':
             point = imttemplate.find(search, bgimg, self._threshold)
         elif method == 'sift':
             point = imtsift.find(search, bgimg)
         else:
             raise RuntimeError("Unknown image match method: %s" %(method))
-        print 'find method=', method
+        print 'match-method:', method
         return point
 
     def _imfindall(self, bgimg, search, maxcnt, sort):
@@ -117,7 +125,10 @@ class DeviceSuit(object):
             maxcnt = 0
         method = self._image_match_method
         if method == 'auto':
-            points = imtauto.locate_more_image_Template(search, bgimg, num=maxcnt)
+            imsrc = ac.imread(bgimg)
+            imsch = ac.imread(search)
+            points = ac.find_all(imsrc, imsch, maxcnt=5)
+            # points = imtauto.locate_more_image_Template(search, bgimg, num=maxcnt)
         elif method == 'template':
             points = imttemplate.findall(search, bgimg, self._threshold, maxcnt=maxcnt)
         elif method == 'sift':
@@ -143,33 +154,58 @@ class DeviceSuit(object):
             self.width = w
             self.height = h
 
-    def _getRotation(self):
+    def rotation(self):
         '''
-        @return UP|RIGHT|DOWN|LEFT
+        device orientation
+        @return int
         '''
+        # 通过globalSet设置的rotation
+        if self._rotation:
+            return self.rotation
+        # windows上的特殊处理
         if self._devtype == 'windows':
-            return 'UP'
-        rotation = self._rotation
-        if not rotation:
-            (w, h) = self.dev.shape() # when rotate w > h
-            if w != self.width:
-                rotation = 'RIGHT'
-            else:
-                rotation = 'UP'
-        return rotation
+            return proto.ROTATION_0
+        # 看dev是否有rotation方法
+        if hasattr(self.dev, 'orientation'):
+            return self.dev.orientation()
+        # 判断下shape的宽高，来猜测旋转方向
+        w, h = self.dev.shape()
+        if w > h:
+            return proto.ROTATION_90
+        else:
+            return proto.ROTATION_0
+
+    # def _getRotation(self):
+    #     '''
+    #     @return UP|RIGHT|DOWN|LEFT
+    #     '''
+    #     if self._devtype == 'windows':
+    #         return 'UP'
+    #     rotation = self._rotation
+    #     if not rotation:
+    #         (w, h) = self.dev.shape() # when rotate w > h
+    #         if w != self.width:
+    #             rotation = 'RIGHT'
+    #         else:
+    #             rotation = 'UP'
+    #     return rotation
 
     def _fixPoint(self, (x, y)):
-        width, height = self.width, self.height
-        rotation = self._getRotation()
-        if rotation in ('RIGHT', 'LEFT'):
-            width, height = max(height,width), min(height,width) # adjust width > height
+        # width, height = self.width, self.height
+        w, h = self.shape()
+        if self.rotation() % 2 == 1:
+            w, h = h, w
+
+        # rotation = self._getRotation()
+        # if rotation in ('RIGHT', 'LEFT'):
+            # width, height = max(height,width), min(height,width) # adjust width > height
         if isinstance(x, float) and x <= 1.0:
-            x = int(width*x)
+            x = int(w*x)
         if isinstance(y, float) and y <= 1.0:
-            y = int(height*y)
+            y = int(h*y)
         return (x, y)
 
-    def _search_image(self, filename):
+    def _searchImage(self, filename):
         ''' Search image in default path '''
         if isinstance(filename, unicode) and platform.system() == 'Windows':
             filename = filename.encode('gbk')
@@ -209,15 +245,9 @@ class DeviceSuit(object):
         if not os.path.exists(parent_dir):
             base.makedirs(parent_dir)
 
+        # FIXME(ssx): don't save as file, better store in memory
         self.dev.snapshot(filename)
 
-        if self._devtype == 'windows':
-            return filename
-        rotation = self._getRotation()
-        # the origin screenshot is UP, so need to rotate it here for human
-        if rotation != 'UP':
-            angle = dict(RIGHT=Image.ROTATE_90, LEFT=Image.ROTATE_270).get(rotation)
-            Image.open(filename).transpose(angle).save(filename)
         if tempdir:
             self.log(proto.TAG_SNAPSHOT, dict(filename=filename))
         self._snapshot_file = filename
@@ -288,27 +318,44 @@ class DeviceSuit(object):
             return getattr(self, '_'+key)
         return None
 
+    def startApp(self, appname, activity):
+        '''
+        Start app
+        '''
+        self.dev.start_app(appname, activity)
+
+    def stopApp(self, appname):
+        '''
+        Stop app
+        '''
+        self.dev.stop_app(appname)
+
     def find(self, imgfile):
         '''
         Find image position on screen
 
         @return (point founded or None if not found)
         '''
-        filepath = self._search_image(imgfile)
+        filepath = self._searchImage(imgfile)
         
         log.debug('Locate image path: %s', filepath)
         
         screen = self._saveScreen('screen-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
         if self._screen_resolution:
             # resize image
-            w, h = self._screen_resolution
-            (ratew, rateh) = self.width/float(w), self.height/float(h)
-            im = Image.open(filepath)
-            (rw, rh) = im.size
+            ow, oh = self._screen_resolution # original
+            cw, ch = self.shape() # current
+            (ratew, rateh) = cw/float(ow), ch/float(oh)
+            # (ratew, rateh) = self.width/float(w), self.height/float(h)
+            im = cv2.open(filepath, cv2.IMREAD_UNCHANGED)
+            # im = Image.open(filepath)
+            # (rw, rh) = im.s
+            nim = cv2.resize(im, (0, 0), fx=ratew, fy=rateh)
             new_name = base.random_name('resize-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
-            new_name = os.path.join(self._tmpdir, new_name)
-            im.resize((int(ratew*rw), int(rateh*rh))).save(new_name)
-            filepath = new_name
+            filepath = new_name = os.path.join(self._tmpdir, new_name)
+            nim.imwrite(new_name, nim)
+            # im.resize((int(ratew*rw), int(rateh*rh))).save(new_name)
+            # filepath = new_name
         pt = self._imfind(screen, filepath)
         return pt
 
@@ -330,12 +377,12 @@ class DeviceSuit(object):
         @return list point that found
         @warn not finished yet.
         '''
-        filepath = self._search_image(imgfile)
+        filepath = self._searchImage(imgfile)
         screen = self._saveScreen('find-XXXXXXXX.png')
         pts = self._imfindall(screen, filepath, maxcnt, sort)
         return pts
 
-    def safeWait(self, imgfile, seconds):
+    def safeWait(self, imgfile, seconds=20.0):
         '''
         Like wait, but don't raise RuntimeError
 
@@ -384,13 +431,11 @@ class DeviceSuit(object):
         self.dev.touch(x, y, duration)
         log.debug('delay after click: %.2fs' ,self._delay_after_click)
 
-        # FIXME(ssx): mark point(not tested) alse need globalSet
-        # import cv2
-        # import aircv as ac
-        # if os.path.exists(self._snapshot_file):
-        #     img = ac.imread(self._snapshot_file)
-        #     ac.mark_point(img, (x, y))
-        #     cv2.imwrite(self._snapshot_file, img)
+        # FIXME(ssx): not tested
+        if self._operation_mark and os.path.exists(self._snapshot_file):
+            img = ac.imread(self._snapshot_file)
+            ac.mark_point(img, (x, y))
+            cv2.imwrite(self._snapshot_file, img) 
 
         time.sleep(self._delay_after_click)
 
@@ -446,13 +491,14 @@ class DeviceSuit(object):
         '''
         self.dev.type(text)
 
+    @patch.run_once
     def shape(self):
         '''
         Get device shape
 
-        @return (width, height)
+        @return (width, height), width < height
         '''
-        return self.dev.shape()
+        return sorted(self.dev.shape())
 
     def keyevent(self, event):
         '''
