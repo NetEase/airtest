@@ -2,7 +2,7 @@
 title: 常见问题
 layout: post
 category: wikipedia
-permalink: /wikipedia/adb.html
+permalink: /wikipedia/question-answer.html
 ---
 
 1. 问题: `app.type`不能使用
