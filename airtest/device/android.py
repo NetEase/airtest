@@ -106,7 +106,7 @@ class Monitor(object):
         else:
             output = self.adbshell(proto.AIRNATIVE, '-q', '-runjs', 
                 'console.log(JSON.stringify(cpuPercent(300, false)))')
-            return float(output[0])
+            return json.loads(output)[0]
 
     def memory(self):
         '''
@@ -149,7 +149,6 @@ class Monitor(object):
         unit KB
         '''
         output = self.adbshell('cat', '/proc/meminfo')
-        print output
         match = re.compile('MemTotal:\s*(\d+)\s*kB\s*MemFree:\s*(\d+)', re.IGNORECASE).match(output)
         if match:
             total = int(match.group(1), 10)
