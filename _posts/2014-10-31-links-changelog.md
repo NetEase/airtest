@@ -4,6 +4,20 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2015/01/16 - 0.9.11
+1. 配置项的改动
+
+		rotation这个选项有很大的改动。 
+		从原来的
+		app.globalSet(rotation='LEFT') 
+		调整为了
+		app.globalSet(rotation=airtest.proto.ROTATION_90)
+
+2. airtest.connect重写
+3. 增加operation_mark这个选项
+4. image match 中的auto算法，改用了[aircv](https://github.com/netease/aircv)这个库
+5. 增加两个接口startApp和stopApp
+
 ### 2015/01/13 - 0.9.9
 1. air.test watch 增加了 --syscpu选项，来导出系统cpu占用率
 	增加了SYSAVGCPU,SYSALLCPU
