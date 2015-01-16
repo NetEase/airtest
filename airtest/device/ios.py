@@ -5,17 +5,17 @@
 basic operation for a game(like a user does)
 '''
 
-import subprocess
 import logging
+logging.getLogger("paramiko").setLevel(logging.WARNING)
 
-from airtest import base
+import subprocess
 from appium import webdriver
 from PIL import Image
 
+from .. import base
 from .. import patch
  
 log = base.getLogger('ios')
-logging.getLogger("paramiko").setLevel(logging.WARNING)
 
 class Monitor(object):
     def __init__(self, ip, appname):
