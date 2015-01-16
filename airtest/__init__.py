@@ -147,7 +147,7 @@ class _JoinClass(object):
 def connect(addr, appname=None, device=None, monitor=True, interval=3.0, logfile='log/airtest.log'):
     clss = []
     # compatible with old connect style
-    if not device:
+    if device:
         addr = device+'://'+addr
 
     dev = Device(addr, logfile)
