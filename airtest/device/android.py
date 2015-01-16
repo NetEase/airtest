@@ -22,55 +22,55 @@ log = base.getLogger('android')
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 
-def _get_meminfo(serialno, package):
-    '''
-    @description details view: http://my.oschina.net/goskyblue/blog/296798
+# def _get_meminfo(serialno, package):
+#     '''
+#     @description details view: http://my.oschina.net/goskyblue/blog/296798
 
-    @param package(string): android package name
-    @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
-    '''
-    command = 'adb -s %s shell ps' %(serialno)
-    output = base.check_output(command)
-    ret = {}
-    for line in str(output).splitlines():
-        if line and line.split()[-1] == package:
-            # USER PID PPID VSIZE RSS WCHAN PC NAME
-            values = line.split()
-            if values[3].isdigit() and values[4].isdigit():
-                ret.update(dict(VSS=int(values[3]), RSS=int(values[4])))
-            else:
-                ret.update(dict(VSS=-1, RSS=-1))
-            break
-    else:
-        log.error("mem get: adb shell ps error")
-        return {}
-    psscmd = 'adb -s %s shell dumpsys meminfo %s' %(serialno, package)
-    memout = base.check_output(psscmd)
-    pss = 0
-    result = re.search(r'\(Pss\):(\s+\d+)+', memout, re.M)
-    if result:
-        pss = result.group(1)
-    else:
-        result = re.search(r'TOTAL\s+(\d+)', memout, re.M)
-        if result:
-            pss = result.group(1)
-    ret.update(dict(PSS=int(pss)))
-    return ret
+#     @param package(string): android package name
+#     @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
+#     '''
+#     command = 'adb -s %s shell ps' %(serialno)
+#     output = base.check_output(command)
+#     ret = {}
+#     for line in str(output).splitlines():
+#         if line and line.split()[-1] == package:
+#             # USER PID PPID VSIZE RSS WCHAN PC NAME
+#             values = line.split()
+#             if values[3].isdigit() and values[4].isdigit():
+#                 ret.update(dict(VSS=int(values[3]), RSS=int(values[4])))
+#             else:
+#                 ret.update(dict(VSS=-1, RSS=-1))
+#             break
+#     else:
+#         log.error("mem get: adb shell ps error")
+#         return {}
+#     psscmd = 'adb -s %s shell dumpsys meminfo %s' %(serialno, package)
+#     memout = base.check_output(psscmd)
+#     pss = 0
+#     result = re.search(r'\(Pss\):(\s+\d+)+', memout, re.M)
+#     if result:
+#         pss = result.group(1)
+#     else:
+#         result = re.search(r'TOTAL\s+(\d+)', memout, re.M)
+#         if result:
+#             pss = result.group(1)
+#     ret.update(dict(PSS=int(pss)))
+    # return ret
 
-def _get_cpuinfo(serialno, package):
-    '''
-    @param package(string): android package name
-    @return float: the cpu usage
-    '''
-    command = 'adb -s %s shell dumpsys cpuinfo' % serialno
-    cpu_info = base.check_output(command).splitlines()
-    try:
-        xym_cpu = filter(lambda x: package in x, cpu_info)[0].split()[0]
-        cpu = float(xym_cpu[:-1])
-        return cpu
-    except IndexError:
-        log.error("cpu_info error")
-        return 0
+# def _get_cpuinfo(serialno, package):
+#     '''
+#     @param package(string): android package name
+#     @return float: the cpu usage
+#     '''
+#     command = 'adb -s %s shell dumpsys cpuinfo' % serialno
+#     cpu_info = base.check_output(command).splitlines()
+#     try:
+#         xym_cpu = filter(lambda x: package in x, cpu_info)[0].split()[0]
+#         cpu = float(xym_cpu[:-1])
+#         return cpu
+#     except IndexError:
+#         log.error("cpu_info error")
+#         return 0
 
 class Monitor(object):
     def __init__(self, serialno, pkgname):
@@ -162,7 +162,7 @@ class Device(object):
         self._snapshot_method = 'adb'
         print 'SerialNo:', serialno
 
-        self.adbclient, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno)
+        self.adbclient, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno, ignoreversioncheck=True)
         self.adbclient.setReconnect(True) # this way is more stable
 
         self.vc = ViewClient(self.adbclient, serialno, autodump=False)
@@ -309,50 +309,50 @@ class Device(object):
     #
     # ------------ useless below -------------------
     #
-    def meminfo(self, appname):
-        '''
-        Retrive memory info for app
-        @param package(string): android package name
-        @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
-        '''
-        return _get_meminfo(self._serialno, appname)
+    # def meminfo(self, appname):
+    #     '''
+    #     Retrive memory info for app
+    #     @param package(string): android package name
+    #     @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
+    #     '''
+    #     return _get_meminfo(self._serialno, appname)
 
-    def cpuinfo(self, appname):
-        '''
-        @param package(string): android package name
-        @return dict: {'total': float, 'average': float}
-        '''
-        total = _get_cpuinfo(self._serialno, appname)
-        ncpu=self._devinfo['cpu_count']
-        return total/ncpu #dict(total=total, )
+    # def cpuinfo(self, appname):
+    #     '''
+    #     @param package(string): android package name
+    #     @return dict: {'total': float, 'average': float}
+    #     '''
+    #     total = _get_cpuinfo(self._serialno, appname)
+    #     ncpu=self._devinfo['cpu_count']
+    #     return total/ncpu #dict(total=total, )
 
 
-    def clear(self, appname):
-        '''
-        Stop app and clear data
-        '''
-        self.adbshell('pm', 'clear', appname)
+    # def clear(self, appname):
+    #     '''
+    #     Stop app and clear data
+    #     '''
+    #     self.adbshell('pm', 'clear', appname)
 
-    def getdevinfo(self):
-        # cpu
-        output = self.adbshell('cat', '/proc/cpuinfo')
-        matches = re.compile('processor').findall(output)
-        cpu_count = len(matches)
-        # mem
-        output = self.adbshell('cat', '/proc/meminfo')
-        match = re.compile('MemTotal:\s*(\d+)\s*kB\s*MemFree:\s*(\d+)', re.IGNORECASE).match(output)
-        if match:
-            mem_total = int(match.group(1), 10)>>10 # MB
-            mem_free = int(match.group(2), 10)>>10
-        else:
-            mem_total = -1
-            mem_free = -1
+    # def getdevinfo(self):
+    #     # cpu
+    #     output = self.adbshell('cat', '/proc/cpuinfo')
+    #     matches = re.compile('processor').findall(output)
+    #     cpu_count = len(matches)
+    #     # mem
+    #     output = self.adbshell('cat', '/proc/meminfo')
+    #     match = re.compile('MemTotal:\s*(\d+)\s*kB\s*MemFree:\s*(\d+)', re.IGNORECASE).match(output)
+    #     if match:
+    #         mem_total = int(match.group(1), 10)>>10 # MB
+    #         mem_free = int(match.group(2), 10)>>10
+    #     else:
+    #         mem_total = -1
+    #         mem_free = -1
 
-        # brand = self.adb.getProperty('ro.product.brand')
-        return {
-            'cpu_count': cpu_count,
-            'mem_total': mem_total,
-            'mem_free': mem_free,
-            'product_brand': self.adbclient.getProperty('ro.product.brand'),
-            'product_model': self.adbclient.getProperty('ro.product.model')
-            }
+    #     # brand = self.adb.getProperty('ro.product.brand')
+    #     return {
+    #         'cpu_count': cpu_count,
+    #         'mem_total': mem_total,
+    #         'mem_free': mem_free,
+    #         'product_brand': self.adbclient.getProperty('ro.product.brand'),
+    #         'product_model': self.adbclient.getProperty('ro.product.model')
+    #         }
