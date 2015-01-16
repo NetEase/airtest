@@ -60,7 +60,7 @@ class Monitor(object):
         @description details view: http://my.oschina.net/goskyblue/blog/296798
 
         @param package(string): android package name
-        @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
+        @return dict: {'VSS', 'RSS'} (unit KB)
         '''
         output = self.sh('ps -o pmem,rss,vsz -p %d | tail -n+2' % self.pid())
         pmem, rss, vss = output.split()

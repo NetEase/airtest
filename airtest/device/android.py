@@ -169,7 +169,7 @@ class Device(object):
         self.vc = ViewClient(self.adbclient, serialno, autodump=False)
 
         def _adb(*args):
-            return subprocess.check_output(['adb', '-s', self._serialno] + list(args))
+            return subprocess.check_output(['adb', '-s', self._serialno] + list(map(str, args)))
         self.adb = _adb
         self.adbshell = partial(_adb, 'shell')
 
@@ -211,13 +211,15 @@ class Device(object):
             raise RuntimeError("No such snapshot method: [%s]" % self._snapshot_method)
 
 
-    def touch(self, x, y, duration=0.1):
+    def touch(self, x, y, duration=None):
         '''
         same as adb -s ${SERIALNO} shell input tap x y
         '''
-        assert duration >= 0
-        self.adbshell(proto.AIRNATIVE, '-runjs', 'tap({x}, {y}, {dur})'.format(
-            x=x, y=y, dur=int(duration*1000)))
+        if not duration:
+            self.adbshell('input', 'tap', x, y)
+        else:
+            self.adbshell(proto.AIRNATIVE, '-runjs', 'tap({x}, {y}, {dur})'.format(
+                x=x, y=y, dur=int(duration*1000)))
 
     def drag(self, (x0, y0), (x1, y1), duration=0.5):
         '''

@@ -13,8 +13,8 @@ import aircv as ac
 
 from . import base
 from . import proto
-from . import monitor
 from . import patch
+# from . import monitor
 # from .image import auto as imtauto
 from .image import sift as imtsift
 from .image import template as imttemplate
@@ -22,22 +22,16 @@ from .image import template as imttemplate
 log = base.getLogger('devsuit')
 
 class DeviceSuit(object):
-    def __init__(self, devtype, dev, 
-            appname=None, logfile='log/airtest.log', monitor=True):
+    def __init__(self, devtype, dev, logfile='log/airtest.log'):
         # print 'DEVSUIT_SERIALNO:', phoneno
         self.dev = dev
-        self.appname = appname
+        # self.appname = appname
         self._devtype = devtype
         self._inside_depth = 0
-        self._initWidthHeight()
 
         # default image search extentension and 
         self._image_exts = ['.jpg', '.png']
         self._image_dirs = ['.', 'image']
-        self._image_pre_search_dirs = ['image-%d_%d'%(self.width, self.height), 
-                'image-'+devtype]
-        self._image_match_method = 'auto'
-        self._threshold = 0.3 # for findImage
 
         self._rotation = None # UP,DOWN,LEFT,RIGHT
         self._tmpdir = 'tmp'
@@ -52,19 +46,15 @@ class DeviceSuit(object):
         self._operation_mark = False
 
         logdir = os.path.dirname(logfile) or '.'
+
+        self._image_match_method = 'auto'
+        self._threshold = 0.3 # for findImage
+
         if not os.path.exists(logdir):
             os.makedirs(logdir)
         if os.path.exists(logfile):
             backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
             os.rename(logfile, backfile)
-
-        #-- start of func setting
-        self._init_monitor()
-        if monitor:
-            self.monitor.start()
-        def _setinterval(x):
-            self.monitor._cycle = x
-        self._monitor_interval = _setinterval
 
         # Only for android phone method=<adb|screencap>
         def _snapshot_method(method):
@@ -89,19 +79,6 @@ class DeviceSuit(object):
                 return ret
             return _wrapper
         return v
-
-    def _init_monitor(self):
-        def _cpu_mem_monitor():
-            if not self.appname:
-                return
-            meminfo = self.dev.meminfo(self.appname)
-            self.log(proto.TAG_MEMORY, meminfo)
-            cpuinfo = self.dev.cpuinfo(self.appname)
-            self.log(proto.TAG_CPU, cpuinfo)
-
-        self.monitor = monitor.Monitor()
-        self.monitor.addfunc(_cpu_mem_monitor)
-        self.monitor._cycle = 5.0 # the default value
 
     def _imfind(self, bgimg, search):
         method = self._image_match_method
@@ -144,16 +121,6 @@ class DeviceSuit(object):
             points.sort(cmp=m[sort])
         return points
 
-    # FIXME(ssx): use rotation func + patch.run_once instead initial
-    def _initWidthHeight(self):
-        w, h = self.dev.shape()
-        if self._devtype != 'windows':
-            self.width = min(w, h)
-            self.height = max(w, h)
-        else:
-            self.width = w
-            self.height = h
-
     def rotation(self):
         '''
         device orientation
@@ -175,23 +142,7 @@ class DeviceSuit(object):
         else:
             return proto.ROTATION_0
 
-    # def _getRotation(self):
-    #     '''
-    #     @return UP|RIGHT|DOWN|LEFT
-    #     '''
-    #     if self._devtype == 'windows':
-    #         return 'UP'
-    #     rotation = self._rotation
-    #     if not rotation:
-    #         (w, h) = self.dev.shape() # when rotate w > h
-    #         if w != self.width:
-    #             rotation = 'RIGHT'
-    #         else:
-    #             rotation = 'UP'
-    #     return rotation
-
     def _fixPoint(self, (x, y)):
-        # width, height = self.width, self.height
         w, h = self.shape()
         if self.rotation() % 2 == 1:
             w, h = h, w
@@ -212,12 +163,12 @@ class DeviceSuit(object):
             #filename = filename.encode('utf-8')
         basename, ext = os.path.splitext(filename)
         exts = [ext] if ext else self._image_exts
-        for folder in self._image_pre_search_dirs + self._image_dirs:
+        for folder in self._image_dirs:
             for ext in exts:
                 fullpath = os.path.join(folder, basename+ext)
                 if os.path.exists(fullpath):
                     return fullpath
-        raise RuntimeError('Image file(%s) not found in %s' %(filename, self._image_pre_search_dirs+self._image_dirs))
+        raise RuntimeError('Image file(%s) not found in %s' %(filename, self._image_dirs))
 
     def _PS2Point(self, PS):
         '''
@@ -346,10 +297,9 @@ class DeviceSuit(object):
             ow, oh = self._screen_resolution # original
             cw, ch = self.shape() # current
             (ratew, rateh) = cw/float(ow), ch/float(oh)
-            # (ratew, rateh) = self.width/float(w), self.height/float(h)
+
             im = cv2.open(filepath, cv2.IMREAD_UNCHANGED)
-            # im = Image.open(filepath)
-            # (rw, rh) = im.s
+
             nim = cv2.resize(im, (0, 0), fx=ratew, fy=rateh)
             new_name = base.random_name('resize-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
             filepath = new_name = os.path.join(self._tmpdir, new_name)
@@ -394,7 +344,7 @@ class DeviceSuit(object):
         except:
             return None
 
-    def wait(self, imgfile, seconds=20):
+    def wait(self, imgfile, timeout=20):
         '''
         Wait until some picture exists
         @return position when imgfile shows
@@ -406,28 +356,28 @@ class DeviceSuit(object):
             pt = self.find(imgfile)
             if pt:
                 return pt
-            if time.time()-start > seconds: 
+            if time.time()-start > timeout: 
                 break
             time.sleep(1)
-        raise RuntimeError('Wait timeout(%.2f)', float(seconds))
+        raise RuntimeError('Wait timeout(%.2f)', float(timeout))
 
     def exists(self, imgfile):
         return True if self.find(imgfile) else False
 
-    def click(self, SF, seconds=None, duration=0.1):
+    def click(self, SF, timeout=None, duration=None):
         '''
         Click function
         @param seconds: float (if time not exceed, it will retry and retry)
         '''
-        if seconds == None:
-            seconds = self._click_timeout
-        log.info('CLICK %s, timeout=%.2fs, duration=%.2fs', SF, seconds, duration)
+        if timeout == None:
+            timeout = self._click_timeout
+        log.info('CLICK %s, timeout=%.2fs, duration=%s', SF, timeout, str(duration))
         point = self._PS2Point(SF)
         if point:
             (x, y) = point
         else:
-            (x, y) = self.wait(SF, seconds=seconds)
-            log.info('Click %s point: (%d, %d)', SF, x, y)
+            (x, y) = self.wait(SF, timeout=timeout)
+        log.info('Click %s point: (%d, %d)', SF, x, y)
         self.dev.touch(x, y, duration)
         log.debug('delay after click: %.2fs' ,self._delay_after_click)
 
