@@ -144,8 +144,12 @@ class _JoinClass(object):
                 return getattr(cl, key)
         raise AttributeError('Object has no attribute "%s"' % key)
 
-def connect(addr, appname=None, monitor=True, interval=3.0, logfile='log/airtest.log'):
+def connect(addr, appname=None, device=None, monitor=True, interval=3.0, logfile='log/airtest.log'):
     clss = []
+    # compatible with old connect style
+    if not device:
+        addr = device+'://'+addr
+
     dev = Device(addr, logfile)
     clss.append(dev)
 

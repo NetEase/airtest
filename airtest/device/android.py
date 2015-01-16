@@ -106,7 +106,7 @@ class Monitor(object):
         else:
             output = self.adbshell(proto.AIRNATIVE, '-q', '-runjs', 
                 'console.log(JSON.stringify(cpuPercent(300, false)))')
-            return float(output)
+            return float(output[0])
 
     def memory(self):
         '''
