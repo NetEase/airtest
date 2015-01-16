@@ -110,23 +110,26 @@ class Device(object):
         return filename
 
     def _cvtXY(self, x, y):
-        """convert x,y from device real resolution to action input resolution"""
+        '''
+        convert x,y from device real resolution to action input resolution
+        '''
         x_input = x * self._scale #self.width / self.width_real
         y_input = y * self._scale #self.height / self.height_real
         log.debug("cvt %s,%s to %s,%s" % (x, y, x_input, y_input))
-        return (int(x_input), int(y_input))
+        return map(int, (x_input, y_input))
 
-    def touch(self, x, y, duration=0.1):
+    def touch(self, x, y, duration=None):
         '''
         touch screen at (x, y)
         multi finger operation not provided yet
-        FIXME: not supported duration
         '''
+        if duration:
+            duration *= 1000
         x, y = self._cvtXY(x, y)
         log.debug('touch position %s', (x, y))
-        self.driver.tap([(x, y)])
+        self.driver.tap([(x, y)], duration)
 
-    def drag(self, (x1, y1), (x2, y2), duration=0):
+    def drag(self, (x1, y1), (x2, y2), duration=None):
         '''
         Simulate drag from (x1, y1) to (x2, y2)
         multi finger operation not provided yet
@@ -134,7 +137,8 @@ class Device(object):
         x1, y1 = self._cvtXY(x1, y1)
         x2, y2 = self._cvtXY(x2, y2)
         log.debug('drag from (%s, %s) to (%s, %s)' % (x1, y1, x2, y2))
-        duration = duration * 1000 # seconds to ms
+        if duration:
+            duration = duration * 1000 # seconds to ms
         self.driver.swipe(x1, y1, x2, y2, duration)
 
     def _getShapeReal(self):
