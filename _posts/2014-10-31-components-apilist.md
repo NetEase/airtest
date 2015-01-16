@@ -13,6 +13,8 @@ permalink: /components/apilist.html
 	import airtest
 	print airtest.__version__
 
+iOS的性能监控需要额外的一个库[paramiko](http://www.paramiko.org/installing.html)。需要该功能的话，需要首先手动安装下。
+
 ### 第一步，连接设备
 
 airtest主要由两个类组成

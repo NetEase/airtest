@@ -17,6 +17,7 @@ permalink: /changelog.html
 3. 增加operation_mark这个选项
 4. image match 中的auto算法，改用了[aircv](https://github.com/netease/aircv)这个库
 5. 增加两个接口startApp和stopApp
+6. 增加了rotation()这个接口
 
 ### 2015/01/13 - 0.9.9
 1. air.test watch 增加了 --syscpu选项，来导出系统cpu占用率
