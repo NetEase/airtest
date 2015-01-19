@@ -82,19 +82,23 @@ class DeviceSuit(object):
 
     def _imfind(self, bgimg, search):
         method = self._image_match_method
+        print 'match-method:', method
+        imsrc, imsch = ac.imread(bgimg), ac.imread(search)
         if method == 'auto':
-            imsrc = ac.imread(bgimg)
-            imsch = ac.imread(search)
             point = ac.find(imsrc, imsch)
-
             # point = imtauto.locate_one_image(bgimg, search, threshold=self._threshold)
         elif method == 'template':
-            point = imttemplate.find(search, bgimg, self._threshold)
+            # point = imttemplate.find(search, bgimg, self._threshold)
+            res = ac.find_template(imsrc, imsch, self._threshold)
+            if res:
+                point, score = res
+                print 'match result:', point, score
+            return None
+
         elif method == 'sift':
             point = imtsift.find(search, bgimg)
         else:
             raise RuntimeError("Unknown image match method: %s" %(method))
-        print 'match-method:', method
         return point
 
     def _imfindall(self, bgimg, search, maxcnt, sort):
@@ -106,11 +110,7 @@ class DeviceSuit(object):
             points = ac.find_all(imsrc, imsch, maxcnt=5)
             # points = imtauto.locate_more_image_Template(search, bgimg, num=maxcnt)
         elif method == 'template':
-            point, score = ac.find_template(imsrc, imsch)
-            print 'match-result:', point, score
-            if score < self._threshold:
-                return None
-            # points = imttemplate.findall(search, bgimg, self._threshold, maxcnt=maxcnt)
+            points = imttemplate.findall(search, bgimg, self._threshold, maxcnt=maxcnt)
         elif method == 'sift':
             points = imtsift.findall(search, bgimg, maxcnt=maxcnt)
         else:
