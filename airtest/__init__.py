@@ -18,24 +18,17 @@ import sys
 from . import patch
 from . import proto
 from . import cron
-# just import
-# import monitor
+from . import devsuit
 
 def _sig_handler(signum, frame):
     print >>sys.stderr, 'Signal INT catched !!!'
     sys.exit(1)
 signal.signal(signal.SIGINT, _sig_handler)
 
-from airtest import devsuit
-
 
 # defaultConfigFile = 'air.json'
 defaultDevice = 'android'
 
-# def _safe_load_config(cfg_file):
-#     if os.path.exists(cfg_file):
-#         return json.load(open(cfg_file))
-#     return {}
 
 # #
 # ## ==========================================================
@@ -83,6 +76,9 @@ def _parse_addr(addr):
     '''
     import urlparse
     p = urlparse.urlparse(addr)
+    if not p.scheme:
+        raise RuntimeError('device type must be specified')
+    
     exec('from .device import '+p.scheme)#, p.netloc, p.path
     module = eval(p.scheme)
     # 自动查找设备
