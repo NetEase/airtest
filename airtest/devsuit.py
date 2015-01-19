@@ -93,6 +93,7 @@ class DeviceSuit(object):
             if res:
                 point, score = res
                 print 'match result:', point, score
+                return point
             return None
 
         elif method == 'sift':

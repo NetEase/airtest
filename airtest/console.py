@@ -95,8 +95,8 @@ def snapshot(phoneno, platform, out):
 @click.option('-s', '--serialno', help='Specify which android device to connect')
 @click.argument('apk', required=False)
 def install(no_start, conf, serialno, apk):
-    apk = _get_apk(conf)
-
+    if not apk:
+        apk = _get_apk(conf)
     adbargs = ['adb']
     if serialno:
         adbargs.extend(['-s', serialno])
