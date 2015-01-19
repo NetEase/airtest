@@ -45,7 +45,6 @@ class DeviceSuit(object):
         self._loglock = threading.Lock()
         self._operation_mark = False
 
-
         self._image_match_method = 'auto'
         self._threshold = 0.3 # for findImage
 
@@ -391,10 +390,13 @@ class DeviceSuit(object):
         log.debug('delay after click: %.2fs' ,self._delay_after_click)
 
         # FIXME(ssx): not tested
-        if self._operation_mark and os.path.exists(self._snapshot_file):
-            img = ac.imread(self._snapshot_file)
-            ac.mark_point(img, (x, y))
-            cv2.imwrite(self._snapshot_file, img) 
+        if self._operation_mark:
+            if self._snapshot_file and os.path.exists(self._snapshot_file):
+                img = ac.imread(self._snapshot_file)
+                ac.mark_point(img, (x, y))
+                cv2.imwrite(self._snapshot_file, img)
+            if self._devtype == 'android':
+                self.dev.adbshell('am', 'broadcast', '-a', 'MP_POSITION', '--es', 'msg', '%d,%d'%(x, y))
 
         time.sleep(self._delay_after_click)
 
