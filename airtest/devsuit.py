@@ -45,16 +45,18 @@ class DeviceSuit(object):
         self._loglock = threading.Lock()
         self._operation_mark = False
 
-        logdir = os.path.dirname(logfile) or '.'
 
         self._image_match_method = 'auto'
         self._threshold = 0.3 # for findImage
 
-        if not os.path.exists(logdir):
-            os.makedirs(logdir)
-        if os.path.exists(logfile):
-            backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
-            os.rename(logfile, backfile)
+
+        if self._logfile:
+            logdir = os.path.dirname(logfile) or '.'
+            if not os.path.exists(logdir):
+                os.makedirs(logdir)
+            if os.path.exists(logfile):
+                backfile = logfile+'.'+time.strftime('%Y%m%d%H%M%S')
+                os.rename(logfile, backfile)
 
         # Only for android phone method=<adb|screencap>
         def _snapshot_method(method):
@@ -209,6 +211,9 @@ class DeviceSuit(object):
         return filename
 
     def log(self, tag, message):
+        if not self._logfile:
+            return
+
         self._loglock.acquire()
         timestamp = time.time()
         try:
