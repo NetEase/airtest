@@ -19,5 +19,9 @@ Python lib for **android** and **ios** app test.
 
 可以在发现了问题后，提个issue给作者。 另外一些新的思路也可以提到issue中。
 
+## 相关的项目
+1. 实现了touch,swipe,pinch <https://github.com/netease/airinput>
+2. 基于opencv的图像识别库 <https://github.com/netease/aircv>
+
 ## License
 This project is under the MIT License. See the [LICENSE](LICENSE) file for the full license text.
