@@ -9,7 +9,6 @@ import json
 import os
 import re
 import subprocess
-import string
 import StringIO
 from functools import partial
 
@@ -122,21 +121,21 @@ class Device(object):
             return subprocess.check_output(['adb', '-s', self._serialno] + list(map(str, args)))
         self.adb = _adb
         self.adbshell = partial(_adb, 'shell')
- 
+
+        # self._devinfo = self.getdevinfo()
         # try:
         #     if not self.adb.isScreenOn():
         #         self.adb.wake()
         # except:
         #     pass
 
+        # width, height = self.shape()
+        # width, height = min(width, height), max(width, height)
+
         # install air-native
         airnative = os.path.join(__dir__, '../binfiles/air-native')
-        md5sum = open(airnative+'.md5').read().strip()
-        output = self.adbshell('md5', proto.AIRNATIVE)
-        arr = string.split(output, maxsplit=1)
-        if arr and md5sum != arr[0]:
-            self.adb('push', airnative, proto.AIRNATIVE)
-            self.adbshell('chmod', '755', proto.AIRNATIVE)
+        self.adb('push', airnative, proto.AIRNATIVE)
+        self.adbshell('chmod', '755', proto.AIRNATIVE)
 
         self._init_adbinput()
 
@@ -151,15 +150,12 @@ class Device(object):
         ''' save screen snapshot '''
         if self._snapshot_method == 'adb':
             log.debug('start take snapshot(%s)'%(filename))
-            self.adbclient.display['orientation'] = self.rotation()
             pil = self.adbclient.takeSnapshot(reconnect=True)
             pil.save(filename)
         elif self._snapshot_method == 'screencap':
-            # FIXME(ssx): image not rotate
             tmpname = '/data/local/tmp/airtest-tmp-snapshot.png'
             self.adbshell('screencap', '-p', tmpname)
             self.adb('pull', tmpname, filename)
-            self.adbshell('rm', tmpname)
         else:
             raise RuntimeError("No such snapshot method: [%s]" % self._snapshot_method)
 

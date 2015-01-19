@@ -101,16 +101,13 @@ class DeviceSuit(object):
         if not maxcnt:
             maxcnt = 0
         method = self._image_match_method
-        imsrc, imsch = ac.imread(bgimg), ac.imread(search)
         if method == 'auto':
+            imsrc = ac.imread(bgimg)
+            imsch = ac.imread(search)
             points = ac.find_all(imsrc, imsch, maxcnt=5)
             # points = imtauto.locate_more_image_Template(search, bgimg, num=maxcnt)
         elif method == 'template':
-            point, score = ac.find_template(imsrc, imsch)
-            print 'match-result:', point, score
-            if score < self._threshold:
-                return None
-            # points = imttemplate.findall(search, bgimg, self._threshold, maxcnt=maxcnt)
+            points = imttemplate.findall(search, bgimg, self._threshold, maxcnt=maxcnt)
         elif method == 'sift':
             points = imtsift.findall(search, bgimg, maxcnt=maxcnt)
         else:

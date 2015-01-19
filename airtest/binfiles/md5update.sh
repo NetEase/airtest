@@ -1,1 +1,0 @@
-md5sum air-native | awk '{print $1}' > air-native.md5

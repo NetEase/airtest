@@ -78,7 +78,7 @@ def _parse_addr(addr):
     p = urlparse.urlparse(addr)
     if not p.scheme:
         raise RuntimeError('device type must be specified')
-
+    
     exec('from .device import '+p.scheme)#, p.netloc, p.path
     module = eval(p.scheme)
     # 自动查找设备
@@ -136,11 +136,11 @@ class _JoinClass(object):
                 return getattr(cl, key)
         raise AttributeError('Object has no attribute "%s"' % key)
 
-def connect(addr='', appname=None, device=None, monitor=True, interval=3.0, logfile='log/airtest.log'):
+def connect(addr, appname=None, device=None, monitor=True, interval=3.0, logfile='log/airtest.log'):
     clss = []
     # compatible with old connect style
-    if addr.find('://') == -1:
-        addr = (device or defaultDevice) +'://'+addr
+    if device:
+        addr = device+'://'+addr
 
     dev = Device(addr, logfile)
     clss.append(dev)
