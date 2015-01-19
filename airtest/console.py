@@ -138,10 +138,9 @@ def watch(conf, package, interval, serialno, human_readable, syscpu, output_file
         package, _ = androaxml.parse_apk(apk)
 
     # app = airtest.connect(serialno, device=airtest.ANDROID, monitor=False)
-    airtest.connect(serialno, monitor=False)
+    airtest.connect('android://'+serialno)
     m = airtest.Monitor('android://'+serialno, package)
 
-    # print app.dev.getdevinfo()
     outfd = None
     if output_file:
         outfd = open(output_file, 'w')
@@ -204,10 +203,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-################################################################
-
-# if __name__ == '__main__':
-#     try:
-#         main()
-#     except KeyboardInterrupt:
-#         print 'Exited by user'

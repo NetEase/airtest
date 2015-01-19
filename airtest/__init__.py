@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#coding: utf-8
-#
-#__all__=['devsuit', 'android', 'image', 'base', 'patch', 'ios', 'device']
-
-__version__ = '0.9.12'
+__version__ = '0.9.13'
 
 ANDROID = 'android'
 IOS = 'ios'
@@ -153,6 +149,7 @@ def connect(addr, appname=None, device=None, monitor=True, interval=3.0, logfile
     dev = Device(addr, logfile)
     clss.append(dev)
 
+    m = None
     if appname:
         m = Monitor(addr, appname)
         clss.append(m)

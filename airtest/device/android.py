@@ -22,56 +22,6 @@ log = base.getLogger('android')
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 
-# def _get_meminfo(serialno, package):
-#     '''
-#     @description details view: http://my.oschina.net/goskyblue/blog/296798
-
-#     @param package(string): android package name
-#     @return dict: {'VSS', 'RSS', 'PSS'} (unit KB)
-#     '''
-#     command = 'adb -s %s shell ps' %(serialno)
-#     output = base.check_output(command)
-#     ret = {}
-#     for line in str(output).splitlines():
-#         if line and line.split()[-1] == package:
-#             # USER PID PPID VSIZE RSS WCHAN PC NAME
-#             values = line.split()
-#             if values[3].isdigit() and values[4].isdigit():
-#                 ret.update(dict(VSS=int(values[3]), RSS=int(values[4])))
-#             else:
-#                 ret.update(dict(VSS=-1, RSS=-1))
-#             break
-#     else:
-#         log.error("mem get: adb shell ps error")
-#         return {}
-#     psscmd = 'adb -s %s shell dumpsys meminfo %s' %(serialno, package)
-#     memout = base.check_output(psscmd)
-#     pss = 0
-#     result = re.search(r'\(Pss\):(\s+\d+)+', memout, re.M)
-#     if result:
-#         pss = result.group(1)
-#     else:
-#         result = re.search(r'TOTAL\s+(\d+)', memout, re.M)
-#         if result:
-#             pss = result.group(1)
-#     ret.update(dict(PSS=int(pss)))
-    # return ret
-
-# def _get_cpuinfo(serialno, package):
-#     '''
-#     @param package(string): android package name
-#     @return float: the cpu usage
-#     '''
-#     command = 'adb -s %s shell dumpsys cpuinfo' % serialno
-#     cpu_info = base.check_output(command).splitlines()
-#     try:
-#         xym_cpu = filter(lambda x: package in x, cpu_info)[0].split()[0]
-#         cpu = float(xym_cpu[:-1])
-#         return cpu
-#     except IndexError:
-#         log.error("cpu_info error")
-#         return 0
-
 class Monitor(object):
     def __init__(self, serialno, pkgname):
         self._sno = serialno 
@@ -172,15 +122,15 @@ class Device(object):
         self.adb = _adb
         self.adbshell = partial(_adb, 'shell')
 
-        self._devinfo = self.getdevinfo()
+        # self._devinfo = self.getdevinfo()
         # try:
         #     if not self.adb.isScreenOn():
         #         self.adb.wake()
         # except:
         #     pass
 
-        width, height = self.shape()
-        width, height = min(width, height), max(width, height)
+        # width, height = self.shape()
+        # width, height = min(width, height), max(width, height)
 
         # install air-native
         airnative = os.path.join(__dir__, '../binfiles/air-native')
