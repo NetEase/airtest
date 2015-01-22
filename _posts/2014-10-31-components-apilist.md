@@ -38,7 +38,7 @@ airtest主要由两个类组成
 2. **Device**: 包含操作类相关的接口
 	参数类似Monitor，但是只有第一个参数。
 
-	连接android设备
+	连接android设备, 如果没有指定serialno的话，airtest还会从环境变量`AIRTEST_SERIALNO`去尝试获取
 
 		dev = airtest.Device('android://uubbff')
 

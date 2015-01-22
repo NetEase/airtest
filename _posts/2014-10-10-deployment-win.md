@@ -41,5 +41,8 @@ adb介绍: <http://developer.android.com/tools/help/adb.html>
 
         pip install -U git+https://github.com/netease/airtest.git
 
+	或者
 
-
+		git clone https://github.com/netease/airtest.git
+		cd airtest
+		python setup.py install
