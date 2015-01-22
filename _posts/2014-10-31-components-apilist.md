@@ -120,7 +120,7 @@ ios的则是, 少了个PSS
 
 数据返回 example
 
-	{'TOTAL': 221142, 'FREE': 81912}
+	{'TOTAL': 2048, 'FREE': 123}
 
 #### battery()
 借助了`adb shell dumpsys battery`，目前ios还没有 *0.9.14版本开始引入到android*
