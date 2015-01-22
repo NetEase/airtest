@@ -111,7 +111,6 @@ class Monitor(object):
         ret.update(dict(PSS=int(pss)))
         return ret
 
-    @patch.run_once
     def sys_memory(self):
         '''
         unit KB
