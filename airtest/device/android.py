@@ -23,6 +23,13 @@ log = base.getLogger('android')
 
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 
+def str2any(s):
+    if s.isdigit():
+        return int(s)
+    if s.lower() == 'true' or s.lower() == 'false':
+        return s.lower() == 'true'
+    return s
+
 class Monitor(object):
     def __init__(self, serialno, pkgname):
         self._sno = serialno 
@@ -58,6 +65,16 @@ class Monitor(object):
             output = self.adbshell(proto.AIRNATIVE, '-q', '-runjs', 
                 'console.log(JSON.stringify(cpuPercent(300, false)))')
             return json.loads(output)[0]
+
+    def battery(self):
+        ''' use: adb shell dumpsys battery '''
+        output = self.adbshell('dumpsys', 'battery')
+        output = output[output.find('\n'):] # ignore the first line
+        patten = re.compile('(\w[\w ]+):\s*([-\w\d]+)')
+        ret = {}
+        for key, val in patten.findall(output):
+            ret[key] = str2any(val)
+        return ret
 
     def memory(self):
         '''

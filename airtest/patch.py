@@ -6,7 +6,7 @@ import threading
 
 from functools import partial
 
-from airtest import base
+from . import base
 
 log = base.getLogger('patch')
 

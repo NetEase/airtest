@@ -6,7 +6,7 @@ sys.path.insert(0,'/usr/lib/pyshared/python2.7')
 
 from setuptools import setup, find_packages
 
-import airtest
+from airtest import __version__
 
 long_description = ''
 try:
@@ -17,7 +17,7 @@ except:
 
 setup(
       name='airtest',
-      version=airtest.__version__,
+      version=__version__,
       description='mobile test(black air) python lib',
       long_description=long_description,
 

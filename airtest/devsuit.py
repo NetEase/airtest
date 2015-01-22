@@ -306,12 +306,12 @@ class DeviceSuit(object):
             cw, ch = self.shape() # current
             (ratew, rateh) = cw/float(ow), ch/float(oh)
 
-            im = cv2.open(filepath, cv2.IMREAD_UNCHANGED)
+            im = cv2.imread(filepath, cv2.IMREAD_UNCHANGED)
 
             nim = cv2.resize(im, (0, 0), fx=ratew, fy=rateh)
             new_name = base.random_name('resize-{t}-XXXX.png'.format(t=time.strftime("%y%m%d%H%M%S")))
             filepath = new_name = os.path.join(self._tmpdir, new_name)
-            nim.imwrite(new_name, nim)
+            cv2.imwrite(new_name, nim)
             # im.resize((int(ratew*rw), int(rateh*rh))).save(new_name)
             # filepath = new_name
         pt = self._imfind(screen, filepath)

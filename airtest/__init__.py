@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = '0.9.13'
+__version__ = '0.9.14'
 
 ANDROID = 'android'
 IOS = 'ios'
@@ -14,11 +14,11 @@ ANDROIDWIFI = 'androidwifi'
 import subprocess
 import signal
 import sys
+import os
 
 from . import patch
 from . import proto
 from . import cron
-from . import devsuit
 
 def _sig_handler(signum, frame):
     print >>sys.stderr, 'Signal INT catched !!!'
@@ -79,6 +79,7 @@ def _parse_addr(addr):
     if not p.scheme:
         raise RuntimeError('device type must be specified')
 
+    # FIXME(ssx): better change to __import__
     exec('from .device import '+p.scheme)#, p.netloc, p.path
     module = eval(p.scheme)
     # 自动查找设备
@@ -117,6 +118,7 @@ class Device(object):
         '''
         @addr: eg: android://<serialno> or ios://127.0.0.1
         '''
+        from . import devsuit
         module, loc, p = _parse_addr(addr)
         dev = module.Device(loc)
         self._m = devsuit.DeviceSuit(p.scheme, dev, logfile=logfile)
@@ -235,6 +237,10 @@ def getDevices(device='android'):
 
 def mustOneDevice():
     ''' make sure only one devices connected '''
+    serialno = os.getenv(proto.ENV_SERIALNO)
+    if serialno:
+        return serialno
+
     devs = [d for d, t in getDevices() if t == 'device']
     if len(devs) == 0:
         raise RuntimeError('no device connected')
