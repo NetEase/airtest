@@ -122,7 +122,7 @@ ios的则是, 少了个PSS
 
 	{'TOTAL': 221142, 'FREE': 81912}
 
-#### bettery()
+#### battery()
 借助了`adb shell dumpsys battery`，目前ios还没有 *0.9.14版本开始引入到android*
 
 一个返回值的例子, 详细的介绍可以看这里<http://imsardine.simplbug.com/note/android/adb/commands/dumpsys-battery.html>
