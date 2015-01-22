@@ -4,6 +4,12 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2015/01/22 - 0.9.14
+1. android-Monitor添加了battery()
+
+### 2015/01/22 - 0.9.13
+1. bug好多，修复了一堆
+
 ### 2015/01/16 - 0.9.11
 1. 配置项的改动
 

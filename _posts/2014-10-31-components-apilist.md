@@ -115,6 +115,33 @@ ios的则是, 少了个PSS
 
 	{"VSS": 1051236, "RSS": 170048}
 
+#### sys_memory()
+获取系统当前内存(单位KB)， ios还没有
+
+数据返回 example
+
+	{'TOTAL': 221142, 'FREE': 81912}
+
+#### bettery()
+借助了`adb shell dumpsys battery`，目前ios还没有 *0.9.14版本开始引入到android*
+
+一个返回值的例子, 详细的介绍可以看这里<http://imsardine.simplbug.com/note/android/adb/commands/dumpsys-battery.html>
+
+	{
+		'status': 2,  // 1:unknown, 2:charging, 3:discharning, 4:notcharning, 5:full
+		'scale': 100,  // 和level一起看
+		'temperature': 265, // 代表26.5摄氏度
+		'level': 8, // 属于电量百分比 = level / scale * 100 = 8%
+		'AC powered': False,  // 交流电
+		'health': 2, // 1:unknown, 2:good, 3:overheat 4:dead 5:over_voltage, 6:unspecified_failure 7:cold
+		'voltage': 3757, // 当前电压 millivolts,mV 毫伏 3.737V
+		'Wireless powered': False, // 这个太高端，不解释了
+		'USB powered': True, // USB充电？
+		'technology': 'Li-ion', // 电池类型
+		'present': True // 表示电池是否在手机里
+	}
+
+
 ### 分类：Device接口
 ![rotation]({{site.baseurl}}/static/img/device.png)
 API比较多，如果遇到接口问题。请反馈到 <https://github.com/netease/airtest/issues>
