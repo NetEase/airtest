@@ -16,23 +16,18 @@ permalink: /overview/quick_start.html
 
 3. 打开flappybird中的main.py文件，中有几行代码是
 
-        devnum  = os.getenv('AIRTEST_DEVNO') or '4d005f1f9df03107'
-        appname = os.getenv('AIRTEST_APPNAME') or 'com.dotgears.flappybird'
-        device  = os.getenv('AIRTEST_DEVICE') or airtest.ANDROID
+		serialno = '' # 如果只有一个设备时可以空的
+        appname = 'com.dotgears.flappybird'
 
-        app = airtest.connect(devnum, appname=appname, device=device)
+		app = airtest.connect('android://'+serialno, appname=appname)
 
-    其中的**devnum**是手机连接电脑后，通过cmd中运行`adb devices`查看到的手机序列号。
+    其中的**serialno**是手机连接电脑后，通过cmd中运行`adb devices`查看到的手机序列号。ios是一个地址，`serialno  = 'localhost'`就可以了
     **appname**是apk文件的包名，可以通过询问开发人员拿到。
-
-    在最新版的airtest中，devnum是airtest.connect中的可选参数，只有当连接设备超过1台的时候，才需要指定。
-    代码可以简写成
-
-        app = airtest.connect(appname=appname, device=device)
 
 4. 成品代码[filename: main.py]
 
         import airtest
+
         app = airtest.connect(appname='com.dotgears.flappybird', device=airtest.WINDOWS)
         w, h = app.shape()
         app.click(w/2, h/2) # 屏幕中间点一下
