@@ -161,7 +161,7 @@ API比较多，如果遇到接口问题。请反馈到 <https://github.com/netea
 	image_dirs		['.', 'image']	list类型。指定在那些文件夹下查找图片
 	snapshot_method		'adb'			可以选择的参数有adb,screencap。一种是用framebuffer的方式截图，一种是用screencap命令行。如果一种不行就换下试试
 	screen_resolution	None			下面专门有说明
-	rotation			None			int行，可选的值有0,1,2,3 可参考rotaion()这个函数的介绍
+	rotation		None			(暂时设置也不能用, 直到改消息去掉)int行，可选的值有0,1,2,3 可参考rotaion()这个函数的介绍
 
 `screen_resolution`是为了能使一台手机上的截图更容易的匹配别的机器。根据两个手机的宽高比，进行相应的缩放。从而提高识别率。
 

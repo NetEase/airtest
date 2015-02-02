@@ -4,6 +4,9 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2015/02/02 - 0.9.15
+1. 修复小米手机截图时，旋转方向错误的问题
+
 ### 2015/01/22 - 0.9.14
 1. android-Monitor添加了battery()
 
