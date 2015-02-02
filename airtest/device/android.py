@@ -12,8 +12,7 @@ import subprocess
 import string
 import StringIO
 from functools import partial
-
-from com.dtmilano.android.viewclient import ViewClient 
+from .adb.adbclient import AdbClient
 
 from .. import patch, base
 from .. import proto
@@ -125,14 +124,16 @@ class Monitor(object):
         return dict(TOTAL=total, FREE=free)
 
 class Device(object):
-    def __init__(self, serialno=None):
+    def __init__(self, serialno):
         self._snapshot_method = 'adb'
         print 'SerialNo:', serialno
 
-        self.adbclient, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno, ignoreversioncheck=True)
+        self._serialno = serialno
+        self.adbclient = AdbClient(serialno)
+        # self.adbclient, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno, ignoreversioncheck=True)
         self.adbclient.setReconnect(True) # this way is more stable
 
-        self.vc = ViewClient(self.adbclient, serialno, autodump=False)
+        # self.vc = ViewClient(self.adbclient, serialno, autodump=False)
 
         def _adb(*args):
             return subprocess.check_output(['adb', '-s', self._serialno] + list(map(str, args)))
