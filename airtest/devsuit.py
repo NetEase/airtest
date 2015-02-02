@@ -14,8 +14,6 @@ import aircv as ac
 from . import base
 from . import proto
 from . import patch
-# from . import monitor
-# from .image import auto as imtauto
 from .image import sift as imtsift
 from .image import template as imttemplate
 
@@ -33,7 +31,7 @@ class DeviceSuit(object):
         self._image_exts = ['.jpg', '.png']
         self._image_dirs = ['.', 'image']
 
-        # self._rotation = None # UP,DOWN,LEFT,RIGHT
+        self._rotation = None # 0,1,2,3
         self._tmpdir = 'tmp'
         self._click_timeout = 20.0 # if icon not found in this time, then panic
         self._delay_after_click = 0.5 # when finished click, wait time
@@ -63,12 +61,6 @@ class DeviceSuit(object):
                 self.dev._snapshot_method = method
 
         self._snapshot_method = _snapshot_method
-        def _rotation_method(r):
-            if hasattr(self.dev, 'rotation'):
-                self.dev.rotation(r)
-            else:
-                print 'No rotation set method for device(%s)' % self._devtype
-        self._rotation = _rotation_method
         #-- end of func setting
 
     def __getattribute__(self, name):
@@ -138,30 +130,22 @@ class DeviceSuit(object):
         device orientation
         @return int
         '''
-        # # 通过globalSet设置的rotation
-        # if self._rotation:
-        #     return self._rotation
+        # 通过globalSet设置的rotation
+        if self._rotation:
+            return self._rotation
         # 看dev是否有rotation方法
         if hasattr(self.dev, 'rotation'):
             return self.dev.rotation()
         # windows上的特殊处理
         if self._devtype == 'windows':
             return proto.ROTATION_0
-        # 判断下shape的宽高，来猜测旋转方向
-        w, h = self.dev.shape()
-        if w > h:
-            return proto.ROTATION_90
-        else:
-            return proto.ROTATION_0
+        return proto.ROTATION_0
 
     def _fixPoint(self, (x, y)):
-        w, h = self.shape()
+        w, h = self.shape() # in shape() the width always < height
         if self.rotation() % 2 == 1:
             w, h = h, w
 
-        # rotation = self._getRotation()
-        # if rotation in ('RIGHT', 'LEFT'):
-            # width, height = max(height,width), min(height,width) # adjust width > height
         if isinstance(x, float) and x <= 1.0:
             x = int(w*x)
         if isinstance(y, float) and y <= 1.0:

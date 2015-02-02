@@ -138,8 +138,7 @@ class Device(object):
             return subprocess.check_output(['adb', '-s', self._serialno] + list(map(str, args)))
         self.adb = _adb
         self.adbshell = partial(_adb, 'shell')
-        
-        self._setted_rotation = None
+      
         # try:
         #     if not self.adbclient.isScreenOn():
         #         self.adb.wake()
@@ -199,17 +198,10 @@ class Device(object):
             x0=x0, y0=y0, x1=x1, y1=y1, steps=10, dur=int(duration*1000)))
         # self.adb.drag((x0, y0), (x1, y1), duration)
 
-    def rotation(self, new_rotation=None):
+    def rotation(self):
         '''
         dumpsys ref: http://imsardine.simplbug.com/note/android/adb/commands/dumpsys.html
         '''
-        if new_rotation:
-            self._setted_rotation = new_rotation
-            return new_rotation
-
-        if self._setted_rotation:
-            return self._setted_rotation
-
         patten = re.compile('SurfaceOrientation:\s+(\d+)')
         output = self.adbshell('dumpsys', 'input')
         match = patten.search(output)

@@ -158,7 +158,6 @@ def connect(addr='', appname=None, device=None, monitor=True, interval=3.0, logf
     def logPerformance(self):
         if not hasattr(m, 'cpu'):
             return
-        print m.cpu()
         dev.log(proto.TAG_CPU, m.cpu())
         dev.log(proto.TAG_MEMORY, m.memory())
 
