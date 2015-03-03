@@ -4,6 +4,9 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2015/03/03 - 0.9.16
+1. 增加air.test doctor命令，用来检测可能干扰airtest正常运行的情况
+
 ### 2015/02/02 - 0.9.15
 1. 修复小米手机截图时，旋转方向错误的问题
 

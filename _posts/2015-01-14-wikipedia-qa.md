@@ -13,3 +13,7 @@ permalink: /wikipedia/question-answer.html
 2. 出现连接失败
 
 	如果是windows的话。打开进程管理器看看有没有`AndroidServer.exe`这个进程。然后`adb start-server`启动下就好了。
+
+	多个adb也会形成干扰。
+	运行`air.test doctor`查看其它位置的adb。将多余的adb移除。
+

@@ -10,4 +10,4 @@ permalink: /overview/limit.html
 1. 小米One Plus 不支持（原因它的系统是安卓2.3.5）
 2. airtest对中文路径支持还不是很好，所以最好放在全英文路径。
 
-关于内存和CPU的采集，只有Android设备才支持。
+关于内存和CPU的采集，苹果手机需要手机越狱。

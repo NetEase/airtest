@@ -7,6 +7,11 @@ permalink: /overview/command_line.html
 
 使用pip安装完airtest后，就可以再命令行中使用`air.test`这个命令了。等价于调用`python -mairtest`
 
+#### doctor
+检测可能引发airtest不正常工作的问题。
+
+	air.test doctor
+
 #### gui
 WEB GUI客户端，主要用于截图和调试
 
