@@ -8,6 +8,7 @@ import subprocess
 import time
 import urllib
 import json
+import platform
 
 import airtest
 import click
@@ -39,6 +40,7 @@ def _get_apk(config_file, cache=False):
                 apk = cfg.get('android', {}).get('apk_url') 
     
     if not apk:
+        # sys.exit("Usage: air.test install <APK-PATH | APK-URL")
         apk = raw_input('Enter apk path or url: ')
         assert apk.lower().endswith('.apk')
         # FIXME: save to file
@@ -57,6 +59,23 @@ def _get_apk(config_file, cache=False):
 def cli(verbose=False):
     global __debug
     __debug = verbose
+
+@cli.command(help='Check environment')
+def doctor():
+    # adb check
+    print '>> check if contains multi adb.exe'
+    paths = []
+    for line in os.getenv('PATH').split(os.pathsep):
+        if os.path.exists(os.path.join(line, 'adb' + '.exe' if platform.system() == 'Windows' else '')):
+            paths.append(line)
+    if len(paths) == 1:
+        print 'Good'
+    if len(paths) == 0:
+        print 'No adb.exe found, download from: http://adbshell.com/download/'
+    if len(paths) > 1:
+        print 'adb found in %d paths, need to delete and keep one' % len(paths)
+        for p in paths:
+            print 'PATH:', p
 
 @cli.command(help='Get package and activity name from apk')
 @click.argument('apkfile', type=click.Path(exists=True))

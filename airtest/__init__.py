@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = '0.9.15'
+__version__ = '0.9.16'
 
 ANDROID = 'android'
 IOS = 'ios'
@@ -178,47 +178,6 @@ def connect(addr='', appname=None, device=None, monitor=True, interval=3.0, logf
         c.startMonitor()
     
     return c
-
-# def conn()
-# def connect(devno=None, appname=None, device=None, monitor=True, logfile='log/airtest.log'):
-#     '''
-#     Connect device
-#     @param devno: If devno is None, then get device serialno from `adb devices`
-#     @param device: can be one of <android|windows|ios>
-#     @param monitor: wether to enable CPU monitor
-#     '''
-#     if not devno:
-#         devs = getDevices()
-#         if not devs:
-#             sys.exit('adb: No devices found')
-#         if len(devs) != 1:
-#             sys.exit('adb: Too many devices, need to specify phone serialno')
-#         devno = devs[0][0]
-
-#     device = device or defaultDevice
-#     if  device == ANDROID:
-#         from airtest.device import android
-#         subprocess.call(['adb', 'start-server'])
-#         if not devno:
-#             devno = [d for d, t in getDevices() if t == 'device'][0]
-#         devClass = android.Device
-#     elif device == IOS:
-#         from airtest.device import ios
-#         devClass = ios.Device
-#     elif device == WINDOWS:
-#         from airtest.device import windows
-#         devClass = windows.Device
-#     elif device == 'dummy': # this class is only for test
-#         from airtest.device import dummy
-#         devClass = dummy.Device 
-#     elif device == ANDROIDWIFI:
-#         from airtest.device import androidwifi
-#         devClass = androidwifi.Device
-#     else:
-#         raise RuntimeError('device type not recognize')
-
-#     return devsuit.DeviceSuit(device, devClass(devno), 
-#             appname=appname, logfile=logfile, monitor=monitor)
 
 def getDevices(device='android'):
     ''' 
