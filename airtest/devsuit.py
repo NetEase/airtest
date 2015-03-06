@@ -73,7 +73,9 @@ class DeviceSuit(object):
                 objdict['_inside_depth'] += 1
                 # log function call
                 ret = v(*args, **kwargs)
-                if objdict['_inside_depth'] == 1 and not v.__name__.startswith('_'):
+                if objdict['_inside_depth'] == 1 and \
+                    not v.__name__.startswith('_') and \
+                    not v.__name__ == 'log':
                     self.log(proto.TAG_FUNCTION, dict(name=v.__name__, args=args, kwargs=kwargs))
                 objdict['_inside_depth'] -= 1
                 return ret
@@ -86,9 +88,7 @@ class DeviceSuit(object):
         imsrc, imsch = ac.imread(bgimg), ac.imread(search)
         if method == 'auto':
             point = ac.find(imsrc, imsch)
-            # point = imtauto.locate_one_image(bgimg, search, threshold=self._threshold)
         elif method == 'template':
-            # point = imttemplate.find(search, bgimg, self._threshold)
             res = ac.find_template(imsrc, imsch, self._threshold)
             if res:
                 point, score = res

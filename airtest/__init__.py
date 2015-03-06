@@ -160,6 +160,8 @@ def connect(addr='', appname=None, device=None, monitor=True, interval=3.0, logf
             return
         dev.log(proto.TAG_CPU, m.cpu())
         dev.log(proto.TAG_MEMORY, m.memory())
+        dev.log(proto.TAG_BATTERY, m.battery())
+        dev.log(proto.TAG_SYS_MEMORY, m.sys_memory())
 
     @patch.attachmethod(c)
     def startMonitor(self):

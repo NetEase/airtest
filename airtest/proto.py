@@ -2,6 +2,8 @@
 
 TAG_FUNCTION = 'func'
 TAG_MEMORY = 'memory'
+TAG_SYS_MEMORY = 'sys_memory'
+TAG_BATTERY = 'battery'
 TAG_CPU = 'cpu'
 TAG_SNAPSHOT = 'screen'
 
