@@ -45,4 +45,6 @@ permalink: /overview/quick_start.html
 
     >air.test是airtest的辅助运行工具，它依赖air.json这个文件。可以通过air.test gen flappybird.apk生成。`air.json`默认生成在当前目录。
 
-    为了能让airtest运行的更准确，还需要参考下[配置的设置]({site.baseurl}/components/setting.html)
+    为了能让airtest运行的更准确，还需要参考下[使用技巧]({{site.baseurl}}/components/snippets.html)
+
+	接下来了解更多的函数, [API接口列表]({{site.baseurl}}/components/apilist.html)
