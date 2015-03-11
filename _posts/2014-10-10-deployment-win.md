@@ -21,12 +21,14 @@ permalink: /deployment/win-installing.html
     8. setuptools
     9. opencv
 
-上述安装完后，打开命令行，继续安装两个软件包
+上述安装完后，打开命令行，继续接着安装软件包
+
+	pip install --upgrade airtest 
+	# or  easy_install -U airtest
 
 <del>(*官方的androidviewclient更新快的有点不稳定，所以这里还是用老版本*)
 easy_install http://goandroid.qiniudn.com/androidviewclient-7.1.2.tar.gz
 easy_install androidviewclient
-pip install --upgrade airtest # or  easy_install -U airtest
 </del>
 
 最后下载adb.exe客户端 - [下载地址](http://goandroid.qiniudn.com/adb.zip),下好解压后放到PATH下, 软件[来源](http://adbshell.com/download/download-adb-for-windows.html)
