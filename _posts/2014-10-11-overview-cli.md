@@ -57,10 +57,9 @@ air.json文件的内容格式如下
 监控cpu，内存数据。内存数据分为PSS，RSS，VSS。cpu是进程的平均cpu，范围`[0, 100]`
 如果不清楚可以看[这篇文章]({{site.baseurl}}/wikipedia/memory.html)
 
-连接手机后，运行`air.test watch -h -p com.netease.h15` 会出现下面的信息，默认每3s更新一次，`Ctrl+C`终止。
+连接手机后，运行`air.test watch -p com.netease.h15` 会出现下面的信息，默认每3s更新一次，`Ctrl+C`终止。
 
-其中`com.netease.h15`是包名。-h是以人类可读的方式显示大小。更多的参数可以从`--help`中找到。
-
+其中`com.netease.h15`是包名。更多的参数可以从`--help`中找到。
 
     TIME        CPU         PSS         RSS         VSS
     10:32:04    0.6         90.4 MB     126.1 MB    960.3 MB
@@ -74,7 +73,7 @@ air.json文件的内容格式如下
 
 增加了--syscpu之后，可以查看系统的cpu占用率
 
-	bash $ air.test watch -h -p com.netease.h15 --syscpu
+	bash $ air.test watch -p com.netease.h15
 	TIME        CPU         PSS         RSS         VSS         SYSAVGCPU   SYSALLCPU
 	15:28:34    0.025       47.3 MB     89.5 MB     965.2 MB    14.63       38.71|12.9|3.45|3.4
 	15:28:37    0.025       47.3 MB     89.5 MB     965.2 MB    13.18       0.0|3.33|10.0|39.39
