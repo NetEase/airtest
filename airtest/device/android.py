@@ -218,26 +218,6 @@ class Device(object):
         height = self.adbclient.getProperty("display.height")
         return (width, height)
 
-    def _type_raw(self, text):
-        '''
-        Command Order are: 
-            adb shell ime enable com.android.adbkeyboard/.AdbIME
-            adb shell ime set com.android.adbkeyboard/.AdbIME
-            adb shell am broadcast -a ADB_INPUT_TEXT --es msg '你好嗎? Hello?'
-            adb shell ime disable com.android.adbkeyboard/.AdbIME
-        '''
-        # adbkeyboard = ['com.android.adbkeyboard/.AdbIME']
-        # ime = ['adb', '-s', self._serialno, 'shell', 'ime']
-        adbime = 'com.android.adbkeyboard/.AdbIME'
-        self.adbshell('ime', 'enable', adbime)
-        self.adbshell('ime', 'set', adbime)
-        self.adbshell('am', 'broadcast', '-a', 'ADB_INPUT_TEXT', '--es', 'msg', text)
-        self.adbshell('ime', 'disable', adbime)
-        # subprocess.call(ime+['enable']+adbkeyboard)
-        # subprocess.call(ime+['set']+adbkeyboard)
-        # subprocess.call(['adb', '-s', self._serialno, 'shell', 'am', 'broadcast', '-a', 'ADB_INPUT_TEXT', '--es', 'msg', text])
-        # subprocess.call(ime+['disable']+adbkeyboard)
-
     def type(self, text):
         '''
         Input some text
@@ -245,15 +225,20 @@ class Device(object):
         @param text: string (text want to type)
         '''
         log.debug('type text: %s', repr(text))
+        adbime = 'com.android.adbkeyboard/.AdbIME'
+        self.adbshell('ime', 'enable', adbime)
+        self.adbshell('ime', 'set', adbime)
         first = True
         for s in text.split('\n'):
             if first:
                 first=False
             else:
-                self.adbclient.press('ENTER')
+                KEYCODE_ENTER = '66'
+                self.adbshell('am', 'broadcast', '-a', 'ADB_INPUT_CODE', '--ei', 'code', KEYCODE_ENTER)
             if not s:
                 continue
-            self._type_raw(s)
+            self.adbshell('am', 'broadcast', '-a', 'ADB_INPUT_TEXT', '--es', 'msg', s)
+        self.adbshell('ime', 'disable', adbime)
 
     def keyevent(self, event):
         '''
