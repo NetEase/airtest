@@ -9,6 +9,7 @@ import time
 import urllib
 import json
 import platform
+import csv
 
 import airtest
 import click
@@ -146,32 +147,33 @@ def uninstall(conf, serialno, apk):
 @cli.command(help='Watch cpu, mem')
 @click.option('--conf', default='air.json', type=click.Path(dir_okay=False), help='config file', show_default=True)
 @click.option('-p', '--package', default=None, help='Package name which can get by air.test inspect, this is conflict with --conf')
-@click.option('-n', '--interval', default=3, show_default=True, help='Seconds to wait between updates')
+@click.option('-n', '--interval', type=click.FLOAT, default=3, show_default=True, help='Seconds to wait between updates')
 @click.option('-s', '--serialno', default='', help='Specify which android device to connect')
-@click.option('-h', '--human-readable', is_flag=True, help='Print size with human readable format')
-@click.option('--syscpu', is_flag=True, help='Print cpu info seperately')
-@click.option('-o', '--output-file', type=click.Path(dir_okay=False), help='Save output to file(no title)')
-def watch(conf, package, interval, serialno, human_readable, syscpu, output_file):
+# @click.option('--bytes', '--human-readable', default=True, is_flag=True, help='Print size with human readable format')
+# @click.option('--syscpu', is_flag=True, help='Print cpu info seperately')
+@click.option('--csv', 'output_file', type=click.Path(dir_okay=False), help='Save output to file as csv format')
+def watch(conf, package, interval, serialno, output_file):
     if not package:
         apk = _get_apk(conf, cache=True)
         package, _ = androaxml.parse_apk(apk)
 
-    # app = airtest.connect(serialno, device=airtest.ANDROID, monitor=False)
-    airtest.connect('android://'+serialno)
     m = airtest.Monitor('android://'+serialno, package)
 
     outfd = None
     if output_file:
-        outfd = open(output_file, 'w')
+        outfd = open(output_file, 'wb')
+        wr = csv.writer(outfd)
         
     mem_items = ['PSS', 'RSS', 'VSS']
     items = ['TIME', 'CPU'] + mem_items
     format = '%-12s'*len(items)
-    if syscpu:
-        format += '%-12s'*2
-        items += ['SYSAVGCPU', 'SYSALLCPU']
+    # if syscpu:
+    #     format += '%-12s'*2
+    #     items += ['SYSAVGCPU', 'SYSALLCPU']
 
     print format % tuple(items)
+    if outfd:
+        wr.writerow(items)
     while True:
         time_start = time.time()
         values = []
@@ -181,25 +183,29 @@ def watch(conf, package, interval, serialno, human_readable, syscpu, output_file
         #cpu = app.dev.cpuinfo(package)
         values.append(str(m.cpu()))
 
-        mem = m.memory() #app.dev.meminfo(package)
+        mem = m.memory()
+        strvals = values[:]
         for item in mem_items:
             v = int(mem.get(item, 0))*1024
+            # if human_readable:
+            v_str = humanize.naturalsize(int(v))
+            # else:
+            # v_str = v
+            strvals.append(v_str)
+            values.append(round(v/1024.0/1024, 2))
 
+        # if syscpu:
+        #     syscpus = m.sys_cpu(True)
+        #     cpustr = '|'.join([str(round(v, 2)) for v in syscpus])
+        #     sysavg = sum(syscpus)/len(syscpus)
+        #     values += [(round(sysavg, 2)), cpustr]
+        #     strvals += [str(round(sysavg, 2)), cpustr]
 
-            if human_readable:
-                v = humanize.naturalsize(int(v))
-            values.append(str(v))
-
-        if syscpu:
-            syscpus = m.sys_cpu(True)
-            cpustr = '|'.join([str(round(v, 2)) for v in syscpus])
-            sysavg = sum(syscpus)/len(syscpus)
-            values += [str(round(sysavg, 2)), cpustr]
-
-        print format % tuple(values)
+        print format % tuple(strvals)
         if outfd:
-            outfd.write((format + '\n') % tuple(values))
-            outfd.flush()
+            wr.writerow(values)
+            # outfd.write((format + '\n') % tuple(values))
+            # outfd.flush()
 
         sleep = interval - (time.time() - time_start)
         if sleep > 0:
