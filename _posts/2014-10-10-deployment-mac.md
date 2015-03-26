@@ -5,9 +5,9 @@ category: deployment
 permalink: /deployment/mac-installing.html
 ---
 
-一键安装脚本
-
-    bash -c "$(curl -s https://raw.githubusercontent.com/NetEase/airtest/master/scripts/mac_install.sh)"
+<del>一键安装脚本
+bash -c "$(curl -s https://raw.githubusercontent.com/NetEase/airtest/master/scripts/mac_install.sh)"
+</del>
 
 或者手动安装，首先[安装brew](http://brew.sh/), 其中opencv一定不能早于python安装
 
