@@ -158,6 +158,7 @@ API比较多，如果遇到接口问题。请反馈到 <https://github.com/netea
 	delay_after_click	0.5			点击完成后的等待时间
 	operation_mark		False			是否在图像匹配的时候，标记找到的位置。图像存储在tmp下
 	image_match_method	'auto'			可以选择的有auto,template,sift。更多的请参考 https://github.com/netease/aircv
+    threshold		0.3				匹配图像时的阈值，越低越容易匹配上
 	image_dirs		['.', 'image']	list类型。指定在那些文件夹下查找图片
 	snapshot_method		'adb'			可以选择的参数有adb,screencap。一种是用framebuffer的方式截图，一种是用screencap命令行。如果一种不行就换下试试
 	screen_resolution	None			下面专门有说明
