@@ -20,7 +20,7 @@ bash -c "$(curl -s https://raw.githubusercontent.com/NetEase/airtest/master/scri
     brew tap Homebrew/python && brew install pillow
     pip install Appium-Python-Client
 
-    pip install -U airtest #开发版安装方法，见下面
+    pip install -i http://pypi.douban.com/simple -U airtest #开发版安装方法，见下面
 
 #### opencv安装检查：
 

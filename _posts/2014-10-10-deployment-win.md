@@ -21,9 +21,9 @@ permalink: /deployment/win-installing.html
     8. setuptools
     9. opencv
 
-上述安装完后，打开命令行，继续接着安装软件包
+上述安装完后，打开命令行，继续接着安装软件包(这里用了douban提供的pypi镜像)
 
-	pip install --upgrade airtest 
+	pip install -i http://pypi.douban.com/simple --upgrade airtest 
 	# or  easy_install -U airtest
 
 <del>(*官方的androidviewclient更新快的有点不稳定，所以这里还是用老版本*)
