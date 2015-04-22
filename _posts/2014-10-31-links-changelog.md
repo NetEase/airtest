@@ -4,6 +4,9 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2015/03/19 - 0.9.19
+1. 修复air.test log2html
+
 ### 2015/03/19 - 0.9.18
 1. air.test watch 去除`--sys_cpu`, 和`-h`参数 (因为，导出数据时会有干扰)
 2. 修复在小米1S上， `app.type('\n')` 输入回车无效的问题
