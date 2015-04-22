@@ -26,53 +26,25 @@ def render(logfile, htmldir):
     '''
     if not os.path.exists(logfile):
         sys.exit('logfile: %s not exists' %(logfile))
-    #htmldir = base.dirname(htmlfile)
     if not os.path.exists(htmldir):
         os.makedirs(htmldir)
     cpus, items = [], []
     fpss = []
-    mems, imgs = [], []
+    mems = []
+    imgs = []
+    # The render data
     data = {
             'info': {
                 'generated_time': time.strftime('%Y/%m/%d %H:%M:%S'),
             },
             'items': items, 
-            #'cpus': cpus,
             'cpu_data': None,
             'mem_data': None,
-            #'mems': mems,
             'images': imgs,
-            }
+        }
     info = data.get('info')
 
-    start_time = 0
-    for line in open(logfile):
-        d = json.loads(line)
-        timestamp = d.get('timestamp') - start_time
-        _type = d.get('type')
-        if _type == 'start':
-            start_time = d.get('timestamp')
-        elif _type == 'record':
-            mem = d.get('mem')
-            if mem:
-                mems.append([timestamp, mem])
-            cpu = d.get('cpu')
-            if cpu:
-                cpus.append([timestamp, cpu])
-            fps = d.get('fps')
-            if fps:
-                fpss.append([timestamp, fps])
-        elif _type == 'snapshot':
-            filename = d.get('filename')
-            basename = os.path.basename(filename)
-            with fuckit:
-                shutil.copyfile(filename, os.path.join(htmldir, basename))
-                imgs.append({'time':timestamp, 'filename':basename})
-        #elif d.get('result'):
-        #    data['result'] = {'status': d.get('result'), 'detail': d.get('detail')}
-    data['cpu_data'] = json.dumps(cpus)
-    data['mem_data'] = json.dumps(mems)
-
+    # Read log line by line
     from . import proto
     records = []
     for line in open(logfile):
@@ -81,16 +53,21 @@ def render(logfile, htmldir):
         d = v.get('data', {})
         tag = v.get('tag')
 
+        # Process Function, Snapshot, Memory, CPU ...
         if tag == proto.TAG_FUNCTION:
-            tag = markupsafe.Markup('<span class="glyphicon glyphicon-sound-dolby"></span>')    
+            tag = markupsafe.Markup('function')    
             args = map(json.dumps, d.get('args'))
             kwargs = [ '%s=%s' %(k, json.dumps(_v)) for k, _v in d.get('kwargs', {}).items() ]
-            message = '<code>%s(%s)</code>' %(d.get('name'), ', '.join(args+kwargs))
+            message = '<code style="color:green">%s(%s)</code>' %(d.get('name'), ', '.join(args+kwargs))
             message = markupsafe.Markup(message)
         elif tag == proto.TAG_SNAPSHOT:
-            message = d.get('filename')
+            message = markupsafe.Markup("<img width=100%% src='%s'/>" % d.get('filename'))
         elif tag == proto.TAG_CPU:
-            message = 'total: %d, average: %d' %(d.get('total'), d.get('average'))
+            message = '%d%%' %(d)
+            cpus.append([r, d])
+        elif tag == proto.TAG_MEMORY:
+            mems.append([r, d['PSS']])
+            message = json.dumps(d)
         else:
             message = None
         
@@ -99,7 +76,7 @@ def render(logfile, htmldir):
             r['message'] = message
             records.append(r)
 
-
+    # Calculate average cpu and mem
     data['records'] = records
     def average(ss):
         if ss:
@@ -129,6 +106,10 @@ def render(logfile, htmldir):
         # store json data file, for other system
         with open(os.path.join(htmldir, 'data.json'), 'w') as file:
             json.dump(data, file)
+    # Copy snapshots
+    if htmldir != '.':
+        shutil.rmtree(os.path.join(htmldir, 'tmp'), ignore_errors=True)
+    shutil.copytree('tmp', os.path.join(htmldir, 'tmp'))
 
 if __name__ == '__main__':
     render('testdata/airtest.log', 'tmp/out.html')
