@@ -73,3 +73,5 @@ for name, ver, fname in requirements:
     print installed.get(name), ver, name
     p = subprocess.Popen(['easy_install', CDN_PREFIX+fname])
     p.wait()
+
+os.system('pip install -i http://pypi.douban.com/simple airtest')
