@@ -124,12 +124,17 @@ class Monitor(object):
         return dict(TOTAL=total, FREE=free)
 
 class Device(object):
-    def __init__(self, serialno):
+    def __init__(self, serialno, addr=''):
         self._snapshot_method = 'adb'
+        self._serialno = serialno
         print 'SerialNo:', serialno
 
-        self._serialno = serialno
-        self.adbclient = AdbClient(serialno)
+        if addr:
+            host, port = addr.split(':')
+            self.adbclient = AdbClient(serialno, hostname=host, port=int(port))
+        else:
+            self.adbclient = AdbClient(serialno)
+
         # self.adbclient, self._serialno = ViewClient.connectToDeviceOrExit(verbose=False, serialno=serialno, ignoreversioncheck=True)
         self.adbclient.setReconnect(True) # this way is more stable
 

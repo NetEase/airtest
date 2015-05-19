@@ -120,7 +120,14 @@ class Device(object):
         '''
         from . import devsuit
         module, loc, p = _parse_addr(addr)
-        dev = module.Device(loc)
+        if p.path and p.netloc:
+            serialno = p.path.lstrip('/')
+            addr = p.netloc
+            print addr, serialno
+        else:
+            serialno = p.netloc
+            addr = ''
+        dev = module.Device(loc, addr) # FIXME(ssx): may not fit well with ios
         self._m = devsuit.DeviceSuit(p.scheme, dev, logfile=logfile)
 
     def __getattr__(self, key):
