@@ -20,8 +20,10 @@ Many requirements will be install automaticly.
 
 
 import sys
-import urllib
 import platform
+import subprocess
+
+CDN_PREFIX = 'http://goandroid.qiniudn.com/airtest/'
 
 
 def log(msg):
@@ -30,6 +32,7 @@ def log(msg):
 
 def err(msg):
     print '>>> ERR:', msg
+    raw_input('Press Enter to exit: ')
     sys.exit(1)
 
 
@@ -45,15 +48,19 @@ try:
     import pip
 except:
     log('Install pip')
-    code = urllib.urlopen('https://bootstrap.pypa.io/get-pip.py').read()
-    exec code
-    import pip
+    # import urllib
+    # code = urllib.urlopen('https://bootstrap.pypa.io/get-pip.py').read()
+    # exec code # Will exit, not a ok way.
+    # print 'Next'
+    code = subprocess.Popen(['easy_install', CDN_PREFIX+'7-pip-1.5.6.win32-py2.7.exe']).wait()
+    if code == 0:
+        subprocess.Popen(['python', sys.argv[0]]).wait()
+        sys.exit(0)
 
 installed = {}
 for soft in pip.pip.get_installed_distributions():
     installed[soft.project_name] = soft.version
 
-CDN_PREFIX = 'http://goandroid.qiniudn.com/airtest/'
 
 requirements = [
     ['pyparsing', '2.0.2', '2-pyparsing-2.0.2.win32-py2.7.exe'],
@@ -66,10 +73,24 @@ requirements = [
 ]
     #['setuptools', '5.4.2', '8-setuptools-5.4.2.win32-py2.7.exe'],
 
-import subprocess
 for name, ver, fname in requirements:
     if installed.get(name) == ver:
+        print 'Already installed "%s"' % name
         continue
-    print installed.get(name), ver, name
+    #print installed.get(name), ver, name
+    print 'Downloading', name, ver
     p = subprocess.Popen(['easy_install', CDN_PREFIX+fname])
     p.wait()
+
+if not installed.get('airtest'):
+    retry = 4
+    for i in range(retry):
+        code = subprocess.Popen(['easy_install', CDN_PREFIX+'airtest.tar.gz']).wait()
+        print code
+        if code == 0:
+            raw_input('Finished. Press Enter to exit: ')
+            sys.exit(0)
+    raw_input('Network error, run this script again.')
+    sys.exit(1)
+else:
+    raw_input('\nFinished. Press Enter to exit: ')
