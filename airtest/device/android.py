@@ -141,6 +141,8 @@ class Device(object):
         # self.vc = ViewClient(self.adbclient, serialno, autodump=False)
 
         def _adb(*args):
+            if addr:
+                return subprocess.check_output(['adb', '-H', host, '-P', port, '-s', self._serialno] + list(map(str, args)))
             return subprocess.check_output(['adb', '-s', self._serialno] + list(map(str, args)))
         self.adb = _adb
         self.adbshell = partial(_adb, 'shell')
