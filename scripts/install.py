@@ -82,15 +82,4 @@ for name, ver, fname in requirements:
     p = subprocess.Popen(['easy_install', CDN_PREFIX+fname])
     p.wait()
 
-if not installed.get('airtest'):
-    retry = 4
-    for i in range(retry):
-        code = subprocess.Popen(['easy_install', CDN_PREFIX+'airtest.tar.gz']).wait()
-        print code
-        if code == 0:
-            raw_input('Finished. Press Enter to exit: ')
-            sys.exit(0)
-    raw_input('Network error, run this script again.')
-    sys.exit(1)
-else:
-    raw_input('\nFinished. Press Enter to exit: ')
+os.system('pip install -i http://pypi.douban.com/simple airtest')
