@@ -49,9 +49,12 @@ air.json文件的内容格式如下
 打开浏览器，访问localhost:8800可以查看报告
 
 #### snapshot
-截取屏幕图像，扩展名支持png和jpg
+截取屏幕图像，扩展名支持png和jpg, (目前这个功能出了点毛病，先用下面的命令截图吧)
 
-	air.test snapshot --out snapshot.png
+	adb shell screencap -p /sdcard/screen.png
+	adb pull /sdcard/screen.png
+
+<del>air.test snapshot --out snapshot.png</del>
 
 #### watch
 监控cpu，内存数据。内存数据分为PSS，RSS，VSS。cpu是进程的平均cpu，范围`[0, 100]`
