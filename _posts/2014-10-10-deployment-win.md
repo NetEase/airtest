@@ -21,7 +21,9 @@ permalink: /deployment/win-installing.html
     8. setuptools
     9. opencv
 
-上述安装完后，打开命令行，继续接着安装软件包(这里用了douban提供的pypi镜像)
+上述安装完后，打开命令行，继续接着安装软件包(这里用了douban提供的pypi镜像).
+
+如果pip提示没有找到。可能是Scripts目录没有加到系统的PATH中去。比如我系统的pip在的目录是`C:\Python27\Scripts`。
 
 	pip install -i http://pypi.douban.com/simple --upgrade airtest 
 	# or  easy_install -U airtest
