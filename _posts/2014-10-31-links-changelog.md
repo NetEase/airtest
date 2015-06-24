@@ -4,6 +4,9 @@ layout: post
 category: links
 permalink: /changelog.html
 ---
+### 2015/06/24 - 0.9.20
+1. airtest支持airadb
+
 ### 2015/03/19 - 0.9.19
 1. 修复air.test log2html
 
