@@ -19,7 +19,7 @@
 
 
 [代码地址](https://github.com/netease/airtest) |
-[问题反馈](http://git.mt.nie.netease.com/hzsunshx/airtest/issues) |
+[问题反馈](https://github.com/NetEase/airtest/issues) |
 [主要维护人员](mailto:codeskyblue@gmail.com)
 
 Popo交流群: **1275211**
