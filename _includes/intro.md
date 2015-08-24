@@ -22,6 +22,6 @@
 [问题反馈](https://github.com/NetEase/airtest/issues) |
 [主要维护人员](mailto:codeskyblue@gmail.com)
 
-Popo交流群: **1275211**
+Popo交流群: **1313514**
 
 点击查看 [快速入门](overview/quick_start.html)
