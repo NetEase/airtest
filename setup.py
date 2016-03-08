@@ -33,7 +33,7 @@ setup(
           'fuckit >= 4.8.0',
           'humanize >= 0.5',
           'pystache >= 0.5.4',
-          'aircv >= 1.02',
+          'aircv == 1.2',
           'Flask >= 0.10.1',
           # 'paramiko',
           #'androidviewclient >= 7.1.1', 
