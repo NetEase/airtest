@@ -2,6 +2,15 @@ Airtest
 =====
 Python lib for **android** and **ios** app test.
 
+## Airtest已被重构，欢迎前往新项目地址 <https://github.com/codeskyblue/AirtestX>
+重构原因：
+
+1. 代码太多，维护量巨大
+2. 很多的API不合理，需要换掉，尤其是那个connect函数
+3. 原有项目历史数据太大，低带宽的网速根本无法clone代码
+4. 依赖太多，安装复杂
+
+## airtest文档
 在线文档 <http://netease.github.io/airtest>
 
 作为在线文档的一个补充，有个pydoc生成的API列表可以作为参考
