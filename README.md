@@ -2,7 +2,7 @@ Airtest
 =====
 Python lib for **android** and **ios** app test.
 
-## Airtest已被重构，欢迎前往新项目地址 <https://github.com/codeskyblue/AirtestX>
+## Airtest已被重构，欢迎前往新项目地址 <http://airtest.netease.com>
 重构原因：
 
 1. 代码太多，维护量巨大
